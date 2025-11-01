@@ -19,9 +19,7 @@ class Settings(BaseSettings):
     r2_region: str = Field(default="auto", alias="R2_REGION")
     signed_get_ttl_seconds: int = Field(default=172800, alias="SIGNED_GET_TTL_SECONDS")  # 48h
     
-    # Stripe Payments
-    stripe_secret_key: str = Field(alias="STRIPE_SECRET_KEY")
-    stripe_webhook_secret: str = Field(alias="STRIPE_WEBHOOK_SECRET")
+    # Payment Processing (PayPal only)
     min_price_cents: int = Field(default=50, alias="MIN_PRICE_CENTS")
     target_profit_cents: int = Field(default=40, alias="TARGET_PROFIT_CENTS")
     price_cents_per_million_tokens: int = Field(default=300, alias="PRICE_CENTS_PER_MILLION_TOKENS")

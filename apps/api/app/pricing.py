@@ -1,6 +1,10 @@
 import math
+import zipfile
+import xml.etree.ElementTree as ET
 from typing import Optional
 from decimal import Decimal, ROUND_HALF_UP
+from pathlib import Path
+import re
 
 from app.config import settings
 from app.logger import get_logger
@@ -8,13 +12,60 @@ from app.logger import get_logger
 logger = get_logger(__name__)
 
 
+def extract_text_from_epub(file_path: str) -> str:
+    """Extract text content from EPUB file, ignoring images and metadata."""
+    try:
+        with zipfile.ZipFile(file_path, 'r') as epub:
+            text_content = []
+            
+            # Find all HTML/XHTML files in the EPUB
+            for file_info in epub.filelist:
+                if file_info.filename.endswith(('.html', '.xhtml', '.htm')):
+                    try:
+                        content = epub.read(file_info.filename).decode('utf-8', errors='ignore')
+                        # Parse HTML and extract text
+                        # Remove HTML tags but keep text content
+                        text = re.sub(r'<[^>]+>', ' ', content)
+                        # Clean up whitespace
+                        text = re.sub(r'\s+', ' ', text).strip()
+                        if text:
+                            text_content.append(text)
+                    except Exception as e:
+                        logger.debug(f"Could not extract text from {file_info.filename}: {e}")
+                        continue
+            
+            full_text = ' '.join(text_content)
+            logger.info(f"Extracted {len(full_text)} characters of text from EPUB")
+            return full_text
+            
+    except Exception as e:
+        logger.warning(f"Could not extract text from EPUB: {e}")
+        return ""
+
+
 def estimate_tokens_from_size(size_bytes: int) -> int:
     """Estimate token count from file size.
     
     Rough heuristic: 1 token ≈ 4 characters ≈ 4 bytes for most languages.
+    This is a fallback for non-EPUB files.
     """
     tokens_est = size_bytes // 4
-    logger.info(f"Estimated {tokens_est} tokens from {size_bytes} bytes")
+    logger.info(f"Estimated {tokens_est} tokens from {size_bytes} bytes (fallback method)")
+    return tokens_est
+
+
+def estimate_tokens_from_epub(file_path: str) -> int:
+    """Estimate token count from EPUB file by extracting text content only."""
+    text_content = extract_text_from_epub(file_path)
+    if not text_content:
+        logger.warning("No text extracted from EPUB, using fallback estimation")
+        return estimate_tokens_from_size(Path(file_path).stat().st_size)
+    
+    # Estimate tokens: ~4 characters per token for most languages
+    char_count = len(text_content)
+    tokens_est = char_count // 4
+    
+    logger.info(f"EPUB text analysis: {char_count:,} chars → {tokens_est:,} tokens")
     return tokens_est
 
 
@@ -34,15 +85,17 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
     # Check maximum token limit first
     if tokens_est > settings.max_file_tokens:
         logger.warning(f"File rejected: {tokens_est:,} tokens exceeds {settings.max_file_tokens:,} token limit")
-        raise ValueError(f"File too large: {tokens_est:,} tokens. Maximum allowed: {settings.max_file_tokens:,} tokens (~{settings.max_file_tokens//1333:,}K words)")
+        words_est = tokens_est * 0.75  # ~0.75 words per token
+        max_words = settings.max_file_tokens * 0.75
+        raise ValueError(f"Content limit exceeded: ~{words_est:,.0f} words > {max_words:,.0f} word maximum. Please use a shorter book or split into multiple files.")
     
     # 5-tier pricing structure aligned with word ranges
     # Word ranges: 0-56K, 56K-112K, 112K-225K, 225K-375K, 375K-750K
-    # Token equivalents: 0-42K, 42K-84K, 84K-169K, 169K-282K, 282K-564K
+    # Token equivalents: 0-42K, 42K-84K, 84K-169K, 169K-282K, 282K-1M
     if tokens_est < 42000:  # ~56K words
         price_dollars = 0.50
         tier = "Short Novel"
-    elif tokens_est < 84000:  # ~112K words
+    elif tokens_est < 84000:  # ~112K words  
         price_dollars = 0.75
         tier = "Novel"
     elif tokens_est < 169000:  # ~225K words
@@ -51,7 +104,7 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
     elif tokens_est < 282000:  # ~375K words
         price_dollars = 1.25
         tier = "Epic Novel"
-    else:  # 282K-750K tokens (~375K-1M words, capped at 1M tokens)
+    else:  # 282K-1M tokens (~375K-750K words, capped at 1M tokens)
         price_dollars = 1.50
         tier = "Epic Series"
     
@@ -85,6 +138,23 @@ def estimate_price_from_size(size_bytes: int, provider: str = "gemini") -> tuple
     return tokens_est, price_cents
 
 
+def estimate_price_from_file(file_path: str, provider: str = "gemini") -> tuple[int, int]:
+    """Estimate both tokens and price from actual file, with EPUB text extraction.
+    
+    Returns:
+        tuple: (tokens_estimated, price_cents)
+    """
+    if file_path.lower().endswith('.epub'):
+        tokens_est = estimate_tokens_from_epub(file_path)
+    else:
+        file_size = Path(file_path).stat().st_size
+        tokens_est = estimate_tokens_from_size(file_size)
+    
+    price_cents = calculate_price_cents(tokens_est, provider)
+    
+    return tokens_est, price_cents
+
+
 def validate_price_match(
     size_bytes: int, 
     expected_price_cents: int, 
@@ -109,11 +179,35 @@ def validate_price_match(
     return is_valid
 
 
-def calculate_provider_cost_cents(tokens_actual: int, provider: str) -> Decimal:
-    """Calculate actual provider cost with sub-cent precision.
+def validate_price_match_from_file(
+    file_path: str,
+    expected_price_cents: int, 
+    provider: str = "gemini",
+    tolerance_cents: int = 10
+) -> bool:
+    """Validate that expected price matches server-side calculation using file analysis.
+    
+    Used to prevent client-side price tampering for EPUB files.
+    """
+    _, calculated_price = estimate_price_from_file(file_path, provider)
+    
+    price_diff = abs(calculated_price - expected_price_cents)
+    is_valid = price_diff <= tolerance_cents
+    
+    if not is_valid:
+        logger.warning(
+            f"Price validation failed (file-based): expected {expected_price_cents}, "
+            f"calculated {calculated_price}, diff {price_diff}"
+        )
+    
+    return is_valid
+
+
+def calculate_provider_cost_cents(tokens_actual: int, provider: str) -> int:
+    """Calculate actual provider cost in cents for database storage.
     
     Used for margin tracking and cost monitoring.
-    Returns Decimal for precise cost calculations.
+    Returns integer cents to avoid SQLite Decimal issues.
     """
     # Actual provider costs in dollars per 1M tokens
     # Translation workloads are typically ~20% input, ~80% output tokens
@@ -124,12 +218,15 @@ def calculate_provider_cost_cents(tokens_actual: int, provider: str) -> Decimal:
     
     rate = cost_per_million_tokens.get(provider, Decimal("0.15"))
     
-    # Calculate precise cost without rounding
-    cost_decimal = Decimal(str(tokens_actual)) / Decimal("1000000") * rate
+    # Calculate precise cost in dollars
+    cost_dollars = Decimal(str(tokens_actual)) / Decimal("1000000") * rate
     
-    logger.info(f"Provider cost: {tokens_actual} tokens via {provider} = ${cost_decimal:.6f}")
+    # Convert to cents for database storage (SQLite-compatible)
+    cost_cents = int(cost_dollars * 100)
     
-    return cost_decimal
+    logger.info(f"Provider cost: {tokens_actual} tokens via {provider} = ${cost_dollars:.6f} = {cost_cents} cents")
+    
+    return cost_cents
 
 
 def calculate_provider_cost_display(tokens_actual: int, provider: str) -> str:
@@ -146,36 +243,22 @@ def calculate_provider_cost_display(tokens_actual: int, provider: str) -> str:
 
 
 def get_optimal_payment_provider(amount_cents: int) -> str:
-    """Determine optimal payment provider based on amount.
+    """Return PayPal as the only payment provider.
     
     PayPal micropayments: 5% + $0.05 fee structure
-    Stripe standard: 2.9% + $0.30 fee structure
-    
-    Break-even point is around $8.00
     
     Args:
         amount_cents: Payment amount in cents
         
     Returns:
-        str: "paypal" or "stripe"
+        str: Always "paypal"
     """
-    # Calculate fees for both providers
+    # Calculate PayPal fee for logging
     paypal_fee_cents = int(amount_cents * 0.05 + 5)  # 5% + 5 cents
-    stripe_fee_cents = int(amount_cents * 0.029 + 30)  # 2.9% + 30 cents
     
-    # Choose provider with lower fees
-    if paypal_fee_cents < stripe_fee_cents:
-        logger.info(
-            f"PayPal optimal for ${amount_cents/100:.2f}: "
-            f"PayPal fee ${paypal_fee_cents/100:.2f} vs Stripe ${stripe_fee_cents/100:.2f}"
-        )
-        return "paypal"
-    else:
-        logger.info(
-            f"Stripe optimal for ${amount_cents/100:.2f}: "
-            f"Stripe fee ${stripe_fee_cents/100:.2f} vs PayPal ${paypal_fee_cents/100:.2f}"
-        )
-        return "stripe"
+    logger.info(f"Using PayPal for ${amount_cents/100:.2f}: PayPal fee ${paypal_fee_cents/100:.2f}")
+    
+    return "paypal"
 
 
 def calculate_payment_fees(amount_cents: int, provider: str) -> int:

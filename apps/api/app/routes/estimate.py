@@ -4,7 +4,7 @@ from slowapi.util import get_remote_address
 
 from app.config import settings
 from app.deps import get_storage
-from app.pricing import estimate_price_from_size
+from app.pricing import estimate_price_from_size, estimate_price_from_file
 from app.schemas import EstimateRequest, EstimateResponse
 from app.logger import get_logger
 
@@ -34,16 +34,42 @@ async def estimate_price(
                 detail="File not found or not yet uploaded"
             )
         
-        # Validate file size
+        # Validate file size (hard limit)
         max_bytes = settings.max_file_mb * 1024 * 1024
         if size_bytes > max_bytes:
+            size_mb = size_bytes / (1024 * 1024)
             raise HTTPException(
                 status_code=400,
-                detail=f"File too large. Maximum size: {settings.max_file_mb}MB"
+                detail=f"File size limit exceeded: {size_mb:.1f}MB > {settings.max_file_mb}MB maximum. Please use a smaller file."
             )
         
-        # Calculate price estimation
-        tokens_est, price_cents = estimate_price_from_size(size_bytes)
+        # For EPUB files, download and analyze text content
+        if data.key.lower().endswith('.epub'):
+            # Download file temporarily for text extraction
+            import tempfile
+            import os
+            
+            with tempfile.NamedTemporaryFile(suffix='.epub', delete=False) as temp_file:
+                temp_file_path = temp_file.name
+            
+            try:
+                success = storage.download_file(data.key, temp_file_path)
+                if success:
+                    tokens_est, price_cents = estimate_price_from_file(temp_file_path)
+                    logger.info(f"EPUB analysis successful: {tokens_est:,} tokens → ${price_cents/100:.2f}")
+                else:
+                    logger.warning("Failed to download EPUB file, using size fallback")
+                    tokens_est, price_cents = estimate_price_from_size(size_bytes)
+            except Exception as e:
+                logger.warning(f"Failed to extract EPUB text, using size fallback: {e}")
+                tokens_est, price_cents = estimate_price_from_size(size_bytes)
+            finally:
+                # Clean up temp file
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+        else:
+            # For non-EPUB files, use size-based estimation
+            tokens_est, price_cents = estimate_price_from_size(size_bytes)
         
         logger.info(
             f"Price estimate for {data.key}: {size_bytes} bytes -> "

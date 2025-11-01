@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface PriceBoxProps {
   tokensEst: number;
@@ -63,42 +63,104 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
   };
 
   const priceUSD = priceCents / 100;
-  const charactersEst = tokensEst * 4; // Rough estimation
+  const wordsEst = Math.round(tokensEst * 0.75); // More accurate word estimation
   
-  // Determine optimal payment provider
-  const usePayPal = priceCents < 800; // $8.00 threshold
+  // Determine book category based on token count (matching backend pricing logic)
+  const getBookCategory = (tokens: number) => {
+    if (tokens < 42000) {
+      return { 
+        name: 'Short Stories', 
+        color: 'blue', 
+        example: '"The Great Gatsby"',
+        range: 'Up to 56K words'
+      };
+    } else if (tokens < 84000) {
+      return { 
+        name: 'Standard Novel', 
+        color: 'green', 
+        example: '"To Kill a Mockingbird"',
+        range: '56K - 112K words'
+      };
+    } else if (tokens < 168000) {
+      return { 
+        name: 'Long Novel', 
+        color: 'purple', 
+        example: '"Pride and Prejudice"',
+        range: '112K - 225K words'
+      };
+    } else if (tokens < 280000) {
+      return { 
+        name: 'Epic Novel', 
+        color: 'orange', 
+        example: '"The Count of Monte Cristo"',
+        range: '225K - 375K words'
+      };
+    } else {
+      return { 
+        name: 'Epic Series', 
+        color: 'red', 
+        example: '"War and Peace"',
+        range: '375K - 750K words'
+      };
+    }
+  };
+
+  const bookCategory = getBookCategory(tokensEst);
+  
+  // Calculate PayPal fees (only payment provider)
   const paypalFee = Math.round(priceCents * 0.05 + 5);
-  const stripeFee = Math.round(priceCents * 0.029 + 30);
-  const optimalProvider = paypalFee < stripeFee ? 'PayPal' : 'Stripe';
+  const optimalProvider = 'PayPal';
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+    <div className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-xl p-6 shadow-md">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-neutral-900 mb-2">
           Translation Estimate
         </h3>
-        <div className="space-y-1">
-          <p className="text-sm text-gray-600">
-            ~{charactersEst.toLocaleString()} characters
+        <div className="bg-gradient-to-br from-primary-50 via-blue-50 to-purple-50 rounded-xl p-6 mb-6 border border-primary-100">
+          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-3 ${
+            bookCategory.color === 'blue' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+            bookCategory.color === 'green' ? 'bg-green-100 text-green-700 border border-green-200' :
+            bookCategory.color === 'purple' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+            bookCategory.color === 'orange' ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+            'bg-red-100 text-red-700 border border-red-200'
+          }`}>
+            <span className="mr-1">📚</span>
+            <span>{bookCategory.name}</span>
+          </div>
+          <p className="text-sm text-neutral-600 mb-2 flex items-center justify-center space-x-2">
+            <Sparkles className="w-4 h-4 text-primary-500" />
+            <span>~{wordsEst.toLocaleString()} words detected</span>
           </p>
-          <p className="text-3xl font-bold text-primary-600">
-            ${priceUSD.toFixed(2)} USD
+          <p className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent mb-1">
+            ${priceUSD.toFixed(2)}
           </p>
-          <p className="text-xs text-gray-500">
-            You'll get EPUB + PDF + TXT formats
-          </p>
-          {usePayPal && (
-            <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-              🎯 Best rate via {optimalProvider} (saves ${((stripeFee - paypalFee) / 100).toFixed(2)})
-            </p>
-          )}
+          <p className="text-sm text-neutral-600 mb-3">{bookCategory.range}</p>
+          <p className="text-xs text-neutral-500 italic mb-3">Similar to {bookCategory.example}</p>
+          <div className="flex items-center justify-center space-x-4 text-xs text-neutral-600 mb-3">
+            <div className="flex items-center space-x-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" />
+              <span>EPUB</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" />
+              <span>PDF</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" />
+              <span>TXT</span>
+            </div>
+          </div>
+          <div className="inline-flex items-center px-3 py-1 bg-white/70 text-primary-700 text-xs rounded-full border border-primary-200">
+            💳 Secure payment via {optimalProvider} (${(paypalFee / 100).toFixed(2)} processing fee)
+          </div>
         </div>
       </div>
 
       <div className="space-y-4">
         {/* Target Language Selection */}
         <div>
-          <label htmlFor="target-lang" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="target-lang" className="block text-sm font-medium text-neutral-700 mb-1">
             Translate to:
           </label>
           <select
@@ -106,7 +168,7 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
             value={targetLang}
             onChange={(e) => setTargetLang(e.target.value)}
             disabled={disabled || isProcessing}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
           >
             {LANGUAGES.map((lang) => (
               <option key={lang.code} value={lang.code}>
@@ -118,7 +180,7 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
 
         {/* Email Input */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
             Email for download link:
           </label>
           <input
@@ -128,9 +190,9 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your.email@example.com"
             disabled={disabled || isProcessing}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-neutral-500 mt-1">
             Optional but recommended
           </p>
         </div>
@@ -143,9 +205,9 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
             checked={hasRights}
             onChange={(e) => setHasRights(e.target.checked)}
             disabled={disabled || isProcessing}
-            className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 disabled:opacity-50"
+            className="mt-1 h-4 w-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500 disabled:opacity-50"
           />
-          <label htmlFor="rights-check" className="text-sm text-gray-700">
+          <label htmlFor="rights-check" className="text-sm text-neutral-700">
             I own the rights to translate this file
           </label>
         </div>
@@ -154,7 +216,7 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
         <button
           onClick={handlePayment}
           disabled={disabled || isProcessing || !hasRights || !targetLang}
-          className="w-full bg-primary-600 text-white py-3 px-4 rounded-md font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+          className="w-full bg-gradient-to-r from-primary-600 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-primary-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
         >
           {isProcessing ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -167,8 +229,8 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
         </button>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Files auto-delete after 7 days • Powered by {usePayPal ? 'PayPal + Stripe' : 'Stripe'}
+          <p className="text-xs text-neutral-500">
+            Files auto-delete after 7 days • Powered by PayPal
           </p>
         </div>
       </div>

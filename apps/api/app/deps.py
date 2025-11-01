@@ -1,5 +1,4 @@
 import redis
-import stripe
 from functools import lru_cache
 from rq import Queue
 from sqlalchemy.orm import Session
@@ -11,8 +10,7 @@ from app.providers.base import TranslationProvider
 from app.providers.gemini import GeminiFlashProvider
 from app.providers.groq import GroqLlamaProvider
 
-# Initialize Stripe
-stripe.api_key = settings.stripe_secret_key
+# Payment processing is handled by PayPal
 
 
 @lru_cache()
@@ -47,6 +45,3 @@ def get_storage():
     return get_storage_instance()
 
 
-def get_stripe():
-    """Get Stripe client."""
-    return stripe

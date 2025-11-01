@@ -4,6 +4,9 @@
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
 export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
 
+# Fix macOS multiprocessing fork issues
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
 cd "$(dirname "$0")/../apps/api"
 
 # Set Python path

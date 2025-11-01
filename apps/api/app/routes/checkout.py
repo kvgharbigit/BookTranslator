@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db import get_db
-from app.deps import get_storage, get_stripe
-from app.pricing import estimate_price_from_size, validate_price_match, get_optimal_payment_provider
+from app.deps import get_storage
+from app.pricing import estimate_price_from_size, estimate_price_from_file, validate_price_match, validate_price_match_from_file, get_optimal_payment_provider
 from app.paypal import get_paypal_provider
 from app.schemas import CreateCheckoutRequest, CreateCheckoutResponse
 from app.models import Job
@@ -26,10 +26,9 @@ async def create_checkout(
     request: Request,
     data: CreateCheckoutRequest,
     db: Session = Depends(get_db),
-    storage = Depends(get_storage),
-    stripe = Depends(get_stripe)
+    storage = Depends(get_storage)
 ):
-    """Create payment session (PayPal or Stripe) based on amount."""
+    """Create PayPal payment session for EPUB translation."""
     
     try:
         # Determine provider first
@@ -47,10 +46,43 @@ async def create_checkout(
             )
         
         # Server-side price recalculation (prevent tampering)
-        tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+        # For EPUB files, download and analyze text content for accurate token estimation
+        temp_file_path = None
+        epub_download_success = False
+        
+        if data.key.lower().endswith('.epub'):
+            import tempfile
+            import os
+            
+            with tempfile.NamedTemporaryFile(suffix='.epub', delete=False) as temp_file:
+                temp_file_path = temp_file.name
+            
+            try:
+                success = storage.download_file(data.key, temp_file_path)
+                if success:
+                    tokens_est, server_price_cents = estimate_price_from_file(temp_file_path, provider)
+                    epub_download_success = True
+                else:
+                    logger.warning("Failed to download EPUB file for checkout, using size fallback")
+                    tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+            except Exception as e:
+                logger.warning(f"Failed to extract EPUB text for checkout, using size fallback: {e}")
+                tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+        else:
+            tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
         
         # Validate client price matches server calculation
-        if not validate_price_match(size_bytes, data.price_cents, provider):
+        # Use file-based validation for EPUB files if we downloaded it successfully
+        if epub_download_success and temp_file_path and os.path.exists(temp_file_path):
+            price_validation_passed = validate_price_match_from_file(temp_file_path, data.price_cents, provider)
+        else:
+            price_validation_passed = validate_price_match(size_bytes, data.price_cents, provider)
+            
+        # Clean up temp file after validation
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+            
+        if not price_validation_passed:
             logger.warning(
                 f"Price validation failed: client={data.price_cents}, server={server_price_cents}"
             )
@@ -59,17 +91,15 @@ async def create_checkout(
                 detail=f"Price mismatch. Expected: ${server_price_cents/100:.2f}"
             )
         
-        # Determine optimal payment provider based on amount
-        optimal_provider = get_optimal_payment_provider(server_price_cents)
-        logger.info(f"Using {optimal_provider} for ${server_price_cents/100:.2f} payment")
+        # Always use PayPal for payments
+        logger.info(f"Using PayPal for ${server_price_cents/100:.2f} payment")
         
         # Generate job ID
         job_id = str(uuid.uuid4())
         
-        # Check if using fake keys - bypass payment for testing
-        if (settings.stripe_secret_key.startswith("sk_test_fake") or 
-            settings.paypal_client_id.startswith("fake_")):
-            logger.info("Using fake payment keys - bypassing payment for testing")
+        # Check if using fake PayPal keys - bypass payment for testing
+        if settings.paypal_client_id.startswith("fake_"):
+            logger.info("Using fake PayPal keys - bypassing payment for testing")
             
             # Create job directly and trigger translation
             job = Job(
@@ -82,7 +112,7 @@ async def create_checkout(
                 tokens_est=tokens_est,
                 size_bytes=size_bytes,
                 email=data.email,
-                stripe_payment_id=f"fake_payment_{job_id}"
+                stripe_payment_id=f"fake_paypal_payment_{job_id}"
             )
             db.add(job)
             db.commit()
@@ -105,64 +135,29 @@ async def create_checkout(
                 job_id=job_id
             )
         
-        # Route to optimal payment provider
-        if optimal_provider == "paypal":
-            # Create PayPal payment
-            paypal = get_paypal_provider()
-            
-            success_url = f"{request.url.scheme}://{request.url.netloc}/api/paypal/success?job_id={job_id}"
-            cancel_url = f"{request.url.scheme}://{request.url.netloc}/cancel"
-            
-            payment_result = paypal.create_payment(
-                amount_cents=server_price_cents,
-                job_id=job_id,
-                description=f"EPUB Translation to {data.target_lang.upper()}",
-                success_url=success_url,
-                cancel_url=cancel_url,
-                customer_email=data.email
+        # Create PayPal payment
+        paypal = get_paypal_provider()
+        
+        success_url = f"{request.url.scheme}://{request.url.netloc}/api/paypal/success?job_id={job_id}"
+        cancel_url = f"{request.url.scheme}://{request.url.netloc}/cancel"
+        
+        payment_result = paypal.create_payment(
+            amount_cents=server_price_cents,
+            job_id=job_id,
+            description=f"EPUB Translation to {data.target_lang.upper()}",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            customer_email=data.email
+        )
+        
+        if not payment_result['success']:
+            raise HTTPException(
+                status_code=500,
+                detail=f"PayPal payment creation failed: {payment_result.get('error')}"
             )
-            
-            if not payment_result['success']:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"PayPal payment creation failed: {payment_result.get('error')}"
-                )
-            
-            checkout_url = payment_result['approval_url']
-            payment_id = payment_result['payment_id']
-            
-        else:
-            # Create Stripe Checkout session
-            checkout_session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                mode="payment",
-                line_items=[{
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": f"EPUB Translation to {data.target_lang.upper()}",
-                            "description": f"Translate EPUB to {data.target_lang} (EPUB + PDF + TXT formats)",
-                        },
-                        "unit_amount": server_price_cents,
-                    },
-                    "quantity": 1,
-                }],
-                metadata={
-                    "job_id": job_id,
-                    "source_key": data.key,
-                    "target_lang": data.target_lang,
-                    "provider": provider,
-                    "email": data.email or "",
-                    "tokens_est": str(tokens_est),
-                    "size_bytes": str(size_bytes),
-                },
-                success_url=f"{request.url.scheme}://{request.url.netloc}/success?job_id={job_id}",
-                cancel_url=f"{request.url.scheme}://{request.url.netloc}/cancel",
-                customer_email=data.email,
-            )
-            
-            checkout_url = checkout_session.url
-            payment_id = checkout_session.id
+        
+        checkout_url = payment_result['approval_url']
+        payment_id = payment_result['payment_id']
         
         # Pre-create job record (will be updated by webhook)
         job = Job(
@@ -182,7 +177,7 @@ async def create_checkout(
         db.commit()
         
         logger.info(
-            f"Created {optimal_provider} checkout for job {job_id}: "
+            f"Created PayPal checkout for job {job_id}: "
             f"${server_price_cents/100:.2f}, provider={provider}"
         )
         

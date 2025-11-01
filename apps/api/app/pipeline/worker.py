@@ -1,6 +1,7 @@
 import os
 import tempfile
 import uuid
+import asyncio
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -22,7 +23,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import SessionLocal
 from app.models import Job
-from app.storage import storage
+from app.storage import get_storage
 from app.deps import get_provider
 from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
@@ -33,41 +34,48 @@ from app.logger import get_logger, set_request_id
 logger = get_logger(__name__)
 
 
-async def translate_epub(
-    job_id: str,
-    source_key: str,
-    target_lang: str,
-    provider_name: str,
-    email: Optional[str] = None
-):
+def translate_epub(job_id: str):
     """Main worker function to translate EPUB files.
     
     This function:
-    1. Downloads EPUB from R2
-    2. Extracts and segments content
-    3. Translates with provider validation
-    4. Generates EPUB + PDF + TXT outputs
-    5. Uploads results and updates database
-    6. Sends email notification
+    1. Retrieves job details from database
+    2. Downloads EPUB from storage
+    3. Extracts and segments content
+    4. Translates with provider validation
+    5. Generates EPUB + PDF + TXT outputs
+    6. Uploads results and updates database
+    7. Sends email notification
     """
     
     # Set request ID for logging correlation
     set_request_id(job_id[:8])
     
+    # Get database session
     db = SessionLocal()
+    
     try:
-        # Get job from database
+        # Retrieve job details from database
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
-            logger.error(f"Job {job_id} not found")
+            logger.error(f"Job {job_id} not found in database")
             return
+            
+        logger.info(f"Starting translation for job {job_id}: {job.source_key} -> {job.target_lang}")
         
-        logger.info(f"Starting translation job {job_id}")
+        # Extract job parameters
+        source_key = job.source_key
+        target_lang = job.target_lang
+        provider_name = job.provider
+        email = job.email
         
-        # Update job status
+        # Update job status to processing
         job.status = "processing"
-        job.progress_step = "unzipping"
+        job.progress_step = "starting"
         db.commit()
+        logger.info(f"Job {job_id} status updated to processing")
+        
+        # Initialize storage
+        storage = get_storage()
         
         # Step 1: Download and validate EPUB
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -99,12 +107,14 @@ async def translate_epub(
             
             orchestrator = TranslationOrchestrator()
             
-            translated_segments, tokens_actual, provider_used = await orchestrator.translate_segments(
-                segments=segments,
-                target_lang=target_lang,
-                primary_provider=primary_provider,
-                fallback_provider=fallback_provider,
-                source_lang=job.source_lang
+            translated_segments, tokens_actual, provider_used = asyncio.run(
+                orchestrator.translate_segments(
+                    segments=segments,
+                    target_lang=target_lang,
+                    primary_provider=primary_provider,
+                    fallback_provider=fallback_provider,
+                    source_lang=job.source_lang
+                )
             )
             
             # Update job with actual usage
@@ -132,7 +142,7 @@ async def translate_epub(
             job.progress_step = "uploading"
             db.commit()
             
-            output_keys = await _generate_outputs(
+            output_keys = _generate_outputs(
                 job_id, temp_dir, original_book, translated_docs, translated_segments
             )
             
@@ -151,7 +161,7 @@ async def translate_epub(
             # Step 7: Send email notification
             if email:
                 try:
-                    await _send_completion_email(job, email)
+                    _send_completion_email(job, email)
                 except Exception as e:
                     logger.error(f"Failed to send email notification: {e}")
                     # Don't fail the job for email issues
@@ -167,7 +177,7 @@ async def translate_epub(
         # Send failure email if provided
         if email:
             try:
-                await _send_failure_email(job, email, str(e))
+                _send_failure_email(job, email, str(e))
             except Exception as email_error:
                 logger.error(f"Failed to send failure email: {email_error}")
     
@@ -175,7 +185,7 @@ async def translate_epub(
         db.close()
 
 
-async def _generate_outputs(
+def _generate_outputs(
     job_id: str,
     temp_dir: str,
     original_book,
@@ -183,6 +193,9 @@ async def _generate_outputs(
     translated_segments: list
 ) -> dict:
     """Generate EPUB, PDF, and TXT outputs."""
+    
+    # Initialize storage
+    storage = get_storage()
     
     output_keys = {}
     epub_processor = EPUBProcessor()
@@ -263,8 +276,11 @@ def _apply_rtl_layout(translated_docs: list) -> list:
     return translated_docs
 
 
-async def _send_completion_email(job: Job, email: str):
+def _send_completion_email(job: Job, email: str):
     """Send completion email with download links."""
+    
+    # Initialize storage
+    storage = get_storage()
     
     from app.email import email_service
     
@@ -279,11 +295,11 @@ async def _send_completion_email(job: Job, email: str):
         download_urls["txt"] = storage.generate_presigned_download_url(job.output_txt_key)
     
     if download_urls:
-        success = await email_service.send_completion_email(
+        success = asyncio.run(email_service.send_completion_email(
             to_email=email,
             download_urls=download_urls,
             job_id=job.id
-        )
+        ))
         
         if success:
             logger.info(f"Sent completion email to {email} with {len(download_urls)} download links")
@@ -293,16 +309,16 @@ async def _send_completion_email(job: Job, email: str):
         logger.error(f"No download URLs available for job {job.id}")
 
 
-async def _send_failure_email(job: Job, email: str, error_message: str):
+def _send_failure_email(job: Job, email: str, error_message: str):
     """Send failure notification email."""
     
     from app.email import email_service
     
-    success = await email_service.send_failure_email(
+    success = asyncio.run(email_service.send_failure_email(
         to_email=email,
         job_id=job.id,
         error_message=error_message
-    )
+    ))
     
     if success:
         logger.info(f"Sent failure email to {email} for job {job.id}")
