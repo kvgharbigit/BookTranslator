@@ -84,9 +84,13 @@ outputs/
 tmp/
 temp/
 
-# Debug files
+# Debug files (but not organized tests/)
 debug_*.py
 fix_*.py
 verify_*.py
 test_*.py
 *_debug.py
+
+# Allow organized tests directory
+!tests/
+!tests/*.py
