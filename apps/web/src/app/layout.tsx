@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'EPUB Translator - Translate Books to Any Language',
+  title: 'Polytext - Translate Books to Any Language',
   description: 'Professional EPUB translation service. Upload your book and get it translated to any language in EPUB, PDF, and TXT formats. No account required.',
-  keywords: 'EPUB translator, book translation, ebook translation, multilingual books',
+  keywords: 'EPUB translator, book translation, ebook translation, multilingual books, polytext',
 };
 
 export default function RootLayout({

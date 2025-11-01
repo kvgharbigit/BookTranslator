@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="EPUB Translator API",
+    title="Polytext API",
     description="Pay-per-file EPUB translation service with multi-format output",
     version="1.0.0"
 )
@@ -28,11 +28,21 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:8000", 
+    "https://polytext.site",
+    "https://www.polytext.site"
+]
+
+if settings.env == "development":
+    allowed_origins.append("*")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -97,7 +107,7 @@ app.include_router(skip_payment.router, tags=["Testing"])
 @app.on_event("startup")
 async def startup_event():
     """Initialize application on startup."""
-    logger.info("Starting EPUB Translator API")
+    logger.info("Starting Polytext API")
     
     # Create database tables
     create_tables()
@@ -109,27 +119,27 @@ async def startup_event():
     logger.info(f"Max file size: {settings.max_file_mb}MB")
     logger.info(f"Price per million tokens: ${settings.price_cents_per_million_tokens/100:.2f}")
     
-    logger.info("EPUB Translator API started successfully")
+    logger.info("Polytext API started successfully")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on application shutdown."""
-    logger.info("Shutting down EPUB Translator API")
+    logger.info("Shutting down Polytext API")
 
 
 @app.get("/")
 async def root():
     """Root endpoint with API information."""
     return {
-        "name": "EPUB Translator API",
+        "name": "Polytext API",
         "version": "1.0.0",
         "status": "running",
         "features": [
             "Multi-format output (EPUB + PDF + TXT)",
             "Gemini 2.5 Flash-Lite + Groq Llama fallback",
             "Smart payment routing (PayPal + Stripe)",
-            "$0.50 minimum pricing",
+            "$0.99 minimum pricing",
             "No accounts required",
             "7-day file retention"
         ]

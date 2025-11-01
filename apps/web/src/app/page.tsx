@@ -97,7 +97,7 @@ export default function HomePage() {
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">EPUB Translator</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</h1>
               <p className="text-sm text-neutral-600">Made by polyglots, for polyglots</p>
             </div>
           </div>
@@ -586,11 +586,11 @@ export default function HomePage() {
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="font-semibold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">EPUB Translator</div>
+              <div className="font-semibold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</div>
               <div className="text-sm text-neutral-600">Made by polyglots, for polyglots</div>
             </div>
           </div>
-          <p className="text-sm text-neutral-600">© 2024 EPUB Translator</p>
+          <p className="text-sm text-neutral-600">© 2024 Polytext</p>
           <p className="text-xs text-neutral-500 mt-1">Files automatically deleted after 7 days for your privacy</p>
         </div>
       </footer>
