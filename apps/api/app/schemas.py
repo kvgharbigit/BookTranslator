@@ -42,6 +42,7 @@ class JobStatusResponse(BaseModel):
     id: str = Field(..., description="Job ID")
     status: str = Field(..., description="Job status")
     progress_step: str = Field(..., description="Current progress step")
+    progress_percent: int = Field(default=0, description="Progress percentage 0-100")
     created_at: datetime = Field(..., description="Creation timestamp")
     download_urls: Optional[Dict[str, str]] = Field(None, description="Download URLs by format")
     expires_at: Optional[datetime] = Field(None, description="Download link expiration")

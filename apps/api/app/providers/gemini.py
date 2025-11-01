@@ -1,6 +1,6 @@
 import asyncio
 import httpx
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Callable
 from app.providers.base import TranslationProvider
 from app.config import settings
 from app.logger import get_logger
@@ -29,6 +29,7 @@ class GeminiFlashProvider(TranslationProvider):
         tgt_lang: str,
         system_hint: Optional[str] = None,
         glossary: Optional[Dict[str, str]] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> List[str]:
         """Translate segments using Gemini Flash-Lite with batching and retries."""
         
@@ -45,17 +46,21 @@ class GeminiFlashProvider(TranslationProvider):
         
         for i, batch in enumerate(batches):
             logger.info(f"Translating batch {i+1}/{len(batches)} with {len(batch)} segments")
-            
+
             # Rate limiting: 3,200 RPM (80% of limit) = 1 request every 0.01875 seconds
             # Conservative approach: 1 request every 0.02 seconds (50 RPM safe rate)
             if i > 0:
                 await asyncio.sleep(0.02)  # 20ms delay = max 50 requests/second = 3,000 RPM
-            
+
             translated_batch = await self._translate_batch_with_retry(
                 batch, src_lang, tgt_lang, system_hint
             )
             logger.info(f"Batch {i+1} completed: {len(translated_batch)} translations")
             translated_batches.extend(translated_batch)
+
+            # Report progress after each batch
+            if progress_callback:
+                progress_callback(i + 1, len(batches))
         
         logger.info(f"Translated {len(segments)} segments → {len(translated_batches)} results via Gemini")
         return translated_batches

@@ -71,6 +71,7 @@ def translate_epub(job_id: str):
         # Update job status to processing
         job.status = "processing"
         job.progress_step = "starting"
+        job.progress_percent = 10
         db.commit()
         logger.info(f"Job {job_id} status updated to processing")
         
@@ -87,6 +88,7 @@ def translate_epub(job_id: str):
             
             # Step 2: Read and segment EPUB
             job.progress_step = "segmenting"
+            job.progress_percent = 20
             db.commit()
             
             epub_processor = EPUBProcessor()
@@ -100,20 +102,31 @@ def translate_epub(job_id: str):
             
             # Step 3: Translate content
             job.progress_step = "translating"
+            job.progress_percent = 30
             db.commit()
-            
+
             primary_provider = get_provider(provider_name)
             fallback_provider = get_provider("groq" if provider_name == "gemini" else "gemini")
-            
+
             orchestrator = TranslationOrchestrator()
-            
+
+            # Create progress callback for batch-level updates
+            def update_translation_progress(batch_index: int, total_batches: int):
+                """Update job progress based on batch completion."""
+                # Translation phase is 30%-60% of total progress
+                progress = 30 + int((batch_index / total_batches) * 30)
+                job.progress_percent = min(progress, 60)  # Cap at 60%
+                db.commit()
+                logger.info(f"Translation progress: {job.progress_percent}% (batch {batch_index}/{total_batches})")
+
             translated_segments, tokens_actual, provider_used = asyncio.run(
                 orchestrator.translate_segments(
                     segments=segments,
                     target_lang=target_lang,
                     primary_provider=primary_provider,
                     fallback_provider=fallback_provider,
-                    source_lang=job.source_lang
+                    source_lang=job.source_lang,
+                    progress_callback=update_translation_progress
                 )
             )
             
@@ -128,6 +141,7 @@ def translate_epub(job_id: str):
             
             # Step 4: Reconstruct documents
             job.progress_step = "assembling"
+            job.progress_percent = 60
             db.commit()
             
             translated_docs = segmenter.reconstruct_documents(
@@ -140,6 +154,7 @@ def translate_epub(job_id: str):
             
             # Step 5: Generate multi-format outputs
             job.progress_step = "uploading"
+            job.progress_percent = 80
             db.commit()
             
             output_keys = _generate_outputs(
@@ -154,6 +169,7 @@ def translate_epub(job_id: str):
             # Step 6: Complete job
             job.status = "done"
             job.progress_step = "done"
+            job.progress_percent = 100
             db.commit()
             
             logger.info(f"Job {job_id} completed successfully")

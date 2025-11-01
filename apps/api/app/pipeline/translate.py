@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Callable
 from langdetect import detect
 
 from app.providers.base import TranslationProvider
@@ -27,7 +27,8 @@ class TranslationOrchestrator:
         target_lang: str,
         primary_provider: TranslationProvider,
         fallback_provider: Optional[TranslationProvider] = None,
-        source_lang: Optional[str] = None
+        source_lang: Optional[str] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None
     ) -> tuple[List[str], int, str]:
         """Translate segments with validation and fallback.
         
@@ -58,7 +59,8 @@ class TranslationOrchestrator:
                 translated_protected = await provider_to_use.translate_segments(
                     protected_segments,
                     source_lang,
-                    target_lang
+                    target_lang,
+                    progress_callback=progress_callback
                 )
                 
                 # Step 3: Restore placeholders

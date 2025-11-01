@@ -84,8 +84,11 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
     );
   }
 
-  const currentStep = PROGRESS_STEPS[job.progress_step as keyof typeof PROGRESS_STEPS] || 
+  const currentStep = PROGRESS_STEPS[job.progress_step as keyof typeof PROGRESS_STEPS] ||
                      { label: job.progress_step, progress: 50 };
+
+  // Use actual progress_percent if available (0-100), otherwise fall back to step-based progress
+  const progressPercent = job.progress_percent || currentStep.progress;
 
   if (job.status === 'failed') {
     return (
@@ -196,11 +199,18 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-primary-500 h-2 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${currentStep.progress}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
 
+        {/* Progress Percentage */}
         <div className="text-center">
+          <p className="text-lg font-semibold text-primary-600">
+            {progressPercent}%
+          </p>
+        </div>
+
+        <div className="text-center mt-2">
           <p className="text-sm text-gray-500">
             This usually takes 2-5 minutes
           </p>

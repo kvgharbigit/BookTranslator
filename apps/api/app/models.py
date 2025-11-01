@@ -30,6 +30,7 @@ class Job(Base):
     price_charged_cents = Column(Integer, nullable=False)
     stripe_payment_id = Column(String, unique=True, nullable=True)  # Idempotency
     progress_step = Column(String, default="queued")  # User-visible ETA
+    progress_percent = Column(Integer, default=0)  # 0-100 for smooth progress bar
     failover_count = Column(Integer, default=0)  # Provider fallback tracking
     
     def __repr__(self):

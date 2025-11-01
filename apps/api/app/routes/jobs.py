@@ -19,7 +19,7 @@ router = APIRouter()
 
 
 @router.get("/job/{job_id}", response_model=JobStatusResponse)
-@limiter.limit("12/minute")  # 1 request per 5 seconds
+@limiter.limit("1000/minute")  # Allow frequent polling - well below AI API limits
 async def get_job_status(
     job_id: str,
     request: Request,

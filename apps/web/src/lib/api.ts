@@ -20,6 +20,7 @@ export interface JobStatusResponse {
   id: string;
   status: string;
   progress_step: string;
+  progress_percent: number;
   created_at: string;
   download_urls?: {
     epub?: string;
