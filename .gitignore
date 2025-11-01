@@ -17,7 +17,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ - COMMENTED OUT: This was catching Next.js src/lib/ directory
+# Only ignore Python lib directories in specific locations
+apps/api/lib/
+apps/api/lib64/
 lib64/
 parts/
 sdist/
