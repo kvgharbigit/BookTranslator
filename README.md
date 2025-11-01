@@ -6,19 +6,25 @@
 
 ## 🚀 Quick Start
 
-```bash
-# Clone and setup
-git clone <your-repo>
-cd BookTranslator
+**Recommended:** Test with production infrastructure using Railway CLI:
 
-# Start services (3 terminals)
-./scripts/start-backend.sh   # Terminal 1: FastAPI + Database
-./scripts/start-worker.sh    # Terminal 2: Translation worker  
-./scripts/start-frontend.sh  # Terminal 3: Next.js web app
+```bash
+# Terminal 1: Backend (connected to Railway PostgreSQL + Redis)
+cd apps/api
+railway run --service BookTranslator poetry run python -m uvicorn app.main:app --reload --port 8000
+
+# Terminal 2: Worker (connected to Railway Redis)
+cd apps/api
+railway run --service BookTranslator poetry run rq worker translate
+
+# Terminal 3: Frontend
+cd apps/web
+npm run dev
 ```
 
-Visit **http://localhost:3000** and start translating! 
+Visit **http://localhost:3000** → Upload EPUB → Click **"Skip Payment (Test)"** → Watch it translate!
 
+👉 **Full Setup Guide:** See [Local Development](#-local-development) section below
 👉 **Quick Deployment:** See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for 8-hour MVP setup
 
 ## ✨ What This Does
@@ -188,15 +194,48 @@ BookTranslator/
 ### **Prerequisites**
 - Python 3.12+ with Poetry
 - Node.js 18+ with npm
-- Redis server
+- Railway CLI (`npm i -g @railway/cli` or `brew install railway`)
 - Git
 
-### **Environment Setup**
+### **Testing Options**
 
-1. **Clone repository**
+#### **Option 1: Test with Production Infrastructure (Recommended)**
+
+Use Railway CLI to run locally while connecting to production PostgreSQL and Redis:
+
 ```bash
-git clone <your-repo>
-cd BookTranslator
+# Terminal 1: Backend (connected to Railway DB/Redis)
+cd apps/api
+railway run --service BookTranslator poetry run python -m uvicorn app.main:app --reload --port 8000
+
+# Terminal 2: Worker (connected to Railway Redis)
+cd apps/api
+railway run --service BookTranslator poetry run rq worker translate
+
+# Terminal 3: Frontend
+cd apps/web
+npm run dev
+```
+
+**Benefits:**
+- ✅ Test with real production data
+- ✅ No local Redis or PostgreSQL needed
+- ✅ Exact same environment as production
+- ✅ Perfect for testing Skip Payment feature
+
+#### **Option 2: Fully Local Setup**
+
+For isolated testing without production dependencies:
+
+1. **Install Redis locally**
+```bash
+# macOS
+brew install redis
+redis-server
+
+# Ubuntu/Debian
+sudo apt-get install redis-server
+sudo systemctl start redis
 ```
 
 2. **Backend setup**
@@ -205,6 +244,8 @@ cd apps/api
 poetry install
 cp .env.example .env
 # Add your AI provider API keys to .env
+# Ensure DATABASE_URL=sqlite:///./data/jobs.db
+# Ensure REDIS_URL=redis://localhost:6379
 ```
 
 3. **Frontend setup**
@@ -217,20 +258,25 @@ echo "NEXT_PUBLIC_API_BASE=http://localhost:8000" > .env.local
 4. **Start services**
 ```bash
 # Terminal 1: Backend
-./scripts/start-backend.sh
+cd apps/api
+poetry run python -m uvicorn app.main:app --reload --port 8000
 
-# Terminal 2: Worker  
-./scripts/start-worker.sh
+# Terminal 2: Worker
+cd apps/api
+poetry run rq worker translate --url redis://localhost:6379
 
 # Terminal 3: Frontend
-./scripts/start-frontend.sh
+cd apps/web
+npm run dev
 ```
 
-5. **Test the system**
+### **Test the System**
 - Visit http://localhost:3000
 - Upload an EPUB file
 - See price estimate and payment form
-- Complete test translation (currently in bypass mode)
+- Click **"Skip Payment (Test)"** button to bypass PayPal
+- Watch translation progress in real-time
+- Download EPUB + PDF + TXT outputs
 
 ## 📋 Environment Variables
 
