@@ -91,8 +91,25 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 - **PayPal fees**: $0.09-$0.17 per transaction (5% + $0.05 fixed fee)
 
 **Processing Time**: 2-15 minutes depending on book size
-**Average Profit Margin**: 71-86% across all tiers (Groq reduces costs by ~78% when available)  
+**Average Profit Margin**: 71-86% across all tiers (Groq reduces costs by ~78% when available)
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
+
+### 📚 Book Category Examples
+
+**🧾 Short Book / Novella (0–40K words)**
+Compact, fast reads that tell a full story in under 100 pages — like *The Metamorphosis* by Franz Kafka (22K words), *Animal Farm* by George Orwell (30K), or *Of Mice and Men* by John Steinbeck (29K).
+
+**📘 Standard Novel (40K–100K words)**
+Covers most mainstream single-volume novels: *The Great Gatsby* (47K), *Fahrenheit 451* (46K), and *Jane Eyre* (96K). It's the sweet spot for the average modern novel.
+
+**📕 Long Novel (100K–180K words)**
+Full-length works with complex plots and multiple sub-stories — such as *Pride and Prejudice* (122K), *Dune* (175K), and *The Hobbit* (95K, on the lower edge).
+
+**🏛️ Epic Novel (180K–300K words)**
+Massive single-book adventures like *Les Misérables* (195K, abridged), *The Stand* (240K), or *A Game of Thrones* (298K). These books test AI throughput but still process in minutes.
+
+**📚 Grand Epic (300K–750K words)**
+Truly monumental single volumes such as *War and Peace* (587K), *Atlas Shrugged* (645K), or *The Count of Monte Cristo* (464K). Ideal for the "translate an entire classic" use case.
 
 ## 🛠️ Tech Stack
 
