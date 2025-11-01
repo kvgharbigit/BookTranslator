@@ -16,9 +16,9 @@ redis-server
 cd apps/api
 poetry run python -m uvicorn app.main:app --reload --port 8000
 
-# Terminal 3: Worker
+# Terminal 3: Worker (macOS fix)
 cd apps/api
-poetry run rq worker translate --url redis://localhost:6379
+OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
 # Terminal 4: Frontend
 cd apps/web
@@ -241,9 +241,9 @@ redis-server
 cd apps/api
 poetry run python -m uvicorn app.main:app --reload --port 8000
 
-# Terminal 3: Translation Worker
+# Terminal 3: Translation Worker (macOS fix for PDF generation)
 cd apps/api
-poetry run rq worker translate --url redis://localhost:6379
+OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
 # Terminal 4: Frontend
 cd apps/web
