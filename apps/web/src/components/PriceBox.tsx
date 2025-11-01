@@ -72,36 +72,36 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
       return {
         name: 'Short Book/Novella',
         color: 'blue',
-        example: '"The Great Gatsby"',
+        example: '"Animal Farm"',
         range: 'Up to 40K words'
       };
-    } else if (tokens < 133333) {
+    } else if (tokens < 160000) {
       return {
         name: 'Standard Novel',
         color: 'green',
-        example: '"To Kill a Mockingbird"',
-        range: '40K - 100K words'
+        example: '"The Great Gatsby"',
+        range: '40K - 120K words'
       };
-    } else if (tokens < 240000) {
+    } else if (tokens < 266667) {
       return {
         name: 'Long Novel',
         color: 'purple',
-        example: '"Harry Potter"',
-        range: '100K - 180K words'
+        example: '"Pride and Prejudice"',
+        range: '120K - 200K words'
       };
-    } else if (tokens < 400000) {
+    } else if (tokens < 466667) {
       return {
         name: 'Epic Novel',
         color: 'orange',
-        example: '"The Count of Monte Cristo"',
-        range: '180K - 300K words'
+        example: '"Game of Thrones"',
+        range: '200K - 350K words'
       };
     } else {
       return {
         name: 'Grand Epic',
         color: 'red',
         example: '"War and Peace"',
-        range: '300K - 750K words'
+        range: '350K - 750K words'
       };
     }
   };

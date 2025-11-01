@@ -242,35 +242,35 @@ export default function HomePage() {
             {/* Pricing Tiers */}
             <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-blue-600 mb-2">$0.79</div>
-                <div className="text-sm font-semibold text-neutral-900 mb-1">🧾 Short Book/Novella</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">$0.99</div>
+                <div className="text-sm font-semibold text-neutral-900 mb-1">🧾 Short Book</div>
                 <div className="text-xs text-neutral-600 mb-2">0-40K words</div>
                 <div className="text-xs text-blue-700 italic">"Animal Farm" (30K)</div>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">POPULAR</div>
-                <div className="text-3xl font-bold text-green-600 mb-2">$0.99</div>
+                <div className="text-3xl font-bold text-green-600 mb-2">$1.49–$1.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📘 Standard Novel</div>
-                <div className="text-xs text-neutral-600 mb-2">40K-100K words</div>
-                <div className="text-xs text-green-700 italic">"The Great Gatsby" (47K)</div>
+                <div className="text-xs text-neutral-600 mb-2">40K-120K words</div>
+                <div className="text-xs text-green-700 italic">"Great Gatsby" (47K)</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-purple-600 mb-2">$1.29</div>
+                <div className="text-3xl font-bold text-purple-600 mb-2">$2.49</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📕 Long Novel</div>
-                <div className="text-xs text-neutral-600 mb-2">100K-180K words</div>
-                <div className="text-xs text-purple-700 italic">"Pride and Prejudice" (122K)</div>
+                <div className="text-xs text-neutral-600 mb-2">120K-200K words</div>
+                <div className="text-xs text-purple-700 italic">"Pride & Prejudice" (122K)</div>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-orange-600 mb-2">$1.99</div>
+                <div className="text-3xl font-bold text-orange-600 mb-2">$2.99–$3.49</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🏛️ Epic Novel</div>
-                <div className="text-xs text-neutral-600 mb-2">180K-300K words</div>
+                <div className="text-xs text-neutral-600 mb-2">200K-350K words</div>
                 <div className="text-xs text-orange-700 italic">"The Stand" (240K)</div>
               </div>
               <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-red-600 mb-2">$2.49</div>
+                <div className="text-3xl font-bold text-red-600 mb-2">$3.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📚 Grand Epic</div>
-                <div className="text-xs text-neutral-600 mb-2">300K-750K words</div>
-                <div className="text-xs text-red-700 italic">"War and Peace" (587K)</div>
+                <div className="text-xs text-neutral-600 mb-2">350K-750K words</div>
+                <div className="text-xs text-red-700 italic">"War & Peace" (587K)</div>
               </div>
             </div>
 
@@ -303,7 +303,7 @@ export default function HomePage() {
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">MOST POPULAR</div>
                   <div className="text-4xl mb-3 text-center">📘</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Standard Novel</h5>
-                  <div className="text-xs text-center text-neutral-600 mb-3">40K–100K words</div>
+                  <div className="text-xs text-center text-neutral-600 mb-3">40K–120K words</div>
                   <div className="flex flex-wrap gap-1.5 justify-center">
                     <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Great Gatsby</span>
                     <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Fahrenheit 451</span>
@@ -315,7 +315,7 @@ export default function HomePage() {
                 <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border-2 border-purple-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">📕</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Long Novel</h5>
-                  <div className="text-xs text-center text-neutral-600 mb-3">100K–180K words</div>
+                  <div className="text-xs text-center text-neutral-600 mb-3">120K–200K words</div>
                   <div className="flex flex-wrap gap-1.5 justify-center">
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Pride & Prejudice</span>
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Dune</span>
@@ -327,7 +327,7 @@ export default function HomePage() {
                 <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
                   <div className="text-4xl mb-3 text-center">🏛️</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Epic Novel</h5>
-                  <div className="text-xs text-center text-neutral-600 mb-3">180K–300K words</div>
+                  <div className="text-xs text-center text-neutral-600 mb-3">200K–350K words</div>
                   <div className="flex flex-wrap gap-1.5 justify-center">
                     <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">The Stand</span>
                     <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">Game of Thrones</span>
@@ -339,7 +339,7 @@ export default function HomePage() {
                 <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2">
                   <div className="text-4xl mb-3 text-center">📚</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Grand Epic</h5>
-                  <div className="text-xs text-center text-neutral-600 mb-3">300K–750K words</div>
+                  <div className="text-xs text-center text-neutral-600 mb-3">350K–750K words</div>
                   <div className="flex flex-wrap gap-1.5 justify-center">
                     <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">War and Peace</span>
                     <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Atlas Shrugged</span>
@@ -367,27 +367,27 @@ export default function HomePage() {
                 {/* Example 1: Standard Novel */}
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
                   <div className="text-center mb-4">
-                    <div className="text-sm font-semibold text-neutral-700 mb-1">~55,000 Word Novel</div>
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">~100K Word Novel</div>
                     <div className="text-xs text-neutral-500">Most popular fiction books</div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
                       <span className="text-sm font-bold text-green-800">Our Price:</span>
-                      <span className="text-xl font-bold text-green-600">$0.99</span>
+                      <span className="text-xl font-bold text-green-600">$1.99</span>
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Standard:</span>
+                        <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$4.06</div>
-                          <div className="text-red-600">4.1x more</div>
+                          <div className="font-semibold text-neutral-800">~$5.00</div>
+                          <div className="text-red-600">2.5x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Pro:</span>
+                        <span className="text-neutral-600">NovelTranslator:</span>
                         <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$11.09</div>
-                          <div className="text-red-600">11.2x more</div>
+                          <div className="font-semibold text-neutral-800">~$2.99</div>
+                          <div className="text-red-600">1.5x more</div>
                         </div>
                       </div>
                     </div>
@@ -397,27 +397,27 @@ export default function HomePage() {
                 {/* Example 2: Long Novel */}
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
                   <div className="text-center mb-4">
-                    <div className="text-sm font-semibold text-neutral-700 mb-1">~150,000 Word Novel</div>
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">~150K Word Novel</div>
                     <div className="text-xs text-neutral-500">Fantasy/historical novels</div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
                       <span className="text-sm font-bold text-green-800">Our Price:</span>
-                      <span className="text-xl font-bold text-green-600">$1.29</span>
+                      <span className="text-xl font-bold text-green-600">$2.49</span>
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Standard:</span>
+                        <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$11.20</div>
-                          <div className="text-red-600">8.7x more</div>
+                          <div className="font-semibold text-neutral-800">~$7.50</div>
+                          <div className="text-red-600">3x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Pro:</span>
+                        <span className="text-neutral-600">NovelTranslator:</span>
                         <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$30.50</div>
-                          <div className="text-red-600">23.6x more</div>
+                          <div className="font-semibold text-neutral-800">~$4.49</div>
+                          <div className="text-red-600">1.8x more</div>
                         </div>
                       </div>
                     </div>

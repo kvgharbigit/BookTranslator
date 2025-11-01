@@ -73,11 +73,11 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 
 | **Category** | **Word Range** | **Price** | **Est. AI Cost** | **PayPal Fee** | **Net Profit ≈** | **Margin ≈** |
 |--------------|----------------|-----------|------------------|----------------|------------------|--------------|
-| 🧾 **Short Book/Novella** | 0-40K words | **$0.79** | ~$0.03-$0.05 | ~$0.09 | ~$0.65-$0.67 | ~82%-~85% |
-| 📘 **Standard Novel** | 40K-100K words | **$0.99** | ~$0.05-$0.08 | ~$0.10 | ~$0.81-$0.84 | ~82%-~85% |
-| 📕 **Long Novel** | 100K-180K words | **$1.29** | ~$0.08-$0.13 | ~$0.11 | ~$1.05-$1.10 | ~81%-~85% |
-| 🏛️ **Epic Novel** | 180K-300K words | **$1.99** | ~$0.14-$0.21 | ~$0.14 | ~$1.64-$1.71 | ~82%-~86% |
-| 📚 **Grand Epic** | 300K-750K words | **$2.49** | ~$0.24-$0.56 | ~$0.17 | ~$1.76-$2.08 | ~71%-~84% |
+| 🧾 **Short Book** | 0-40K words | **$0.99** | ~$0.03-$0.05 | ~$0.10 | ~$0.84-$0.86 | ~85%-~87% |
+| 📘 **Standard Novel** | 40K-120K words | **$1.49-$1.99** | ~$0.05-$0.13 | ~$0.12-$0.15 | ~$1.22-$1.71 | ~82%-~86% |
+| 📕 **Long Novel** | 120K-200K words | **$2.49** | ~$0.13-$0.20 | ~$0.17 | ~$2.12-$2.19 | ~85%-~88% |
+| 🏛️ **Epic Novel** | 200K-350K words | **$2.99-$3.49** | ~$0.20-$0.32 | ~$0.20-$0.22 | ~$2.59-$2.95 | ~87%-~88% |
+| 📚 **Grand Epic** | 350K-750K words | **$3.99** | ~$0.33-$0.56 | ~$0.25 | ~$3.18-$3.41 | ~80%-~85% |
 
 **Cost Components**:
 - **AI Translation** (conservative Gemini-only estimates):
@@ -88,27 +88,35 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
     - Blended rate: **$0.074/1M tokens** (78% cheaper than Gemini)
     - Source: [Groq Pricing](https://groq.com/) (verified Jan 2025)
   - Translation cost range: $0.03-$0.56 per book (using Gemini pricing)
-- **PayPal fees**: $0.09-$0.17 per transaction (5% + $0.05 fixed fee)
+- **PayPal fees**: $0.10-$0.25 per transaction (5% + $0.05 fixed fee)
 
 **Processing Time**: 2-15 minutes depending on book size
-**Average Profit Margin**: 71-86% across all tiers (Groq reduces costs by ~78% when available)
+**Average Profit Margin**: 80-88% across all tiers (Groq reduces costs by ~78% when available)
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
+
+### 🎯 Competitive Advantages
+
+- **Up to 5× cheaper** than comparable AI EPUB translators (O.Translator charges ~$5 for 100K words)
+- **Professional EPUB translation in minutes** — for less than $2 (40-80K word tier)
+- **Preserves formatting and images** — unlike free document translators that break EPUB layout
+- **Fastest hosted EPUB translator** — 100K words in under 5 minutes with production-grade quality
+- **No accounts, no subscriptions** — just pay-per-book simplicity with instant access
 
 ### 📚 Book Category Examples
 
 **🧾 Short Book / Novella (0–40K words)**
 Compact, fast reads that tell a full story in under 100 pages — like *The Metamorphosis* by Franz Kafka (22K words), *Animal Farm* by George Orwell (30K), or *Of Mice and Men* by John Steinbeck (29K).
 
-**📘 Standard Novel (40K–100K words)**
-Covers most mainstream single-volume novels: *The Great Gatsby* (47K), *Fahrenheit 451* (46K), and *Jane Eyre* (96K). It's the sweet spot for the average modern novel.
+**📘 Standard Novel (40K–120K words)**
+Covers most mainstream single-volume novels: *The Great Gatsby* (47K), *Fahrenheit 451* (46K), and *Jane Eyre* (96K). This is your main "sweet spot" tier with the best value.
 
-**📕 Long Novel (100K–180K words)**
-Full-length works with complex plots and multiple sub-stories — such as *Pride and Prejudice* (122K), *Dune* (175K), and *The Hobbit* (95K, on the lower edge).
+**📕 Long Novel (120K–200K words)**
+Full-length works with complex plots and multiple sub-stories — such as *Pride and Prejudice* (122K), *Dune* (175K), and *Harry Potter and the Philosopher's Stone* (77K on lower edge).
 
-**🏛️ Epic Novel (180K–300K words)**
-Massive single-book adventures like *Les Misérables* (195K, abridged), *The Stand* (240K), or *A Game of Thrones* (298K). These books test AI throughput but still process in minutes.
+**🏛️ Epic Novel (200K–350K words)**
+Massive single-book adventures like *The Stand* (240K), *A Game of Thrones* (298K), or *Les Misérables* (195K, abridged). These books test AI throughput but still process in minutes.
 
-**📚 Grand Epic (300K–750K words)**
+**📚 Grand Epic (350K–750K words)**
 Truly monumental single volumes such as *War and Peace* (587K), *Atlas Shrugged* (645K), or *The Count of Monte Cristo* (464K). Ideal for the "translate an entire classic" use case.
 
 ## 🛠️ Tech Stack
