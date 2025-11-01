@@ -55,7 +55,7 @@ export default function SuccessPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Payment Successful!
+            Translation Started!
           </h2>
           <p className="text-lg text-gray-600">
             Your translation is being processed. You'll be able to download your book when it's ready.
