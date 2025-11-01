@@ -71,15 +71,15 @@ def estimate_tokens_from_epub(file_path: str) -> int:
 
 def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
     """Calculate price using 5-tier pricing model with token caps.
-    
-    Tiers (aligned with word ranges):
-    - Short Novel (0-42K tokens / 0-56K words): $0.50
-    - Novel (42K-84K tokens / 56K-112K words): $0.75
-    - Long Novel (84K-169K tokens / 112K-225K words): $1.00
-    - Epic Novel (169K-282K tokens / 225K-375K words): $1.25
-    - Epic Series (282K-1M tokens / 375K-750K words): $1.50
+
+    Tiers (aligned with word ranges, using 1 token = 0.75 words):
+    - Short Stories (0-42K tokens / 0-31K words): $0.50
+    - Standard Novel (42K-84K tokens / 31K-63K words): $0.75
+    - Long Novel (84K-169K tokens / 63K-127K words): $1.00
+    - Epic Novel (169K-282K tokens / 127K-212K words): $1.25
+    - Epic Series (282K-1M tokens / 212K-750K words): $1.50
     - Files over 1M tokens (~750K+ words): Rejected (too large for profitable processing)
-    
+
     Ensures excellent margins while preventing losses on massive files.
     """
     # Check maximum token limit first
@@ -90,21 +90,21 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
         raise ValueError(f"Content limit exceeded: ~{words_est:,.0f} words > {max_words:,.0f} word maximum. Please use a shorter book or split into multiple files.")
     
     # 5-tier pricing structure aligned with word ranges
-    # Word ranges: 0-56K, 56K-112K, 112K-225K, 225K-375K, 375K-750K
+    # Word ranges: 0-31K, 31K-63K, 63K-127K, 127K-212K, 212K-750K
     # Token equivalents: 0-42K, 42K-84K, 84K-169K, 169K-282K, 282K-1M
-    if tokens_est < 42000:  # ~56K words
+    if tokens_est < 42000:  # ~31K words
         price_dollars = 0.50
-        tier = "Short Novel"
-    elif tokens_est < 84000:  # ~112K words  
+        tier = "Short Stories"
+    elif tokens_est < 84000:  # ~63K words
         price_dollars = 0.75
-        tier = "Novel"
-    elif tokens_est < 169000:  # ~225K words
+        tier = "Standard Novel"
+    elif tokens_est < 169000:  # ~127K words
         price_dollars = 1.00
         tier = "Long Novel"
-    elif tokens_est < 282000:  # ~375K words
+    elif tokens_est < 282000:  # ~212K words
         price_dollars = 1.25
         tier = "Epic Novel"
-    else:  # 282K-1M tokens (~375K-750K words, capped at 1M tokens)
+    else:  # 282K-1M tokens (~212K-750K words, capped at 1M tokens)
         price_dollars = 1.50
         tier = "Epic Series"
     
