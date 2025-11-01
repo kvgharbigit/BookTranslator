@@ -7,6 +7,7 @@ interface PriceBoxProps {
   tokensEst: number;
   priceCents: number;
   onPayment: (email: string, targetLang: string) => Promise<void>;
+  onSkipPayment?: (email: string, targetLang: string) => Promise<void>;
   disabled?: boolean;
 }
 
@@ -34,7 +35,7 @@ const LANGUAGES = [
   { code: 'th', name: 'Thai' },
 ];
 
-export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = false }: PriceBoxProps) {
+export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayment, disabled = false }: PriceBoxProps) {
   const [email, setEmail] = useState('');
   const [targetLang, setTargetLang] = useState('es');
   const [hasRights, setHasRights] = useState(false);
@@ -57,6 +58,30 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
     } catch (error) {
       console.error('Payment failed:', error);
       alert('Payment failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSkipPayment = async () => {
+    if (!hasRights) {
+      alert('Please confirm you have the right to translate this file.');
+      return;
+    }
+
+    if (!targetLang) {
+      alert('Please select a target language.');
+      return;
+    }
+
+    if (!onSkipPayment) return;
+
+    setIsProcessing(true);
+    try {
+      await onSkipPayment(email, targetLang);
+    } catch (error) {
+      console.error('Skip payment failed:', error);
+      alert('Failed to start translation. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -228,6 +253,24 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
             {isProcessing ? 'Processing...' : 'Pay & Translate'}
           </span>
         </button>
+
+        {/* Skip Payment Button (for testing) */}
+        {onSkipPayment && (
+          <button
+            onClick={handleSkipPayment}
+            disabled={disabled || isProcessing || !hasRights || !targetLang}
+            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 px-4 rounded-xl font-medium hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            {isProcessing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Sparkles className="w-5 h-5" />
+            )}
+            <span>
+              {isProcessing ? 'Processing...' : 'Skip Payment (Test)'}
+            </span>
+          </button>
+        )}
 
         <div className="text-center">
           <p className="text-xs text-neutral-500">

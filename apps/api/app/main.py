@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.logger import setup_logging, get_logger, set_request_id
 from app.db import create_tables
-from app.routes import health, presign, estimate, checkout, webhook, jobs, local_storage, paypal
+from app.routes import health, presign, estimate, checkout, webhook, jobs, local_storage, paypal, skip_payment
 
 # Setup logging
 setup_logging()
@@ -91,6 +91,7 @@ app.include_router(webhook.router, tags=["Webhooks"])
 app.include_router(paypal.router, prefix="/api/paypal", tags=["PayPal"])
 app.include_router(jobs.router, tags=["Jobs"])
 app.include_router(local_storage.router, tags=["Local Storage"])
+app.include_router(skip_payment.router, tags=["Testing"])
 
 
 @app.on_event("startup")

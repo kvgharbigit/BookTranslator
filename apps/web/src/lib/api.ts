@@ -114,6 +114,22 @@ export const api = {
     });
   },
 
+  // Skip payment and directly create job (for testing)
+  async skipPayment(
+    key: string,
+    targetLang: string,
+    email: string
+  ): Promise<{ job_id: string }> {
+    return apiCall('/skip-payment', {
+      method: 'POST',
+      body: JSON.stringify({
+        key,
+        target_lang: targetLang,
+        email: email || undefined,
+      }),
+    });
+  },
+
   // Get job status
   async getJobStatus(jobId: string): Promise<JobStatusResponse> {
     return apiCall(`/job/${jobId}`);

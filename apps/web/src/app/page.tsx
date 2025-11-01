@@ -51,13 +51,32 @@ export default function HomePage() {
         email,
         estimate.price_cents
       );
-      
+
       // Redirect to Stripe Checkout
       window.location.href = checkout_url;
-      
+
     } catch (err) {
       console.error('Payment creation failed:', err);
       throw new Error('Failed to create payment session. Please try again.');
+    }
+  };
+
+  const handleSkipPayment = async (email: string, targetLang: string) => {
+    if (!uploadKey) return;
+
+    try {
+      const { job_id } = await api.skipPayment(
+        uploadKey,
+        targetLang,
+        email
+      );
+
+      // Redirect to job status page
+      window.location.href = `/job/${job_id}`;
+
+    } catch (err) {
+      console.error('Skip payment failed:', err);
+      throw new Error('Failed to start translation. Please try again.');
     }
   };
 
@@ -175,6 +194,7 @@ export default function HomePage() {
                 tokensEst={estimate.tokens_est}
                 priceCents={estimate.price_cents}
                 onPayment={handlePayment}
+                onSkipPayment={handleSkipPayment}
               />
               <div className="text-center mt-4">
                 <button
@@ -285,7 +305,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
                 {/* Short Book/Novella */}
                 <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border-2 border-blue-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">🧾</div>
@@ -324,7 +344,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Epic Novel */}
-                <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+                <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
                   <div className="text-4xl mb-3 text-center">🏛️</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Epic Novel</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">200K–350K words</div>
@@ -336,7 +356,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Grand Epic */}
-                <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2">
+                <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 sm:col-span-2">
                   <div className="text-4xl mb-3 text-center">📚</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Grand Epic</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">350K–750K words</div>
@@ -363,7 +383,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
                 {/* Example 1: Standard Novel */}
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
                   <div className="text-center mb-4">
@@ -444,7 +464,7 @@ export default function HomePage() {
                 <p className="text-sm text-neutral-700 mb-3">
                   Built by polyglots who've paid overpriced translation services for years. We know what fair pricing looks like.
                 </p>
-                <div className="grid md:grid-cols-3 gap-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                   <div className="bg-white/70 rounded-lg p-3">
                     <div className="font-semibold text-green-700">🚫 No Agency Markup</div>
                     <div className="text-neutral-600">Direct AI translation</div>
@@ -480,7 +500,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 text-left max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 text-left max-w-4xl mx-auto">
               <div className="space-y-4">
                 <h4 className="text-lg font-semibold text-neutral-900 flex items-center space-x-2">
                   <span>✨</span>
