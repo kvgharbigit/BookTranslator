@@ -25,8 +25,8 @@ RUN pip install poetry
 # Set working directory
 WORKDIR /app
 
-# Copy Poetry files
-COPY pyproject.toml poetry.lock ./
+# Copy Poetry files from apps/api directory (Railway builds from repo root)
+COPY apps/api/pyproject.toml apps/api/poetry.lock ./
 
 # Configure Poetry to not create virtual environment
 RUN poetry config virtualenvs.create false
@@ -34,9 +34,9 @@ RUN poetry config virtualenvs.create false
 # Install Python dependencies
 RUN poetry install --only=main --no-root --no-interaction --no-ansi
 
-# Copy application code
-COPY app/ ./app/
-COPY supervisord.conf ./
+# Copy application code from apps/api directory
+COPY apps/api/app/ ./app/
+COPY apps/api/supervisord.conf ./
 
 # Create directories for storage and processing
 RUN mkdir -p /app/data /app/local_storage/uploads /app/local_storage/outputs /tmp/epub-processing
