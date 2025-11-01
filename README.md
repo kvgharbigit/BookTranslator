@@ -71,13 +71,13 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 
 ## 💰 Pricing Model
 
-| **Book Type** | **Word Range** | **Price** | **Total Cost** | **Net Profit** | **Margin** |
-|---------------|----------------|-----------|----------------|----------------|------------|
-| 📖 **Short Stories** | 0-31K words | **$0.50** | $0.08-$0.09 | $0.41-$0.42 | 82-84% |
-| 📚 **Standard Novel** | 31K-63K words | **$0.75** | $0.10-$0.12 | $0.63-$0.65 | 84-87% |
-| 📕 **Long Novel** | 63K-127K words | **$1.00** | $0.13-$0.16 | $0.84-$0.87 | 84-87% |
-| 🏛️ **Epic Novel** | 127K-212K words | **$1.25** | $0.17-$0.21 | $1.04-$1.08 | 83-86% |
-| 📚📚 **Epic Series** | 212K-750K words | **$1.50** | $0.23-$0.47 | $1.03-$1.27 | 69-85% |
+| **Category** | **Word Range** | **Price** | **Est. AI Cost** | **PayPal Fee** | **Net Profit ≈** | **Margin ≈** |
+|--------------|----------------|-----------|------------------|----------------|------------------|--------------|
+| 🧾 **Short Book/Novella** | 0-40K words | **$0.79** | ~$0.03-$0.05 | ~$0.09 | ~$0.65-$0.67 | ~82%-~85% |
+| 📘 **Standard Novel** | 40K-100K words | **$0.99** | ~$0.05-$0.08 | ~$0.10 | ~$0.81-$0.84 | ~82%-~85% |
+| 📕 **Long Novel** | 100K-180K words | **$1.29** | ~$0.08-$0.13 | ~$0.11 | ~$1.05-$1.10 | ~81%-~85% |
+| 🏛️ **Epic Novel** | 180K-300K words | **$1.99** | ~$0.14-$0.21 | ~$0.14 | ~$1.64-$1.71 | ~82%-~86% |
+| 📚 **Grand Epic** | 300K-750K words | **$2.49** | ~$0.24-$0.56 | ~$0.17 | ~$1.76-$2.08 | ~71%-~84% |
 
 **Cost Components**:
 - **AI Translation** (conservative Gemini-only estimates):
@@ -87,11 +87,11 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
   - **Groq Llama 3.1 8B Instant** (Fallback): $0.05/1M input, $0.08/1M output tokens
     - Blended rate: **$0.074/1M tokens** (78% cheaper than Gemini)
     - Source: [Groq Pricing](https://groq.com/) (verified Jan 2025)
-  - Translation cost range: $0.01-$0.34 per book (using Gemini pricing)
-- **PayPal fees**: $0.08-$0.13 per transaction (5% + $0.05 fixed fee)
+  - Translation cost range: $0.03-$0.56 per book (using Gemini pricing)
+- **PayPal fees**: $0.09-$0.17 per transaction (5% + $0.05 fixed fee)
 
 **Processing Time**: 2-15 minutes depending on book size
-**Average Profit Margin**: 69-87% across all tiers (Groq reduces costs by ~78% when available)  
+**Average Profit Margin**: 71-86% across all tiers (Groq reduces costs by ~78% when available)  
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
 
 ## 🛠️ Tech Stack

@@ -73,11 +73,11 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
     """Calculate price using 5-tier pricing model with token caps.
 
     Tiers (aligned with word ranges, using 1 token = 0.75 words):
-    - Short Stories (0-42K tokens / 0-31K words): $0.50
-    - Standard Novel (42K-84K tokens / 31K-63K words): $0.75
-    - Long Novel (84K-169K tokens / 63K-127K words): $1.00
-    - Epic Novel (169K-282K tokens / 127K-212K words): $1.25
-    - Epic Series (282K-1M tokens / 212K-750K words): $1.50
+    - Short Book/Novella (0-53K tokens / 0-40K words): $0.79
+    - Standard Novel (53K-133K tokens / 40K-100K words): $0.99
+    - Long Novel (133K-240K tokens / 100K-180K words): $1.29
+    - Epic Novel (240K-400K tokens / 180K-300K words): $1.99
+    - Grand Epic (400K-1M tokens / 300K-750K words): $2.49
     - Files over 1M tokens (~750K+ words): Rejected (too large for profitable processing)
 
     Ensures excellent margins while preventing losses on massive files.
@@ -88,41 +88,41 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
         words_est = tokens_est * 0.75  # ~0.75 words per token
         max_words = settings.max_file_tokens * 0.75
         raise ValueError(f"Content limit exceeded: ~{words_est:,.0f} words > {max_words:,.0f} word maximum. Please use a shorter book or split into multiple files.")
-    
+
     # 5-tier pricing structure aligned with word ranges
-    # Word ranges: 0-31K, 31K-63K, 63K-127K, 127K-212K, 212K-750K
-    # Token equivalents: 0-42K, 42K-84K, 84K-169K, 169K-282K, 282K-1M
-    if tokens_est < 42000:  # ~31K words
-        price_dollars = 0.50
-        tier = "Short Stories"
-    elif tokens_est < 84000:  # ~63K words
-        price_dollars = 0.75
+    # Word ranges: 0-40K, 40K-100K, 100K-180K, 180K-300K, 300K-750K
+    # Token equivalents: 0-53K, 53K-133K, 133K-240K, 240K-400K, 400K-1M
+    if tokens_est < 53333:  # ~40K words
+        price_dollars = 0.79
+        tier = "Short Book/Novella"
+    elif tokens_est < 133333:  # ~100K words
+        price_dollars = 0.99
         tier = "Standard Novel"
-    elif tokens_est < 169000:  # ~127K words
-        price_dollars = 1.00
+    elif tokens_est < 240000:  # ~180K words
+        price_dollars = 1.29
         tier = "Long Novel"
-    elif tokens_est < 282000:  # ~212K words
-        price_dollars = 1.25
+    elif tokens_est < 400000:  # ~300K words
+        price_dollars = 1.99
         tier = "Epic Novel"
-    else:  # 282K-1M tokens (~212K-750K words, capped at 1M tokens)
-        price_dollars = 1.50
-        tier = "Epic Series"
-    
+    else:  # 400K-1M tokens (~300K-750K words, capped at 1M tokens)
+        price_dollars = 2.49
+        tier = "Grand Epic"
+
     # Convert to cents
     final_price_cents = int(price_dollars * 100)
-    
+
     # Apply minimum price (though tiers should always be above minimum)
     final_price = max(settings.min_price_cents, final_price_cents)
-    
+
     # Calculate provider cost for logging
     provider_cost_dollars = float(calculate_provider_cost_cents(tokens_est, provider))
-    
+
     logger.info(
         f"5-tier pricing: {tokens_est:,} tokens, {provider} -> "
         f"Tier: {tier} (${price_dollars:.2f}), "
         f"Provider cost: ${provider_cost_dollars:.3f}"
     )
-    
+
     return final_price
 
 

@@ -68,40 +68,40 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
   // Determine book category based on token count (matching backend pricing logic)
   // Using 1 token = 0.75 words conversion
   const getBookCategory = (tokens: number) => {
-    if (tokens < 42000) {
+    if (tokens < 53333) {
       return {
-        name: 'Short Stories',
+        name: 'Short Book/Novella',
         color: 'blue',
         example: '"The Great Gatsby"',
-        range: 'Up to 31K words'
+        range: 'Up to 40K words'
       };
-    } else if (tokens < 84000) {
+    } else if (tokens < 133333) {
       return {
         name: 'Standard Novel',
         color: 'green',
         example: '"To Kill a Mockingbird"',
-        range: '31K - 63K words'
+        range: '40K - 100K words'
       };
-    } else if (tokens < 169000) {
+    } else if (tokens < 240000) {
       return {
         name: 'Long Novel',
         color: 'purple',
-        example: '"Pride and Prejudice"',
-        range: '63K - 127K words'
+        example: '"Harry Potter"',
+        range: '100K - 180K words'
       };
-    } else if (tokens < 282000) {
+    } else if (tokens < 400000) {
       return {
         name: 'Epic Novel',
         color: 'orange',
         example: '"The Count of Monte Cristo"',
-        range: '127K - 212K words'
+        range: '180K - 300K words'
       };
     } else {
       return {
-        name: 'Epic Series',
+        name: 'Grand Epic',
         color: 'red',
         example: '"War and Peace"',
-        range: '212K - 750K words'
+        range: '300K - 750K words'
       };
     }
   };
