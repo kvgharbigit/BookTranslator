@@ -79,9 +79,16 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 | 🏛️ **Epic Novel** | 127K-212K words | **$1.25** | $0.17-$0.21 | $1.04-$1.08 | 83-86% |
 | 📚📚 **Epic Series** | 212K-750K words | **$1.50** | $0.23-$0.47 | $1.03-$1.27 | 69-85% |
 
-**Cost Components** (conservative Gemini-only estimates):
-- AI translation: $0.01-$0.34 (Gemini @ $0.34/1M tokens)
-- PayPal fees: $0.08-$0.13 (5% + $0.05 per transaction)
+**Cost Components**:
+- **AI Translation** (conservative Gemini-only estimates):
+  - **Gemini 2.5 Flash-Lite** (Primary): $0.10/1M input, $0.40/1M output tokens
+    - Blended rate: **$0.34/1M tokens** (assumes 20% input, 80% output)
+    - Source: [Google AI Pricing](https://ai.google.dev/pricing) (verified Jan 2025)
+  - **Groq Llama 3.1 8B Instant** (Fallback): $0.05/1M input, $0.08/1M output tokens
+    - Blended rate: **$0.074/1M tokens** (78% cheaper than Gemini)
+    - Source: [Groq Pricing](https://groq.com/) (verified Jan 2025)
+  - Translation cost range: $0.01-$0.34 per book (using Gemini pricing)
+- **PayPal fees**: $0.08-$0.13 per transaction (5% + $0.05 fixed fee)
 
 **Processing Time**: 2-15 minutes depending on book size
 **Average Profit Margin**: 69-87% across all tiers (Groq reduces costs by ~78% when available)  
