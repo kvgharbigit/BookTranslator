@@ -275,79 +275,75 @@ export default function HomePage() {
             </div>
 
             {/* Book Category Examples */}
-            <div className="bg-gradient-to-br from-neutral-50 to-neutral-100 border border-neutral-200 rounded-xl p-6 mb-8">
-              <div className="text-center mb-6">
-                <h4 className="font-bold text-neutral-900 text-lg mb-2">
-                  📚 Book Category Examples
+            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 mb-8">
+              <div className="text-center mb-8">
+                <h4 className="font-bold text-neutral-900 text-2xl mb-2">
+                  📚 Know Your Book Size
                 </h4>
-                <p className="text-sm text-neutral-600">
-                  Real-world examples so you know exactly where your book fits
+                <p className="text-sm text-neutral-600 max-w-2xl mx-auto">
+                  See where famous classics fit in our pricing tiers
                 </p>
               </div>
 
-              <div className="space-y-4 max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
                 {/* Short Book/Novella */}
-                <div className="bg-white rounded-lg p-4 border border-blue-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-2xl">🧾</div>
-                    <div>
-                      <h5 className="font-semibold text-neutral-900 mb-1">Short Book / Novella (0–40K words)</h5>
-                      <p className="text-sm text-neutral-700 mb-2">
-                        Compact, fast reads that tell a full story in under 100 pages — like <span className="font-medium">The Metamorphosis</span> by Franz Kafka (22K words), <span className="font-medium">Animal Farm</span> by George Orwell (30K), or <span className="font-medium">Of Mice and Men</span> by John Steinbeck (29K).
-                      </p>
-                    </div>
+                <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border-2 border-blue-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                  <div className="text-4xl mb-3 text-center">🧾</div>
+                  <h5 className="font-bold text-neutral-900 text-center mb-2">Short Book</h5>
+                  <div className="text-xs text-center text-neutral-600 mb-3">0–40K words</div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Animal Farm</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Of Mice & Men</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Metamorphosis</span>
                   </div>
                 </div>
 
                 {/* Standard Novel */}
-                <div className="bg-white rounded-lg p-4 border border-green-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-2xl">📘</div>
-                    <div>
-                      <h5 className="font-semibold text-neutral-900 mb-1">Standard Novel (40K–100K words)</h5>
-                      <p className="text-sm text-neutral-700 mb-2">
-                        Covers most mainstream single-volume novels: <span className="font-medium">The Great Gatsby</span> (47K), <span className="font-medium">Fahrenheit 451</span> (46K), and <span className="font-medium">Jane Eyre</span> (96K). It's the sweet spot for the average modern novel.
-                      </p>
-                    </div>
+                <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-5 border-2 border-green-300 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 relative">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">MOST POPULAR</div>
+                  <div className="text-4xl mb-3 text-center">📘</div>
+                  <h5 className="font-bold text-neutral-900 text-center mb-2">Standard Novel</h5>
+                  <div className="text-xs text-center text-neutral-600 mb-3">40K–100K words</div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Great Gatsby</span>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Fahrenheit 451</span>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Jane Eyre</span>
                   </div>
                 </div>
 
                 {/* Long Novel */}
-                <div className="bg-white rounded-lg p-4 border border-purple-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-2xl">📕</div>
-                    <div>
-                      <h5 className="font-semibold text-neutral-900 mb-1">Long Novel (100K–180K words)</h5>
-                      <p className="text-sm text-neutral-700 mb-2">
-                        Full-length works with complex plots and multiple sub-stories — such as <span className="font-medium">Pride and Prejudice</span> (122K), <span className="font-medium">Dune</span> (175K), and <span className="font-medium">The Hobbit</span> (95K, on the lower edge).
-                      </p>
-                    </div>
+                <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border-2 border-purple-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                  <div className="text-4xl mb-3 text-center">📕</div>
+                  <h5 className="font-bold text-neutral-900 text-center mb-2">Long Novel</h5>
+                  <div className="text-xs text-center text-neutral-600 mb-3">100K–180K words</div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Pride & Prejudice</span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">Dune</span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">The Hobbit</span>
                   </div>
                 </div>
 
                 {/* Epic Novel */}
-                <div className="bg-white rounded-lg p-4 border border-orange-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-2xl">🏛️</div>
-                    <div>
-                      <h5 className="font-semibold text-neutral-900 mb-1">Epic Novel (180K–300K words)</h5>
-                      <p className="text-sm text-neutral-700 mb-2">
-                        Massive single-book adventures like <span className="font-medium">Les Misérables</span> (195K, abridged), <span className="font-medium">The Stand</span> (240K), or <span className="font-medium">A Game of Thrones</span> (298K). These books test AI throughput but still process in minutes.
-                      </p>
-                    </div>
+                <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2 lg:col-span-1">
+                  <div className="text-4xl mb-3 text-center">🏛️</div>
+                  <h5 className="font-bold text-neutral-900 text-center mb-2">Epic Novel</h5>
+                  <div className="text-xs text-center text-neutral-600 mb-3">180K–300K words</div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">The Stand</span>
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">Game of Thrones</span>
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">Les Misérables</span>
                   </div>
                 </div>
 
                 {/* Grand Epic */}
-                <div className="bg-white rounded-lg p-4 border border-red-200">
-                  <div className="flex items-start space-x-3">
-                    <div className="text-2xl">📚</div>
-                    <div>
-                      <h5 className="font-semibold text-neutral-900 mb-1">Grand Epic (300K–750K words)</h5>
-                      <p className="text-sm text-neutral-700 mb-2">
-                        Truly monumental single volumes such as <span className="font-medium">War and Peace</span> (587K), <span className="font-medium">Atlas Shrugged</span> (645K), or <span className="font-medium">The Count of Monte Cristo</span> (464K). Ideal for the "translate an entire classic" use case.
-                      </p>
-                    </div>
+                <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 md:col-span-2">
+                  <div className="text-4xl mb-3 text-center">📚</div>
+                  <h5 className="font-bold text-neutral-900 text-center mb-2">Grand Epic</h5>
+                  <div className="text-xs text-center text-neutral-600 mb-3">300K–750K words</div>
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">War and Peace</span>
+                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Atlas Shrugged</span>
+                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Count of Monte Cristo</span>
                   </div>
                 </div>
               </div>
