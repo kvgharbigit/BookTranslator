@@ -31,7 +31,10 @@ async def skip_payment(
     db: Session = Depends(get_db),
     storage = Depends(get_storage)
 ):
-    """Skip payment and directly create translation job (for testing only)."""
+    """Skip payment and directly create translation job (for testing only).
+
+    This endpoint bypasses payment processing for testing purposes.
+    """
 
     try:
         # Determine provider
