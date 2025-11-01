@@ -1,86 +1,11 @@
-import os
-import shutil
 import boto3
 from botocore.exceptions import ClientError
-from datetime import datetime, timedelta
 from typing import Optional
-from urllib.parse import quote
 
 from app.config import settings
 from app.logger import get_logger
 
 logger = get_logger(__name__)
-
-
-class LocalStorage:
-    """Local file storage for testing without cloud dependencies."""
-    
-    def __init__(self):
-        self.base_path = os.path.join(os.getcwd(), "local_storage")
-        os.makedirs(self.base_path, exist_ok=True)
-        logger.info(f"Using local storage at: {self.base_path}")
-    
-    def generate_presigned_upload_url(
-        self,
-        key: str,
-        content_type: str = "application/epub+zip",
-        expires_in: int = 3600
-    ) -> str:
-        """Return a fake upload URL for local testing."""
-        return f"http://localhost:8000/local-upload/{quote(key)}"
-    
-    def generate_presigned_download_url(
-        self,
-        key: str,
-        expires_in: Optional[int] = None
-    ) -> str:
-        """Return a fake download URL for local testing."""
-        return f"http://localhost:8000/local-download/{quote(key)}"
-    
-    def upload_file(self, local_path: str, key: str, content_type: str = "application/octet-stream") -> bool:
-        """Copy file to local storage."""
-        try:
-            dest_path = os.path.join(self.base_path, key)
-            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-            shutil.copy2(local_path, dest_path)
-            logger.info(f"Uploaded file locally: {local_path} -> {dest_path}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to upload file locally: {e}")
-            return False
-    
-    def download_file(self, key: str, local_path: str) -> bool:
-        """Copy file from local storage."""
-        try:
-            src_path = os.path.join(self.base_path, key)
-            shutil.copy2(src_path, local_path)
-            logger.info(f"Downloaded file locally: {src_path} -> {local_path}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to download file locally: {e}")
-            return False
-    
-    def get_object_size(self, key: str) -> Optional[int]:
-        """Get file size."""
-        try:
-            file_path = os.path.join(self.base_path, key)
-            size = os.path.getsize(file_path)
-            logger.info(f"Got file size for {key}: {size} bytes")
-            return size
-        except Exception as e:
-            logger.error(f"Failed to get file size: {e}")
-            return None
-    
-    def delete_object(self, key: str) -> bool:
-        """Delete file from local storage."""
-        try:
-            file_path = os.path.join(self.base_path, key)
-            os.remove(file_path)
-            logger.info(f"Deleted file locally: {file_path}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to delete file locally: {e}")
-            return False
 
 
 class R2Storage:
@@ -194,12 +119,10 @@ class R2Storage:
 storage = None
 
 def get_storage():
-    """Get storage instance with lazy loading for testing."""
+    """Get R2 storage instance."""
     global storage
     if storage is None:
-        # Use local storage if R2 credentials are fake
-        if settings.r2_account_id == "fake_account_id":
-            storage = LocalStorage()
-        else:
-            storage = R2Storage()
+        # Always use R2 storage (production-ready)
+        storage = R2Storage()
+        logger.info(f"Using R2 storage: {settings.r2_bucket}")
     return storage

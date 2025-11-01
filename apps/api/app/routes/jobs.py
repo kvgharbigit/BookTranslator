@@ -38,6 +38,7 @@ async def get_job_status(
         "id": job.id,
         "status": job.status,
         "progress_step": job.progress_step,
+        "progress_percent": job.progress_percent,
         "created_at": job.created_at,
         "download_urls": None,
         "expires_at": None,

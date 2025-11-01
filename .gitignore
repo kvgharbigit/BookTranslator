@@ -98,3 +98,4 @@ test_*.py
 !tests/
 !tests/*.py.env
 apps/api/.env
+.r2-credentials.txt

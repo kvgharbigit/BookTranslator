@@ -43,8 +43,7 @@ def epub_to_pdf_calibre(epub_path: str, output_path: str) -> bool:
             '--pdf-page-numbers',
             '--pdf-sans-family', 'Arial',
             '--pdf-serif-family', 'Times New Roman',
-            '--enable-heuristics',  # Better image handling
-            '--pdf-add-toc'         # Add table of contents
+            '--enable-heuristics'   # Better image handling (removed pdf-add-toc to prevent English TOC)
         ]
         
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)

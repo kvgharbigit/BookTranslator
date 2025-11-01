@@ -158,7 +158,11 @@ class HTMLSegmenter:
                         continue
                     
                     text = element.strip()
-                    if len(text) > 10 and segment_idx < len(translated_segments):
+                    # Use same criteria as segmentation to maintain alignment
+                    if (len(text) >= 3 and 
+                        not text.isdigit() and 
+                        text.lower() not in ['html', 'head', 'body', 'div', 'span'] and 
+                        segment_idx < len(translated_segments)):
                         # Replace with translated text
                         element.replace_with(translated_segments[segment_idx])
                         segment_idx += 1

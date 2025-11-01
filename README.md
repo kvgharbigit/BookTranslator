@@ -1,22 +1,22 @@
-# 📚 Polytext - AI-Powered Book Translation Service
+# 📚 BookTranslator - AI-Powered EPUB Translation Service
 
-> **Production-Ready** EPUB translation service with PayPal payments and real-time processing
+> Transform EPUBs into any language with AI - **Testing Ready** with Cloudflare R2 storage
 
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green)](.) [![License](https://img.shields.io/badge/License-MIT-blue)](.) [![PayPal](https://img.shields.io/badge/Payments-PayPal-blue)](.)
+[![Status](https://img.shields.io/badge/Status-Testing%20Ready-yellow)](./CURRENT_STATUS.md) [![R2](https://img.shields.io/badge/Storage-Cloudflare%20R2-orange)](.) [![License](https://img.shields.io/badge/License-MIT-blue)](.)
 
 ## 🚀 Quick Start
 
-**Test locally with production database:**
+**Test locally with production infrastructure:**
 
 ```bash
 # Terminal 1: Start Redis
 redis-server
 
-# Terminal 2: Backend (uses apps/api/.env.local)
+# Terminal 2: Backend (uses Railway PostgreSQL + Cloudflare R2)
 cd apps/api
 poetry run python -m uvicorn app.main:app --reload --port 8000
 
-# Terminal 3: Worker (macOS fix)
+# Terminal 3: Worker (macOS fix included)
 cd apps/api
 OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
@@ -25,26 +25,30 @@ cd apps/web
 npm run dev
 ```
 
-Visit **http://localhost:3000** → Upload EPUB → Click **"Skip Payment (Test)"** → Watch it translate!
+Visit **http://localhost:3000** → Upload EPUB → Click **"Skip Payment (Test)"** → Watch real-time progress!
 
-**Note:** The `.env.local` file is pre-configured to use:
-- ✅ Railway PostgreSQL (external URL)
-- ✅ Local Redis
-- ✅ Your AI API keys from Railway
+**Current Setup:**
+- ✅ **Cloudflare R2** - Production file storage (5-day retention)
+- ✅ **Railway PostgreSQL** - Production database
+- ✅ **Local Redis** - Job queue
+- ✅ **Groq Llama 3.1** - AI translation ($0.074/1M tokens)
+- ✅ **Batch Progress Tracking** - Smooth 0-100% progress bar
 
-👉 **Full Setup Guide:** See [Local Development](#-local-development) section below
-👉 **Quick Deployment:** See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for 8-hour MVP setup
+👉 **Current Status:** See [CURRENT_STATUS.md](./CURRENT_STATUS.md) for complete implementation details
+👉 **R2 Setup:** See [R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md) for Cloudflare R2 configuration
+👉 **Deployment:** See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for production deployment
 
 ## ✨ What This Does
 
 Transform any EPUB book into any language in **under 5 minutes** with professional quality:
 
 - **📚 Upload EPUB** → Get instant price estimate ($0.50-$1.50)
-- **💳 Pay via PayPal** → Secure micropayment processing  
-- **⚡ AI Translation** → Gemini 2.5 Flash + Groq Llama fallback
-- **📱 Real-time Progress** → Watch translation happen live
+- **💳 Pay via PayPal** → ⚠️ *Configured but needs live credentials*
+- **⚡ AI Translation** → Groq Llama 3.1 (testing) + Gemini 2.5 Flash (production ready)
+- **📱 Real-time Progress** → Smooth batch-level progress tracking (0-100%)
 - **📦 Multi-format Output** → Download EPUB + PDF + TXT
-- **📧 Email Delivery** → Get download links via email
+- **☁️ Cloudflare R2 Storage** → Zero egress fees, 5-day retention
+- **📧 Email Delivery** → ⚠️ *Configured but needs Resend API key*
 
 ## 🎯 Key Features
 

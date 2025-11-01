@@ -11,13 +11,13 @@ class Settings(BaseSettings):
     log_level: str = Field(default="info", alias="LOG_LEVEL")
     database_url: str = Field(default="sqlite:///./data/jobs.db", alias="DATABASE_URL")
     
-    # Cloudflare R2 Storage
+    # Cloudflare R2 Storage (Required - No Local Fallback)
     r2_account_id: str = Field(alias="R2_ACCOUNT_ID")
     r2_access_key_id: str = Field(alias="R2_ACCESS_KEY_ID")
     r2_secret_access_key: str = Field(alias="R2_SECRET_ACCESS_KEY")
-    r2_bucket: str = Field(default="epub-translator", alias="R2_BUCKET")
+    r2_bucket: str = Field(default="epub-translator-production", alias="R2_BUCKET")
     r2_region: str = Field(default="auto", alias="R2_REGION")
-    signed_get_ttl_seconds: int = Field(default=172800, alias="SIGNED_GET_TTL_SECONDS")  # 48h
+    signed_get_ttl_seconds: int = Field(default=432000, alias="SIGNED_GET_TTL_SECONDS")  # 5 days (5 * 24 * 60 * 60)
     
     # Payment Processing (PayPal only)
     min_price_cents: int = Field(default=50, alias="MIN_PRICE_CENTS")

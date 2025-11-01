@@ -90,7 +90,7 @@ export default function SuccessPage() {
                 <li>• <strong>EPUB:</strong> For e-readers and reading apps</li>
                 <li>• <strong>PDF:</strong> For printing or mobile reading</li>
                 <li>• <strong>TXT:</strong> Plain text for any device</li>
-                <li>• All links expire in 48 hours</li>
+                <li>• All files are kept for 5 days</li>
               </ul>
             </div>
           </div>

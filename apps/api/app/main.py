@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.logger import setup_logging, get_logger, set_request_id
 from app.db import create_tables
-from app.routes import health, presign, estimate, checkout, webhook, jobs, local_storage, paypal, skip_payment
+from app.routes import health, presign, estimate, checkout, webhook, jobs, paypal, skip_payment
 
 # Setup logging
 setup_logging()
@@ -17,8 +17,8 @@ logger = get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="Polytext API",
-    description="Pay-per-file EPUB translation service with multi-format output",
+    title="BookTranslator API",
+    description="AI-powered EPUB translation service with multi-format output (EPUB, PDF, TXT)",
     version="1.0.0"
 )
 
@@ -30,9 +30,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # CORS middleware
 allowed_origins = [
     "http://localhost:3000",
-    "http://localhost:8000", 
-    "https://polytext.site",
-    "https://www.polytext.site"
+    "http://localhost:8000"
 ]
 
 if settings.env == "development":
@@ -100,48 +98,50 @@ app.include_router(checkout.router, tags=["Payment"])
 app.include_router(webhook.router, tags=["Webhooks"])
 app.include_router(paypal.router, prefix="/api/paypal", tags=["PayPal"])
 app.include_router(jobs.router, tags=["Jobs"])
-app.include_router(local_storage.router, tags=["Local Storage"])
 app.include_router(skip_payment.router, tags=["Testing"])
 
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize application on startup."""
-    logger.info("Starting Polytext API")
-    
+    logger.info("Starting BookTranslator API")
+
     # Create database tables
     create_tables()
     logger.info("Database tables created/verified")
-    
+
     # Log configuration
     logger.info(f"Environment: {settings.env}")
     logger.info(f"Provider: {settings.provider}")
+    logger.info(f"Storage: Cloudflare R2 ({settings.r2_bucket})")
     logger.info(f"Max file size: {settings.max_file_mb}MB")
     logger.info(f"Price per million tokens: ${settings.price_cents_per_million_tokens/100:.2f}")
-    
-    logger.info("Polytext API started successfully")
+
+    logger.info("BookTranslator API started successfully")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on application shutdown."""
-    logger.info("Shutting down Polytext API")
+    logger.info("Shutting down BookTranslator API")
 
 
 @app.get("/")
 async def root():
     """Root endpoint with API information."""
     return {
-        "name": "Polytext API",
+        "name": "BookTranslator API",
         "version": "1.0.0",
         "status": "running",
+        "storage": "Cloudflare R2",
         "features": [
             "Multi-format output (EPUB + PDF + TXT)",
-            "Gemini 2.5 Flash-Lite + Groq Llama fallback",
-            "Smart payment routing (PayPal + Stripe)",
-            "$0.99 minimum pricing",
+            "Groq Llama 3.1 (testing) + Gemini 2.5 Flash-Lite (production)",
+            "Batch-level progress tracking (0-100%)",
+            "PayPal micropayments",
+            "$0.50 minimum pricing",
             "No accounts required",
-            "7-day file retention"
+            "5-day file retention"
         ]
     }
 

@@ -174,9 +174,12 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
           )}
         </div>
 
+        <p className="text-xs text-gray-500 mt-4 text-center">
+          ⚠️ Download these files soon - they will be automatically deleted after 5 days
+        </p>
         {job.expires_at && (
-          <p className="text-xs text-gray-500 mt-4 text-center">
-            Links expire in {new Date(job.expires_at).toLocaleString()}
+          <p className="text-xs text-gray-400 mt-1 text-center">
+            Files expire: {new Date(job.expires_at).toLocaleDateString()}
           </p>
         )}
       </div>

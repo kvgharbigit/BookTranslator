@@ -1,6 +1,8 @@
-# 🚀 Polytext - Complete Deployment Guide
+# 🚀 BookTranslator - Complete Deployment Guide
 
 Deploy your translation service from zero to production in 8 hours to 2 weeks depending on your needs.
+
+**Current Status:** ✅ R2 Storage configured | ⚠️ PayPal needs live credentials
 
 ## 🎯 Choose Your Deployment Path
 
@@ -181,26 +183,29 @@ DATABASE_URL=postgresql://...  # Production PostgreSQL
 MAX_CONCURRENT_JOBS=10
 ```
 
-**1.2: Storage Migration to Cloudflare R2**
+**1.2: Cloudflare R2 Storage** ✅ **COMPLETED**
+
+R2 is already configured with:
+- Bucket: `epub-translator-production`
+- Region: Eastern North America (ENAM)
+- **5-day automatic file deletion** (lifecycle policy)
+- Zero egress fees
+- CORS policy configured for browser uploads
+
+**Current R2 Variables (Already Set):**
 ```bash
-# Add R2 environment variables
-R2_ACCOUNT_ID=your_cloudflare_account_id
-R2_ACCESS_KEY_ID=your_r2_access_key  
-R2_SECRET_ACCESS_KEY=your_r2_secret_key
+R2_ACCOUNT_ID=3537af84a0b983711ac3cfe7599a33f1
+R2_ACCESS_KEY_ID=e055fe74e4ce9dafd50d8ed171c31c77
+R2_SECRET_ACCESS_KEY=9e8a048e70d60f032c9d9f17e7445bff0d9260a8ffb9b97f0b64fb49dd9a2ae3
 R2_BUCKET=epub-translator-production
 R2_REGION=auto
-SIGNED_GET_TTL_SECONDS=172800
-
-# Configure R2 CORS
-[
-  {
-    "AllowedOrigins": ["https://yourdomain.com"],
-    "AllowedMethods": ["GET", "PUT", "POST"],
-    "AllowedHeaders": ["*"],
-    "MaxAgeSeconds": 300
-  }
-]
+SIGNED_GET_TTL_SECONDS=432000  # 5 days
 ```
+
+**To update CORS after custom domain:**
+See `R2_SETUP_GUIDE.md` for detailed instructions.
+
+**Cost:** ~$0.02-4.50/month depending on volume (5-day retention)
 
 **1.3: Advanced Monitoring**
 ```bash

@@ -1,4 +1,4 @@
-# 🛠️ Polytext Troubleshooting Guide
+# 🛠️ BookTranslator Troubleshooting Guide
 
 ## Common Railway Deployment Issues
 
@@ -91,6 +91,84 @@ DATABASE_URL=${{Postgres.DATABASE_URL}}
 REDIS_URL=${{Redis.REDIS_URL}}
 ```
 
+## Cloudflare R2 Storage Issues
+
+### 1. Files Not Uploading to R2
+
+#### **CORS Errors**
+```
+Access to XMLHttpRequest blocked by CORS policy
+```
+**Fix:** Update R2 bucket CORS policy:
+1. Go to Cloudflare Dashboard → R2 → your bucket → Settings → CORS Policy
+2. Ensure policy includes:
+```json
+{
+  "AllowedOrigins": ["*"],
+  "AllowedMethods": ["GET", "PUT", "POST"],
+  "AllowedHeaders": ["*"]
+}
+```
+
+#### **Authentication Failures**
+```
+SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided
+```
+**Fix:** Verify R2 credentials in Railway variables:
+```bash
+railway variables | grep R2
+```
+Ensure all match Cloudflare API token:
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET`
+
+#### **Files Not Appearing in R2 Dashboard**
+**Symptoms:** Upload succeeds but files not visible
+**Debug steps:**
+1. Check bucket name is correct
+2. Verify account ID matches
+3. Look in correct folder (`uploads/` or `outputs/`)
+4. Check object lifecycle rules didn't delete immediately
+
+### 2. Download Links Not Working
+
+#### **Presigned URL Expired**
+```
+AccessDenied: Request has expired
+```
+**Fix:** Check `SIGNED_GET_TTL_SECONDS` setting:
+```bash
+# Should be set to 5 days (432000 seconds)
+SIGNED_GET_TTL_SECONDS=432000
+```
+
+#### **403 Forbidden on Download**
+**Causes:**
+- Presigned URL expired (>5 days old)
+- Bucket permissions changed
+- File was deleted by lifecycle policy
+
+**Fix:** Re-generate job (if within 5 days) or re-translate
+
+### 3. Storage Costs Unexpectedly High
+
+#### **Monitor R2 Usage**
+1. Go to Cloudflare Dashboard → R2 → Analytics
+2. Check:
+   - Storage usage (should cap with 5-day retention)
+   - Operations count
+   - Monthly cost estimate
+
+#### **Lifecycle Policy Not Working**
+**Symptoms:** Files older than 5 days still present
+**Debug:**
+1. Check lifecycle rule exists: Bucket → Settings → Object Lifecycle Rules
+2. Verify rule is enabled
+3. Check rule applies to correct prefix (or all objects)
+4. Note: Deletions happen once per day, not immediately
+
 ## Vercel Frontend Issues
 
 ### 1. Environment Variables
@@ -133,7 +211,24 @@ origins = [
 **Error:** "File too large"
 **Fix:** Check environment variables:
 ```
-MAX_FILE_MB=50  # Adjust as needed
+MAX_FILE_MB=200  # Current limit
+```
+
+### 3. Progress Bar Stuck at 0%
+
+#### **Database Migration Not Run**
+**Symptoms:** Progress shows 0% throughout translation
+**Cause:** `progress_percent` column missing from database
+**Fix:**
+```bash
+# Run migration on Railway
+railway run --service booktranslator-api psql $DATABASE_URL -f apps/api/add_progress_percent.sql
+```
+
+**Verify migration:**
+```sql
+SELECT column_name FROM information_schema.columns
+WHERE table_name='jobs' AND column_name='progress_percent';
 ```
 
 ### 2. Payment Processing
@@ -152,16 +247,16 @@ PAYPAL_CLIENT_SECRET=your_live_secret
 ### 1. Rate Limit Protection
 
 #### **95% Safety Barrier**
-Polytext operates at 95% of AI provider limits for safety:
+BookTranslator operates at 95% of AI provider limits for safety:
 
 **Gemini 2.5 Flash-Lite:**
 - Limit: 4,000 RPM, 4M TPM
-- Polytext uses: 3,800 RPM, 3.8M TPM (95%)
+- BookTranslator uses: 3,800 RPM, 3.8M TPM (95%)
 - Effective rate: 3,750 RPM with 16ms delays
 
 **Groq Llama 3.1-8B:**
-- Limit: 1,000 RPM, 250K TPM  
-- Polytext uses: 950 RPM, 237.5K TPM (95%)
+- Limit: 1,000 RPM, 250K TPM
+- BookTranslator uses: 950 RPM, 237.5K TPM (95%)
 - Effective rate: 924 RPM with 65ms delays
 
 #### **What Happens During Rate Limits**
