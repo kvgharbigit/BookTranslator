@@ -1,4 +1,4 @@
-# 🛠️ EPUB Translator Troubleshooting Guide
+# 🛠️ Polytext Troubleshooting Guide
 
 ## Common Railway Deployment Issues
 
@@ -146,6 +146,62 @@ PAYPAL_ENVIRONMENT=live  # Not sandbox
 PAYPAL_CLIENT_ID=your_live_client_id
 PAYPAL_CLIENT_SECRET=your_live_secret
 ```
+
+## AI API Rate Limits & Safety
+
+### 1. Rate Limit Protection
+
+#### **95% Safety Barrier**
+Polytext operates at 95% of AI provider limits for safety:
+
+**Gemini 2.5 Flash-Lite:**
+- Limit: 4,000 RPM, 4M TPM
+- Polytext uses: 3,800 RPM, 3.8M TPM (95%)
+- Effective rate: 3,750 RPM with 16ms delays
+
+**Groq Llama 3.1-8B:**
+- Limit: 1,000 RPM, 250K TPM  
+- Polytext uses: 950 RPM, 237.5K TPM (95%)
+- Effective rate: 924 RPM with 65ms delays
+
+#### **What Happens During Rate Limits**
+✅ **Translation continues** - automatic retry with exponential backoff
+✅ **No data loss** - all requests are idempotent
+✅ **Progress preserved** - job resumes from last successful batch
+❌ **Slight delays** - processing takes longer but always completes
+
+### 2. Job Status Polling
+
+#### **Rate Limit Errors (429)**
+**Error:** "Rate limit exceeded at endpoint: /job/{id}"
+
+**Old Issue:** Limited to 12 requests/minute
+**Fixed:** Now allows 1,000 requests/minute
+
+**Why it's safe:**
+- Job status is just a database read (lightweight)
+- No AI API calls involved in status checking
+- Well below actual AI provider limits (1K-4K RPM)
+
+#### **Frontend Polling Behavior**
+- Polls every 5 seconds during translation
+- Automatically slows down if rate limited (adaptive polling)
+- Never crashes or stops - always gets final result
+
+### 3. Global Safety Limits
+
+#### **100K Request/Hour Safety**
+- Prevents runaway request loops
+- Well above normal usage patterns
+- Gemini theoretical max: 228K/hour (4K RPM × 60)
+- Groq theoretical max: 57K/hour (1K RPM × 60)
+
+**What triggers this:**
+- Multiple concurrent large book translations
+- System bugs causing request loops
+- Abnormal usage patterns
+
+**Result:** Graceful degradation, not system failure
 
 ### 3. Translation Failures
 

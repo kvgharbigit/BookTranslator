@@ -1,4 +1,4 @@
-# 📚 EPUB Translator - AI-Powered Book Translation Service
+# 📚 Polytext - AI-Powered Book Translation Service
 
 > **Production-Ready** EPUB translation service with PayPal payments and real-time processing
 
@@ -104,9 +104,15 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
   - Translation cost range: $0.03-$0.56 per book (using Gemini pricing)
 - **PayPal fees**: $0.10-$0.25 per transaction (5% + $0.05 fixed fee)
 
-**Processing Time**: 2-15 minutes depending on book size
-**Average Profit Margin**: 80-88% across all tiers (Groq reduces costs by ~78% when available)
+**Processing Time**: 2-15 minutes depending on book size  
+**Average Profit Margin**: 80-88% across all tiers (Groq reduces costs by ~78% when available)  
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
+
+### 🛡️ **Rate Limit Safety**
+- **95% Safety Barrier**: Operates at 95% of AI provider limits for reliability
+- **Automatic Retry**: Exponential backoff handles temporary rate limits gracefully  
+- **No Translation Failures**: Rate limits cause delays, not failures
+- **Bulletproof Processing**: All requests are idempotent with progress tracking
 
 ### 🎯 Competitive Advantages
 

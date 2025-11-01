@@ -137,9 +137,17 @@ class EPUBProcessor:
                 if item.get_type() != ebooklib.ITEM_DOCUMENT:
                     new_book.add_item(item)
             
+            # Create href mapping for internal link updates
+            href_mapping = {}
+            for doc in translated_docs:
+                href_mapping[doc['href']] = doc['href']  # Keep same hrefs for now
+            
             # Add translated documents
             spine = []
             for doc in translated_docs:
+                # Update internal links in content
+                updated_content = self._update_internal_links(doc['content'], href_mapping)
+                
                 # Create new EPUB item
                 chapter = epub.EpubHtml(
                     title=doc['title'] or f"Chapter {len(spine)+1}",
@@ -148,11 +156,10 @@ class EPUBProcessor:
                 )
                 
                 # Ensure content is properly encoded
-                content = doc['content']
-                if isinstance(content, str):
-                    chapter.content = content.encode('utf-8')
+                if isinstance(updated_content, str):
+                    chapter.content = updated_content.encode('utf-8')
                 else:
-                    chapter.content = content
+                    chapter.content = updated_content
                 
                 new_book.add_item(chapter)
                 spine.append(chapter)
@@ -160,9 +167,8 @@ class EPUBProcessor:
             # Set spine and NCX
             new_book.spine = spine
             
-            # Copy navigation
-            if hasattr(original_book, 'toc'):
-                new_book.toc = original_book.toc
+            # Update navigation and table of contents
+            self._update_navigation(original_book, new_book, spine, translated_docs)
             
             # Write EPUB
             epub.write_epub(output_path, new_book)
@@ -173,3 +179,183 @@ class EPUBProcessor:
         except Exception as e:
             logger.error(f"Failed to write EPUB: {e}")
             return False
+    
+    def _update_navigation(self, original_book: epub.EpubBook, new_book: epub.EpubBook, spine: List, translated_docs: List[Dict]):
+        """Update navigation elements including TOC and NCX files."""
+        try:
+            # Create href mapping for documents
+            href_mapping = {}
+            for i, doc in enumerate(translated_docs):
+                if i < len(spine):
+                    href_mapping[doc['href']] = spine[i].get_name()
+            
+            # Update table of contents if present
+            if hasattr(original_book, 'toc') and original_book.toc:
+                new_book.toc = self._update_toc_links(original_book.toc, href_mapping)
+            else:
+                # Create a basic TOC from spine documents if none exists
+                new_book.toc = self._create_basic_toc(spine)
+            
+            # Find and update NCX file if present
+            for item in original_book.get_items():
+                if item.get_type() == ebooklib.ITEM_NCX:
+                    updated_ncx = self._update_ncx_content(item, href_mapping)
+                    if updated_ncx:
+                        new_book.add_item(updated_ncx)
+                        new_book.add_item(epub.EpubNcx())
+                    break
+            else:
+                # Add default NCX if none exists
+                new_book.add_item(epub.EpubNcx())
+            
+            # Handle EPUB3 navigation document
+            nav_item = None
+            for item in original_book.get_items():
+                if item.get_type() == ebooklib.ITEM_NAV:
+                    nav_item = item
+                    break
+            
+            if nav_item:
+                updated_nav = self._update_nav_document(nav_item, href_mapping)
+                if updated_nav:
+                    new_book.add_item(updated_nav)
+            
+            logger.info("Navigation elements updated successfully")
+            
+        except Exception as e:
+            logger.warning(f"Failed to update navigation: {e}")
+            # Fallback: copy original TOC as-is
+            if hasattr(original_book, 'toc'):
+                new_book.toc = original_book.toc
+    
+    def _update_toc_links(self, toc_items, href_mapping):
+        """Recursively update TOC links."""
+        updated_toc = []
+        
+        for item in toc_items:
+            if isinstance(item, tuple) and len(item) >= 2:
+                # Handle tuple format (section, subsections)
+                section, subsections = item[0], item[1] if len(item) > 1 else []
+                
+                if hasattr(section, 'href') and section.href in href_mapping:
+                    # Update the href
+                    section.href = href_mapping[section.href]
+                
+                # Recursively update subsections
+                if subsections:
+                    updated_subsections = self._update_toc_links(subsections, href_mapping)
+                    updated_toc.append((section, updated_subsections))
+                else:
+                    updated_toc.append(section)
+            else:
+                # Handle direct items
+                if hasattr(item, 'href') and item.href in href_mapping:
+                    item.href = href_mapping[item.href]
+                updated_toc.append(item)
+        
+        return updated_toc
+    
+    def _create_basic_toc(self, spine):
+        """Create a basic table of contents from spine documents."""
+        toc = []
+        for i, chapter in enumerate(spine):
+            toc_item = epub.Link(
+                href=chapter.get_name(),
+                title=chapter.get_title() or f"Chapter {i+1}",
+                uid=f"toc_{i}"
+            )
+            toc.append(toc_item)
+        return toc
+    
+    def _update_ncx_content(self, ncx_item, href_mapping):
+        """Update NCX navigation content."""
+        try:
+            ncx_content = ncx_item.get_content().decode('utf-8', errors='ignore')
+            
+            # Parse NCX XML and update hrefs
+            soup = BeautifulSoup(ncx_content, 'xml')
+            
+            # Update all navPoint src attributes
+            for nav_point in soup.find_all('navPoint'):
+                content_tag = nav_point.find('content')
+                if content_tag and content_tag.get('src'):
+                    src = content_tag['src']
+                    # Extract filename without anchor
+                    base_href = src.split('#')[0]
+                    anchor = '#' + src.split('#')[1] if '#' in src else ''
+                    
+                    if base_href in href_mapping:
+                        content_tag['src'] = href_mapping[base_href] + anchor
+            
+            # Create new NCX item
+            new_ncx = epub.EpubItem(
+                uid=ncx_item.get_id(),
+                file_name=ncx_item.get_name(),
+                media_type=ncx_item.get_type(),
+                content=str(soup).encode('utf-8')
+            )
+            
+            return new_ncx
+            
+        except Exception as e:
+            logger.warning(f"Failed to update NCX content: {e}")
+            return ncx_item
+    
+    def _update_nav_document(self, nav_item, href_mapping):
+        """Update EPUB3 navigation document."""
+        try:
+            nav_content = nav_item.get_content().decode('utf-8', errors='ignore')
+            soup = BeautifulSoup(nav_content, 'html.parser')
+            
+            # Update all anchor hrefs in navigation
+            for link in soup.find_all('a', href=True):
+                href = link['href']
+                base_href = href.split('#')[0]
+                anchor = '#' + href.split('#')[1] if '#' in href else ''
+                
+                if base_href in href_mapping:
+                    link['href'] = href_mapping[base_href] + anchor
+            
+            # Create new navigation item
+            new_nav = epub.EpubNav()
+            new_nav.content = str(soup).encode('utf-8')
+            
+            return new_nav
+            
+        except Exception as e:
+            logger.warning(f"Failed to update navigation document: {e}")
+            return nav_item
+    
+    def _update_internal_links(self, content: str, href_mapping: Dict[str, str]) -> str:
+        """Update internal hyperlinks within document content."""
+        try:
+            if not content or not isinstance(content, str):
+                return content
+            
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            # Update all anchor links
+            for link in soup.find_all('a', href=True):
+                href = link['href']
+                
+                # Skip external links (http/https)
+                if href.startswith(('http://', 'https://', 'mailto:', 'ftp://')):
+                    continue
+                
+                # Handle relative links to other chapters
+                if '/' not in href or href.startswith('./'):
+                    # Clean up the href
+                    base_href = href.replace('./', '')
+                    base_file = base_href.split('#')[0]
+                    anchor = '#' + base_href.split('#')[1] if '#' in base_href else ''
+                    
+                    # Update if we have a mapping for this file
+                    if base_file in href_mapping:
+                        link['href'] = href_mapping[base_file] + anchor
+                        logger.debug(f"Updated internal link: {href} -> {link['href']}")
+            
+            return str(soup)
+            
+        except Exception as e:
+            logger.warning(f"Failed to update internal links: {e}")
+            return content

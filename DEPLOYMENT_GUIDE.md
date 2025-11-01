@@ -1,4 +1,4 @@
-# 🚀 EPUB Translator - Complete Deployment Guide
+# 🚀 Polytext - Complete Deployment Guide
 
 Deploy your translation service from zero to production in 8 hours to 2 weeks depending on your needs.
 
@@ -96,6 +96,10 @@ PAYPAL_ENVIRONMENT=sandbox
 # Email (fake for testing)
 RESEND_API_KEY=fake_resend_key
 EMAIL_FROM=test@yourdomain.com
+
+# Rate Limit Safety (optional - defaults provided)
+MAX_AI_REQUESTS_PER_HOUR=100000  # Global safety limit
+RATE_LIMIT_PER_HOUR=60           # Job status polling limit
 
 # Security
 RATE_LIMIT_PER_HOUR=60
