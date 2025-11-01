@@ -260,33 +260,33 @@ export default function HomePage() {
             </div>
             
             {/* Pricing Tiers */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-12">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+            <div className="flex flex-wrap justify-center gap-4 lg:gap-6 mb-12">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
                 <div className="text-3xl font-bold text-blue-600 mb-2">$0.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🧾 Short Book</div>
                 <div className="text-xs text-neutral-600 mb-2">0-40K words</div>
                 <div className="text-xs text-blue-700 italic">"Animal Farm" (30K)</div>
               </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative w-full sm:w-64">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">POPULAR</div>
                 <div className="text-3xl font-bold text-green-600 mb-2">$1.49</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📘 Standard Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">40K-120K words</div>
                 <div className="text-xs text-green-700 italic">"Great Gatsby" (47K)</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
                 <div className="text-3xl font-bold text-purple-600 mb-2">$2.19</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📕 Long Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">120K-200K words</div>
                 <div className="text-xs text-purple-700 italic">"Pride & Prejudice" (122K)</div>
               </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
                 <div className="text-3xl font-bold text-orange-600 mb-2">$2.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🏛️ Epic Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">200K-350K words</div>
                 <div className="text-xs text-orange-700 italic">"The Stand" (240K)</div>
               </div>
-              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
                 <div className="text-3xl font-bold text-red-600 mb-2">$3.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📚 Grand Epic</div>
                 <div className="text-xs text-neutral-600 mb-2">350K-750K words</div>
