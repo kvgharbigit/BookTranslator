@@ -1,0 +1,52 @@
+import redis
+import stripe
+from functools import lru_cache
+from rq import Queue
+from sqlalchemy.orm import Session
+
+from app.config import settings
+from app.db import get_db
+from app.storage import get_storage as get_storage_instance
+from app.providers.base import TranslationProvider
+from app.providers.gemini import GeminiFlashProvider
+from app.providers.groq import GroqLlamaProvider
+
+# Initialize Stripe
+stripe.api_key = settings.stripe_secret_key
+
+
+@lru_cache()
+def get_redis_client():
+    """Get Redis client instance."""
+    return redis.from_url(settings.redis_url)
+
+
+@lru_cache()
+def get_queue():
+    """Get RQ queue instance."""
+    redis_client = get_redis_client()
+    return Queue(settings.rq_queues, connection=redis_client)
+
+
+def get_provider(name: str) -> TranslationProvider:
+    """Get translation provider instance."""
+    if name == "groq":
+        return GroqLlamaProvider(
+            api_key=settings.groq_api_key,
+            model=settings.groq_model
+        )
+    else:  # Default to Gemini
+        return GeminiFlashProvider(
+            api_key=settings.gemini_api_key,
+            model=settings.gemini_model
+        )
+
+
+def get_storage():
+    """Get storage client instance."""
+    return get_storage_instance()
+
+
+def get_stripe():
+    """Get Stripe client."""
+    return stripe
