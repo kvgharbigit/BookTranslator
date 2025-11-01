@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     stripe_webhook_secret: str = Field(alias="STRIPE_WEBHOOK_SECRET")
     min_price_cents: int = Field(default=50, alias="MIN_PRICE_CENTS")
     target_profit_cents: int = Field(default=40, alias="TARGET_PROFIT_CENTS")
+    price_cents_per_million_tokens: int = Field(default=300, alias="PRICE_CENTS_PER_MILLION_TOKENS")
     
     # PayPal Micropayments
     paypal_client_id: str = Field(alias="PAYPAL_CLIENT_ID")
@@ -68,6 +69,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Ignore extra environment variables
 
 
 # Global settings instance
