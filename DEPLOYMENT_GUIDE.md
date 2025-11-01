@@ -137,7 +137,7 @@ NEXT_PUBLIC_API_BASE=https://your-railway-app.up.railway.app
 ```bash
 # Test complete flow
 1. Upload EPUB file
-2. See price estimate ($0.50-$1.50)
+2. See price estimate ($0.99-$3.99)
 3. Mock payment (with fake PayPal keys)
 4. Watch translation progress
 5. Download EPUB + PDF + TXT outputs

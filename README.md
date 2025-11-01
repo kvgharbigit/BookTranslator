@@ -97,7 +97,7 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 ### 🎯 Competitive Advantages
 
 - **Up to 5× cheaper** than comparable AI EPUB translators (O.Translator charges ~$5 for 100K words)
-- **Professional EPUB translation in minutes** — for less than $2 (40-80K word tier)
+- **Professional EPUB translation in minutes** — for less than $2 (40-120K word tier at $1.49)
 - **Preserves formatting and images** — unlike free document translators that break EPUB layout
 - **Fastest hosted EPUB translator** — 100K words in under 5 minutes with production-grade quality
 - **No accounts, no subscriptions** — just pay-per-book simplicity with instant access

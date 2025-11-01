@@ -56,7 +56,7 @@ PAYPAL_CLIENT_SECRET_SANDBOX=your_sandbox_client_secret
 **3.1: Enable Micropayments Pricing**
 - Call PayPal business support: 1800 073 263 (Australia)
 - Request micropayments pricing: 5% + $0.05 AUD
-- Explain business model: small digital transactions ($0.50-$1.50)
+- Explain business model: small digital transactions ($0.99-$3.99)
 - Wait 1-2 business days for approval
 
 **3.2: Configure Webhooks**
@@ -87,7 +87,7 @@ PAYPAL_CLIENT_ID=your_live_client_id
 PAYPAL_CLIENT_SECRET=your_live_client_secret
 PAYPAL_ENVIRONMENT=live
 
-# Test with real $0.50 payment
+# Test with real $0.99 payment (smallest tier)
 # Verify funds appear in PayPal business account
 ```
 
