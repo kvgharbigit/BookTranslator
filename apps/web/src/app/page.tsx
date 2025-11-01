@@ -379,7 +379,7 @@ export default function HomePage() {
                   How We Compare to Leading Competitors
                 </h4>
                 <p className="text-sm text-neutral-600">
-                  Actual pricing from translateabook.com (checked Nov 2025)
+                  Actual pricing from leading competitors (checked Nov 2025)
                 </p>
               </div>
 
@@ -396,6 +396,13 @@ export default function HomePage() {
                       <span className="text-xl font-bold text-green-600">$1.49</span>
                     </div>
                     <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">BookTranslator.ai:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$5.99</div>
+                          <div className="text-red-600">4x more</div>
+                        </div>
+                      </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
@@ -427,6 +434,13 @@ export default function HomePage() {
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">BookTranslator.ai:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$8.99</div>
+                          <div className="text-red-600">4.1x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$7.50</div>
@@ -447,7 +461,7 @@ export default function HomePage() {
 
               <div className="text-center mt-6">
                 <p className="text-sm font-semibold text-green-800">
-                  Same quality AI translation. Professional output. 5-30x cheaper.
+                  Same quality AI translation. Professional output. 2-4x cheaper.
                 </p>
                 <p className="text-xs text-neutral-600 mt-1">
                   We believe in fair pricing - not gouging readers and authors.
