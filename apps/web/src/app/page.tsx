@@ -245,37 +245,132 @@ export default function HomePage() {
                 <div className="text-3xl font-bold text-blue-600 mb-2">$0.50</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">Short Stories</div>
                 <div className="text-xs text-neutral-600 mb-2">Up to 31K words</div>
-                <div className="text-xs text-blue-700 italic mb-2">"The Great Gatsby"</div>
-                <div className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">vs $5+ elsewhere</div>
+                <div className="text-xs text-blue-700 italic">"The Great Gatsby"</div>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">POPULAR</div>
                 <div className="text-3xl font-bold text-green-600 mb-2">$0.75</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">Standard Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">31K - 63K words</div>
-                <div className="text-xs text-green-700 italic mb-2">"To Kill a Mockingbird"</div>
-                <div className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">vs $15+ elsewhere</div>
+                <div className="text-xs text-green-700 italic">"To Kill a Mockingbird"</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-purple-600 mb-2">$1.00</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">Long Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">63K - 127K words</div>
-                <div className="text-xs text-purple-700 italic mb-2">"Pride and Prejudice"</div>
-                <div className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">vs $25+ elsewhere</div>
+                <div className="text-xs text-purple-700 italic">"Pride and Prejudice"</div>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-orange-600 mb-2">$1.25</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">Epic Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">127K - 212K words</div>
-                <div className="text-xs text-orange-700 italic mb-2">"The Count of Monte Cristo"</div>
-                <div className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded-full">vs $40+ elsewhere</div>
+                <div className="text-xs text-orange-700 italic">"The Count of Monte Cristo"</div>
               </div>
               <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-red-600 mb-2">$1.50</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">Epic Series</div>
                 <div className="text-xs text-neutral-600 mb-2">212K - 750K words</div>
-                <div className="text-xs text-red-700 italic mb-2">"War and Peace"</div>
-                <div className="text-xs bg-red-200 text-red-800 px-2 py-1 rounded-full">vs $75+ elsewhere</div>
+                <div className="text-xs text-red-700 italic">"War and Peace"</div>
+              </div>
+            </div>
+
+            {/* Real Price Comparison */}
+            <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-2 border-green-300 rounded-xl p-6 mb-8">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-full text-sm font-bold mb-3">
+                  📊 Real Price Comparison
+                </div>
+                <h4 className="font-bold text-neutral-900 text-lg mb-2">
+                  How We Compare to Leading Competitors
+                </h4>
+                <p className="text-sm text-neutral-600">
+                  Actual pricing from translateabook.com (checked Nov 2025)
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                {/* Example 1: Small Book */}
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
+                  <div className="text-center mb-4">
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">6,141 Word Novella</div>
+                    <div className="text-xs text-neutral-500">Small book example</div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
+                      <span className="text-sm font-bold text-green-800">Our Price:</span>
+                      <span className="text-xl font-bold text-green-600">$0.50</span>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Standard:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$2.09</div>
+                          <div className="text-red-600">4.2x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Pro:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$4.61</div>
+                          <div className="text-red-600">9.2x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Premium:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$18.78</div>
+                          <div className="text-red-600">37.6x more</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Example 2: Standard Novel */}
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
+                  <div className="text-center mb-4">
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">54,457 Word Novel</div>
+                    <div className="text-xs text-neutral-500">Average fiction book</div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
+                      <span className="text-sm font-bold text-green-800">Our Price:</span>
+                      <span className="text-xl font-bold text-green-600">$0.75</span>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Standard:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$4.06</div>
+                          <div className="text-red-600">5.4x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Pro:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$11.09</div>
+                          <div className="text-red-600">14.8x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Premium:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$50.40</div>
+                          <div className="text-red-600">67.2x more</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center mt-6">
+                <p className="text-sm font-semibold text-green-800">
+                  Same AI quality. Same output formats. 5-67x cheaper.
+                </p>
+                <p className="text-xs text-neutral-600 mt-1">
+                  We believe in fair pricing - not gouging readers and authors.
+                </p>
               </div>
             </div>
             
