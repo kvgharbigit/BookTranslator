@@ -240,7 +240,7 @@ export default function HomePage() {
             </div>
             
             {/* Pricing Tiers */}
-            <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-12">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-blue-600 mb-2">$0.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🧾 Short Book</div>
