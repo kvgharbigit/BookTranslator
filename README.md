@@ -71,16 +71,17 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 
 ## 💰 Pricing Model
 
-| **Book Type** | **Word Range** | **Price** | **Example Books** |
-|---------------|----------------|-----------|-------------------|
-| 📖 **Short Novel** | 0-56K words | **$0.50** | *The Great Gatsby* |
-| 📚 **Standard Novel** | 56K-112K words | **$0.75** | *To Kill a Mockingbird* |
-| 📕 **Long Novel** | 112K-225K words | **$1.00** | *Pride and Prejudice* |
-| 🏛️ **Epic Novel** | 225K-375K words | **$1.25** | *The Count of Monte Cristo* |
-| 📚📚 **Epic Series** | 375K-750K words | **$1.50** | *War and Peace* |
+| **Book Type** | **Word Range** | **Price** | **Total Cost** | **Net Profit** | **Margin** |
+|---------------|----------------|-----------|----------------|----------------|------------|
+| 📖 **Short Stories** | 0-31K words | **$0.50** | $0.08 | $0.42 | 84% |
+| 📚 **Standard Novel** | 31K-63K words | **$0.75** | $0.10 | $0.65 | 87% |
+| 📕 **Long Novel** | 63K-127K words | **$1.00** | $0.11 | $0.89 | 89% |
+| 🏛️ **Epic Novel** | 127K-212K words | **$1.25** | $0.13 | $1.12 | 90% |
+| 📚📚 **Epic Series** | 212K-750K words | **$1.50** | $0.20 | $1.30 | 87% |
 
-**Processing Time**: 2-15 minutes depending on book size  
-**Profit Margins**: 85-95% after AI and payment processing costs  
+**Cost Breakdown**: AI translation ($0.00-$0.07) + PayPal fees ($0.08-$0.13)
+**Processing Time**: 2-15 minutes depending on book size
+**Average Profit Margin**: 84-90% across all tiers  
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
 
 ## 🛠️ Tech Stack

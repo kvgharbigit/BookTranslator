@@ -289,48 +289,11 @@ export default function HomePage() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {/* Example 1: Small Book */}
+                {/* Example 1: Standard Novel */}
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
                   <div className="text-center mb-4">
-                    <div className="text-sm font-semibold text-neutral-700 mb-1">6,141 Word Novella</div>
-                    <div className="text-xs text-neutral-500">Small book example</div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
-                      <span className="text-sm font-bold text-green-800">Our Price:</span>
-                      <span className="text-xl font-bold text-green-600">$0.50</span>
-                    </div>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Standard:</span>
-                        <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$2.09</div>
-                          <div className="text-red-600">4.2x more</div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Pro:</span>
-                        <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$4.61</div>
-                          <div className="text-red-600">9.2x more</div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Premium:</span>
-                        <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$18.78</div>
-                          <div className="text-red-600">37.6x more</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Example 2: Standard Novel */}
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
-                  <div className="text-center mb-4">
-                    <div className="text-sm font-semibold text-neutral-700 mb-1">54,457 Word Novel</div>
-                    <div className="text-xs text-neutral-500">Average fiction book</div>
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">~55,000 Word Novel</div>
+                    <div className="text-xs text-neutral-500">Most popular fiction books</div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
@@ -352,11 +315,34 @@ export default function HomePage() {
                           <div className="text-red-600">14.8x more</div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Example 2: Epic Novel */}
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-200">
+                  <div className="text-center mb-4">
+                    <div className="text-sm font-semibold text-neutral-700 mb-1">~150,000 Word Epic</div>
+                    <div className="text-xs text-neutral-500">Fantasy/historical novels</div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
+                      <span className="text-sm font-bold text-green-800">Our Price:</span>
+                      <span className="text-xl font-bold text-green-600">$1.00</span>
+                    </div>
+                    <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                        <span className="text-neutral-600">Competitor Premium:</span>
+                        <span className="text-neutral-600">Competitor Standard:</span>
                         <div className="text-right">
-                          <div className="font-semibold text-neutral-800">$50.40</div>
-                          <div className="text-red-600">67.2x more</div>
+                          <div className="font-semibold text-neutral-800">$11.20</div>
+                          <div className="text-red-600">11.2x more</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
+                        <span className="text-neutral-600">Competitor Pro:</span>
+                        <div className="text-right">
+                          <div className="font-semibold text-neutral-800">$30.50</div>
+                          <div className="text-red-600">30.5x more</div>
                         </div>
                       </div>
                     </div>
@@ -366,7 +352,7 @@ export default function HomePage() {
 
               <div className="text-center mt-6">
                 <p className="text-sm font-semibold text-green-800">
-                  Same AI quality. Same output formats. 5-67x cheaper.
+                  Same quality AI translation. Professional output. 5-30x cheaper.
                 </p>
                 <p className="text-xs text-neutral-600 mt-1">
                   We believe in fair pricing - not gouging readers and authors.
