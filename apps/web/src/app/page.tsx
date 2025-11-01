@@ -71,8 +71,8 @@ export default function HomePage() {
         email
       );
 
-      // Redirect to success page (same as after payment)
-      window.location.href = `/success?job_id=${job_id}`;
+      // Redirect to processing page to track translation progress
+      window.location.href = `/processing?job_id=${job_id}`;
 
     } catch (err) {
       console.error('Skip payment failed:', err);
