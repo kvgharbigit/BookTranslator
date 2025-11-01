@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install system dependencies
+# Install system dependencies including PDF generation tools
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -12,6 +12,11 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     zlib1g-dev \
     supervisor \
+    calibre \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-xlib-2.0-0 \
+    redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
@@ -27,21 +32,19 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false
 
 # Install Python dependencies
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --only=main --no-root --no-interaction --no-ansi
 
 # Copy application code
 COPY app/ ./app/
 COPY supervisord.conf ./
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data
-
-# Create directories for temporary files
-RUN mkdir -p /tmp/epub-processing
+# Create directories for storage and processing
+RUN mkdir -p /app/data /app/local_storage/uploads /app/local_storage/outputs /tmp/epub-processing
 
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PORT=8000
+ENV OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 # Expose port
 EXPOSE 8000

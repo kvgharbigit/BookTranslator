@@ -19,7 +19,7 @@ cd BookTranslator
 
 Visit **http://localhost:3000** and start translating! 
 
-👉 **MVP Deployment:** See [MVP_DEPLOYMENT.md](./MVP_DEPLOYMENT.md) for 2-day production setup
+👉 **Quick Deployment:** See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for 8-hour MVP setup
 
 ## ✨ What This Does
 
@@ -111,16 +111,16 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 ## 🚀 Deployment Options
 
 ### **Option 1: MVP Deployment (Recommended)**
-Get live in 2-3 days with minimal setup:
-- See [MVP_DEPLOYMENT.md](./MVP_DEPLOYMENT.md)
-- Cost: ~$5-10/month
+Get live in 8 hours with minimal setup:
+- See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+- Cost: ~$25-45/month
 - Features: Full functionality with room to scale
 
-### **Option 2: Full Production Deployment**
-Enterprise-grade setup with monitoring:
-- See [DEPLOYMENT_ROADMAP.md](./DEPLOYMENT_ROADMAP.md)  
-- Timeline: 4-5 weeks
-- Cost: $50-100/month with enterprise features
+### **Option 2: Business Setup**
+PayPal payments, domain, and business operations:
+- See [BUSINESS_SETUP.md](./BUSINESS_SETUP.md)  
+- Timeline: 2-4 hours
+- Revenue-ready with live payments
 
 ## 📁 Project Structure
 
@@ -141,9 +141,9 @@ BookTranslator/
 │       │   └── lib/         # Utility functions
 │       └── package.json     # Node.js dependencies
 ├── scripts/                 # Development scripts
-├── docs/                    # Documentation
-├── MVP_DEPLOYMENT.md        # Quick deployment guide
-├── DEPLOYMENT_ROADMAP.md    # Full production guide
+├── DEPLOYMENT_GUIDE.md      # Complete deployment guide
+├── BUSINESS_SETUP.md        # PayPal, domain, business setup
+├── TROUBLESHOOTING.md       # Technical problem solving
 └── README.md               # This file
 ```
 
@@ -268,19 +268,23 @@ tail -f apps/api/logs/*.log
 
 ## 🛣️ Roadmap
 
-### **Phase 1: MVP Launch** (Done ✅)
-- [x] Core translation pipeline
-- [x] PayPal payment integration
-- [x] Multi-format output (EPUB/PDF/TXT)
-- [x] Real-time progress tracking
-- [x] Production-ready architecture
+### **Phase 1: MVP Launch** (Complete ✅)
+- [x] Core translation pipeline with Groq Llama + Gemini fallback
+- [x] Railway backend deployment with PostgreSQL + Redis
+- [x] Vercel frontend deployment with production URLs
+- [x] Multi-format output (EPUB/PDF/TXT) with enhanced PDF generation
+- [x] Real-time progress tracking with WebSocket-style polling
+- [x] Production-ready architecture with Docker containerization
+- [x] Payment integration (PayPal sandbox mode)
+- [x] End-to-end testing and validation completed
+- [x] Complete troubleshooting documentation
 
-### **Phase 2: Production Hardening** (Next)
-- [ ] Cloud storage (Cloudflare R2)
-- [ ] PostgreSQL database
-- [ ] Email notifications
-- [ ] Monitoring and alerts
-- [ ] Performance optimization
+### **Phase 2: Business Launch** (Ready when needed)
+- [ ] PayPal live integration (Australian business account setup required)
+- [ ] Custom domain setup (epubtranslator.com)
+- [ ] Resend email notifications
+- [ ] Analytics and monitoring
+- [ ] SEO optimization
 
 ### **Phase 3: Growth Features** (Future)
 - [ ] Stripe integration for larger payments
@@ -302,16 +306,21 @@ MIT License - see [LICENSE](LICENSE) for details
 
 ## 🆘 Support
 
-- **Documentation**: Check [docs/](./docs/) directory
-- **Issues**: Use GitHub Issues for bug reports
-- **Deployment Help**: See MVP_DEPLOYMENT.md for quick setup
-- **Business Questions**: Contact via GitHub Discussions
+- **Deployment Help**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+- **Business Setup**: [BUSINESS_SETUP.md](./BUSINESS_SETUP.md)
+- **Technical Issues**: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+- **Bug Reports**: Use GitHub Issues
 
 ---
 
 **Ready to launch your translation service?** 
 
-🚀 **Quick MVP**: [MVP_DEPLOYMENT.md](./MVP_DEPLOYMENT.md) - Live in 2 days  
-📊 **Full Production**: [DEPLOYMENT_ROADMAP.md](./DEPLOYMENT_ROADMAP.md) - Enterprise ready  
+🚀 **Quick Deployment**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Live in 8 hours  
+💼 **Business Ready**: [BUSINESS_SETUP.md](./BUSINESS_SETUP.md) - Revenue in 2-4 hours  
 
-**Current Status**: ✅ Production-ready codebase with working end-to-end translation
+**Current Status**: ✅ **LIVE MVP** - Fully functional translation service deployed and tested
+
+🌐 **Live URLs:**
+- **Frontend**: https://web-39ez6nx0h-kayvan-gharbis-projects.vercel.app
+- **Backend**: https://booktranslator-production.up.railway.app
+- **Health Check**: https://booktranslator-production.up.railway.app/health
