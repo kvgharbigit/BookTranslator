@@ -93,4 +93,5 @@ test_*.py
 
 # Allow organized tests directory
 !tests/
-!tests/*.py
+!tests/*.py.env
+apps/api/.env
