@@ -249,19 +249,19 @@ export default function HomePage() {
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">POPULAR</div>
-                <div className="text-3xl font-bold text-green-600 mb-2">$1.49–$1.99</div>
+                <div className="text-3xl font-bold text-green-600 mb-2">$1.49</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📘 Standard Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">40K-120K words</div>
                 <div className="text-xs text-green-700 italic">"Great Gatsby" (47K)</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-purple-600 mb-2">$2.49</div>
+                <div className="text-3xl font-bold text-purple-600 mb-2">$2.19</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📕 Long Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">120K-200K words</div>
                 <div className="text-xs text-purple-700 italic">"Pride & Prejudice" (122K)</div>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                <div className="text-3xl font-bold text-orange-600 mb-2">$2.99–$3.49</div>
+                <div className="text-3xl font-bold text-orange-600 mb-2">$2.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🏛️ Epic Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">200K-350K words</div>
                 <div className="text-xs text-orange-700 italic">"The Stand" (240K)</div>
@@ -373,21 +373,21 @@ export default function HomePage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
                       <span className="text-sm font-bold text-green-800">Our Price:</span>
-                      <span className="text-xl font-bold text-green-600">$1.99</span>
+                      <span className="text-xl font-bold text-green-600">$1.49</span>
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$5.00</div>
-                          <div className="text-red-600">2.5x more</div>
+                          <div className="text-red-600">3.4x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">NovelTranslator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$2.99</div>
-                          <div className="text-red-600">1.5x more</div>
+                          <div className="text-red-600">2x more</div>
                         </div>
                       </div>
                     </div>
@@ -403,21 +403,21 @@ export default function HomePage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border-2 border-green-500">
                       <span className="text-sm font-bold text-green-800">Our Price:</span>
-                      <span className="text-xl font-bold text-green-600">$2.49</span>
+                      <span className="text-xl font-bold text-green-600">$2.19</span>
                     </div>
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$7.50</div>
-                          <div className="text-red-600">3x more</div>
+                          <div className="text-red-600">3.4x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">NovelTranslator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$4.49</div>
-                          <div className="text-red-600">1.8x more</div>
+                          <div className="text-red-600">2.1x more</div>
                         </div>
                       </div>
                     </div>
