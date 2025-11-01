@@ -73,18 +73,18 @@ Transform any EPUB book into any language in **under 5 minutes** with profession
 
 | **Book Type** | **Word Range** | **Price** | **Total Cost** | **Net Profit** | **Margin** |
 |---------------|----------------|-----------|----------------|----------------|------------|
-| 📖 **Short Stories** | 0-31K words | **$0.50** | $0.08-$0.08 | $0.42 | 84% |
-| 📚 **Standard Novel** | 31K-63K words | **$0.75** | $0.09-$0.11 | $0.64-$0.66 | 85-88% |
-| 📕 **Long Novel** | 63K-127K words | **$1.00** | $0.11-$0.14 | $0.86-$0.89 | 86-89% |
-| 🏛️ **Epic Novel** | 127K-212K words | **$1.25** | $0.13-$0.19 | $1.06-$1.12 | 85-90% |
-| 📚📚 **Epic Series** | 212K-750K words | **$1.50** | $0.17-$0.34 | $1.16-$1.33 | 77-89% |
+| 📖 **Short Stories** | 0-31K words | **$0.50** | $0.08-$0.09 | $0.41-$0.42 | 82-84% |
+| 📚 **Standard Novel** | 31K-63K words | **$0.75** | $0.10-$0.12 | $0.63-$0.65 | 84-87% |
+| 📕 **Long Novel** | 63K-127K words | **$1.00** | $0.13-$0.16 | $0.84-$0.87 | 84-87% |
+| 🏛️ **Epic Novel** | 127K-212K words | **$1.25** | $0.17-$0.21 | $1.04-$1.08 | 83-86% |
+| 📚📚 **Epic Series** | 212K-750K words | **$1.50** | $0.23-$0.47 | $1.03-$1.27 | 69-85% |
 
-**Cost Components**:
-- AI translation: $0.00-$0.22 (Groq primary $0.074/1M tokens, Gemini fallback $0.34/1M tokens)
+**Cost Components** (conservative Gemini-only estimates):
+- AI translation: $0.01-$0.34 (Gemini @ $0.34/1M tokens)
 - PayPal fees: $0.08-$0.13 (5% + $0.05 per transaction)
 
 **Processing Time**: 2-15 minutes depending on book size
-**Average Profit Margin**: 77-90% across all tiers  
+**Average Profit Margin**: 69-87% across all tiers (Groq reduces costs by ~78% when available)  
 **Supported Languages**: 50+ languages including Spanish, French, German, Chinese, Japanese, Arabic
 
 ## 🛠️ Tech Stack
