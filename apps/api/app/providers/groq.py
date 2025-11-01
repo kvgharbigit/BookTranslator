@@ -16,10 +16,10 @@ class GroqLlamaProvider(TranslationProvider):
     def __init__(self, api_key: str, model: str):
         super().__init__(api_key, model)
         self.base_url = "https://api.groq.com/openai/v1"
-        # Groq Developer tier: 1K RPM, 250K TPM - work at 80% to avoid errors
-        self.max_batch_tokens = min(settings.max_batch_tokens, 800)  # Max 800 tokens per batch (80% of safe limit)
-        self.requests_per_minute = 800  # 80% of 1,000 RPM
-        self.tokens_per_minute = 200000  # 80% of 250K TPM
+        # Groq Developer tier: 1K RPM, 250K TPM - work at 95% safety barrier
+        self.max_batch_tokens = min(settings.max_batch_tokens, 950)  # Max 950 tokens per batch (95% of safe limit)
+        self.requests_per_minute = 950  # 95% of 1,000 RPM
+        self.tokens_per_minute = 237500  # 95% of 250K TPM
         self.retry_limit = settings.retry_limit
     
     async def translate_segments(
@@ -49,10 +49,10 @@ class GroqLlamaProvider(TranslationProvider):
             logger.info(f"Translating batch {i+1}/{len(batches)} with {len(batch)} segments")
 
             # Add delay between batches to respect Groq rate limits
-            # 800 safe RPM = 1 request every 0.075 seconds = 13.3 RPS
-            # Conservative: 1 request every 0.1 seconds = 10 RPS = 600 RPM
+            # 950 safe RPM = 1 request every 0.063 seconds = 15.8 RPS
+            # Safe approach: 1 request every 0.065 seconds = 15.4 RPS = 924 RPM (within 95% limit)
             if i > 0:
-                await asyncio.sleep(0.1)  # 100ms delay = max 10 requests/second = 600 RPM
+                await asyncio.sleep(0.065)  # 65ms delay = max 15.4 requests/second = 924 RPM
 
             translated_batch = await self._translate_batch_with_retry(
                 batch, src_lang, tgt_lang, system_hint
