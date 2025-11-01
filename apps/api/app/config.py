@@ -22,17 +22,25 @@ class Settings(BaseSettings):
     # Stripe Payments
     stripe_secret_key: str = Field(alias="STRIPE_SECRET_KEY")
     stripe_webhook_secret: str = Field(alias="STRIPE_WEBHOOK_SECRET")
-    min_price_cents: int = Field(default=100, alias="MIN_PRICE_CENTS")
-    price_cents_per_million_tokens: int = Field(default=300, alias="PRICE_CENTS_PER_MILLION_TOKENS")
+    min_price_cents: int = Field(default=50, alias="MIN_PRICE_CENTS")
+    target_profit_cents: int = Field(default=40, alias="TARGET_PROFIT_CENTS")
+    
+    # PayPal Micropayments
+    paypal_client_id: str = Field(alias="PAYPAL_CLIENT_ID")
+    paypal_client_secret: str = Field(alias="PAYPAL_CLIENT_SECRET")
+    paypal_environment: str = Field(default="sandbox", alias="PAYPAL_ENVIRONMENT")  # "sandbox" or "live"
+    paypal_webhook_id: str = Field(alias="PAYPAL_WEBHOOK_ID")
+    micropayments_threshold_cents: int = Field(default=800, alias="MICROPAYMENTS_THRESHOLD_CENTS")
     
     # Translation Providers
     provider: str = Field(default="gemini", alias="PROVIDER")
     gemini_api_key: str = Field(alias="GEMINI_API_KEY")
-    gemini_model: str = Field(default="text-multilingual-2.5-flash-lite", alias="GEMINI_MODEL")
+    gemini_model: str = Field(default="gemini-2.5-flash-lite", alias="GEMINI_MODEL")
     groq_api_key: str = Field(alias="GROQ_API_KEY")
     groq_model: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")
     max_batch_tokens: int = Field(default=6000, alias="MAX_BATCH_TOKENS")
     max_job_tokens: int = Field(default=1000000, alias="MAX_JOB_TOKENS")
+    max_file_tokens: int = Field(default=1000000, alias="MAX_FILE_TOKENS")  # 1M token limit for pricing tiers
     retry_limit: int = Field(default=3, alias="RETRY_LIMIT")
     
     # Queue & Processing

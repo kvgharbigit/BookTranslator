@@ -11,7 +11,7 @@ class HTMLSegmenter:
     
     def __init__(self):
         # Tags that should not be translated (preserve content)
-        self.no_translate_tags = {'pre', 'code', 'table', 'script', 'style'}
+        self.no_translate_tags = {'pre', 'code', 'table', 'script', 'style', 'svg', 'image', 'img'}
         
         # Block-level tags that define segment boundaries
         self.block_tags = {

@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.logger import setup_logging, get_logger, set_request_id
 from app.db import create_tables
-from app.routes import health, presign, estimate, checkout, webhook, jobs, local_storage
+from app.routes import health, presign, estimate, checkout, webhook, jobs, local_storage, paypal
 
 # Setup logging
 setup_logging()
@@ -88,6 +88,7 @@ app.include_router(presign.router, tags=["Upload"])
 app.include_router(estimate.router, tags=["Pricing"])
 app.include_router(checkout.router, tags=["Payment"])
 app.include_router(webhook.router, tags=["Webhooks"])
+app.include_router(paypal.router, prefix="/api/paypal", tags=["PayPal"])
 app.include_router(jobs.router, tags=["Jobs"])
 app.include_router(local_storage.router, tags=["Local Storage"])
 
@@ -126,7 +127,8 @@ async def root():
         "features": [
             "Multi-format output (EPUB + PDF + TXT)",
             "Gemini 2.5 Flash-Lite + Groq Llama fallback",
-            "Pay-per-file pricing",
+            "Smart payment routing (PayPal + Stripe)",
+            "$0.50 minimum pricing",
             "No accounts required",
             "7-day file retention"
         ]

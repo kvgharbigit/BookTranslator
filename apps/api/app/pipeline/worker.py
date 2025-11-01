@@ -4,13 +4,18 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 
-# Conditional WeasyPrint import to avoid crashes when PDF disabled
+# Enhanced PDF generation import
 try:
-    from weasyprint import HTML
-    WEASYPRINT_AVAILABLE = True
+    import sys
+    from pathlib import Path
+    # Add root directory to path for enhanced PDF converter
+    root_dir = Path(__file__).parent.parent.parent.parent
+    sys.path.insert(0, str(root_dir))
+    from epub_to_pdf_with_images import convert_epub_to_pdf
+    ENHANCED_PDF_AVAILABLE = True
 except Exception:
-    HTML = None
-    WEASYPRINT_AVAILABLE = False
+    convert_epub_to_pdf = None
+    ENHANCED_PDF_AVAILABLE = False
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
@@ -192,22 +197,23 @@ async def _generate_outputs(
                 output_keys["epub"] = epub_key
                 logger.info(f"Uploaded EPUB: {epub_key}")
     
-    # Generate PDF
-    if settings.generate_pdf:
+    # Generate enhanced PDF
+    if settings.generate_pdf and output_keys.get("epub"):
         try:
-            # Combine translated documents into single HTML
-            combined_html = _combine_docs_for_pdf(translated_docs)
-            
-            pdf_path = os.path.join(temp_dir, f"{job_id}.pdf")
-            HTML(string=combined_html).write_pdf(pdf_path)
-            
-            pdf_key = f"outputs/{job_id}.pdf"
-            if storage.upload_file(pdf_path, pdf_key, "application/pdf"):
-                output_keys["pdf"] = pdf_key
-                logger.info(f"Uploaded PDF: {pdf_key}")
+            if ENHANCED_PDF_AVAILABLE:
+                # Use enhanced PDF generation with Calibre/WeasyPrint/ReportLab
+                epub_path = os.path.join(temp_dir, f"{job_id}.epub")
+                pdf_path = convert_epub_to_pdf(epub_path, temp_dir)
+                
+                pdf_key = f"outputs/{job_id}.pdf"
+                if storage.upload_file(pdf_path, pdf_key, "application/pdf"):
+                    output_keys["pdf"] = pdf_key
+                    logger.info(f"Uploaded enhanced PDF: {pdf_key}")
+            else:
+                logger.warning("Enhanced PDF generation not available, skipping PDF")
                 
         except Exception as e:
-            logger.error(f"Failed to generate PDF: {e}")
+            logger.error(f"Failed to generate enhanced PDF: {e}")
     
     # Generate TXT
     if settings.generate_txt:
@@ -230,41 +236,7 @@ async def _generate_outputs(
     return output_keys
 
 
-def _combine_docs_for_pdf(translated_docs: list) -> str:
-    """Combine translated documents into single HTML for PDF generation."""
-    
-    html_parts = [
-        '<!DOCTYPE html>',
-        '<html>',
-        '<head>',
-        '<meta charset="utf-8">',
-        '<style>',
-        'body { font-family: serif; line-height: 1.6; margin: 2cm; }',
-        'h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 2em; }',
-        '.chapter { page-break-before: always; }',
-        '</style>',
-        '</head>',
-        '<body>'
-    ]
-    
-    for i, doc in enumerate(translated_docs):
-        if i > 0:
-            html_parts.append('<div class="chapter">')
-        
-        # Extract body content
-        soup = BeautifulSoup(doc['content'], 'xml')
-        body = soup.find('body')
-        if body:
-            html_parts.append(str(body))
-        else:
-            html_parts.append(doc['content'])
-        
-        if i > 0:
-            html_parts.append('</div>')
-    
-    html_parts.extend(['</body>', '</html>'])
-    
-    return '\n'.join(html_parts)
+# Legacy PDF generation function removed - now using enhanced PDF generation
 
 
 def _apply_rtl_layout(translated_docs: list) -> list:

@@ -64,6 +64,12 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
 
   const priceUSD = priceCents / 100;
   const charactersEst = tokensEst * 4; // Rough estimation
+  
+  // Determine optimal payment provider
+  const usePayPal = priceCents < 800; // $8.00 threshold
+  const paypalFee = Math.round(priceCents * 0.05 + 5);
+  const stripeFee = Math.round(priceCents * 0.029 + 30);
+  const optimalProvider = paypalFee < stripeFee ? 'PayPal' : 'Stripe';
 
   return (
     <div className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
@@ -81,6 +87,11 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
           <p className="text-xs text-gray-500">
             You'll get EPUB + PDF + TXT formats
           </p>
+          {usePayPal && (
+            <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+              🎯 Best rate via {optimalProvider} (saves ${((stripeFee - paypalFee) / 100).toFixed(2)})
+            </p>
+          )}
         </div>
       </div>
 
@@ -157,7 +168,7 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, disabled = 
 
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Files auto-delete after 7 days • Powered by Stripe
+            Files auto-delete after 7 days • Powered by {usePayPal ? 'PayPal + Stripe' : 'Stripe'}
           </p>
         </div>
       </div>

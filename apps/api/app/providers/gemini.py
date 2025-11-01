@@ -18,6 +18,9 @@ class GeminiFlashProvider(TranslationProvider):
         self.base_url = "https://generativelanguage.googleapis.com/v1/models"
         self.max_batch_tokens = settings.max_batch_tokens
         self.retry_limit = settings.retry_limit
+        # Gemini 2.5 Flash-Lite Tier 1: 4,000 RPM, 4M TPM (work at 80% to avoid errors)
+        self.requests_per_minute = 3200  # 80% of 4,000 RPM
+        self.tokens_per_minute = 3200000  # 80% of 4M TPM
     
     async def translate_segments(
         self,
@@ -42,6 +45,12 @@ class GeminiFlashProvider(TranslationProvider):
         
         for i, batch in enumerate(batches):
             logger.info(f"Translating batch {i+1}/{len(batches)} with {len(batch)} segments")
+            
+            # Rate limiting: 3,200 RPM (80% of limit) = 1 request every 0.01875 seconds
+            # Conservative approach: 1 request every 0.02 seconds (50 RPM safe rate)
+            if i > 0:
+                await asyncio.sleep(0.02)  # 20ms delay = max 50 requests/second = 3,000 RPM
+            
             translated_batch = await self._translate_batch_with_retry(
                 batch, src_lang, tgt_lang, system_hint
             )
@@ -88,7 +97,14 @@ class GeminiFlashProvider(TranslationProvider):
             try:
                 return await self._translate_batch(batch, src_lang, tgt_lang, system_hint)
             except Exception as e:
-                wait_time = 2 ** attempt  # 1s, 2s, 4s
+                error_msg = str(e)
+                
+                # Handle rate limits with longer delays for Gemini
+                if "rate limit" in error_msg.lower() or "429" in error_msg or "quota" in error_msg.lower():
+                    wait_time = (2 ** attempt) * 5  # 5s, 10s, 20s for rate limits
+                else:
+                    wait_time = 2 ** attempt  # 1s, 2s, 4s for other errors
+                
                 logger.warning(
                     f"Gemini translation attempt {attempt + 1} failed: {e}. "
                     f"Retrying in {wait_time}s..."

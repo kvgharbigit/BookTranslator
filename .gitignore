@@ -78,8 +78,15 @@ out/
 # Local storage and uploads
 local_storage/
 uploads/
-test_output/
+outputs/
 
 # Temporary files
 tmp/
 temp/
+
+# Debug files
+debug_*.py
+fix_*.py
+verify_*.py
+test_*.py
+*_debug.py
