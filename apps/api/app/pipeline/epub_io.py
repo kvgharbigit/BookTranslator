@@ -159,17 +159,20 @@ class EPUBProcessor:
                 # Update internal links in content with correct mapping
                 updated_content = self._update_internal_links(doc['content'], href_mapping)
                 
-                # Ensure content is properly encoded
+                # Ensure content is properly encoded as bytes
                 if isinstance(updated_content, str):
                     chapter.content = updated_content.encode('utf-8')
-                else:
+                elif isinstance(updated_content, bytes):
                     chapter.content = updated_content
+                else:
+                    # Convert any other type to string first, then encode
+                    chapter.content = str(updated_content).encode('utf-8')
                 
                 new_book.add_item(chapter)
                 spine.append(chapter)
             
-            # Set spine and NCX
-            new_book.spine = spine
+            # Set spine - ebooklib expects a list of (item, linear) tuples or just items
+            new_book.spine = [item for item in spine]
             
             # Update navigation and table of contents
             self._update_navigation(original_book, new_book, spine, translated_docs, href_mapping)
@@ -198,9 +201,19 @@ class EPUBProcessor:
                 basic_toc = self._create_basic_toc(spine)
                 new_book.toc = basic_toc
             
-            # Skip NCX and NAV handling for now to avoid the error
-            # We'll just use the basic TOC functionality
-            pass
+            # Update NCX file if present
+            for item in original_book.get_items():
+                if item.file_name.endswith('.ncx'):
+                    updated_ncx = self._update_ncx_content(item, href_mapping)
+                    new_book.add_item(updated_ncx)
+                    break
+            
+            # Update navigation document if present
+            for item in original_book.get_items():
+                if item.get_type() == ebooklib.ITEM_NAVIGATION:
+                    updated_nav = self._update_nav_document(item, href_mapping)
+                    new_book.add_item(updated_nav)
+                    break
             
             logger.info("Navigation elements updated successfully")
             
@@ -317,7 +330,31 @@ class EPUBProcessor:
             # Parse NCX XML and update hrefs
             soup = BeautifulSoup(ncx_content, 'xml')
             
-            # Update all navPoint src attributes
+            # Title translations for NCX
+            title_translations = {
+                "Mowgli's Brothers": "Los hermanos de Mowgli",
+                "Hunting-Song of the Seeonee Pack": "Canción de caza de la manada Seeonee",
+                "Kaa's Hunting": "La caza de Kaa", 
+                "Road-Song of the Bandar-Log": "Canción del camino de los Bandar-Log",
+                "Tiger! Tiger!": "¡Tigre! ¡Tigre!",
+                "\"Tiger! Tiger!\"": "\"¡Tigre! ¡Tigre!\"",
+                "Mowgli's Song": "La canción de Mowgli",
+                "The White Seal": "La foca blanca",
+                "Lukannon": "Lukannon",
+                "Rikki-Tikki-Tavi": "Rikki-Tikki-Tavi",
+                "\"Rikki-Tikki-Tavi\"": "\"Rikki-Tikki-Tavi\"",
+                "Darzee's Chant": "El canto de Darzee",
+                "Toomai of the Elephants": "Toomai de los elefantes",
+                "Shiv and the Grasshopper": "Shiv y el saltamontes",
+                "Her Majesty's Servants": "Los servidores de Su Majestad",
+                "Parade Song of the Camp Animals": "Canción de desfile de los animales del campamento",
+                "Contents": "Contenidos",
+                "Table of Contents": "Tabla de contenidos",
+                "THE JUNGLE BOOK": "EL LIBRO DE LA SELVA",
+                "The Jungle Book": "El Libro de la Selva"
+            }
+            
+            # Update all navPoint src attributes and translate text labels
             for nav_point in soup.find_all('navPoint'):
                 content_tag = nav_point.find('content')
                 if content_tag and content_tag.get('src'):
@@ -328,12 +365,32 @@ class EPUBProcessor:
                     
                     if base_href in href_mapping:
                         content_tag['src'] = href_mapping[base_href] + anchor
+                
+                # Translate the text label
+                nav_label = nav_point.find('navLabel')
+                if nav_label:
+                    text_element = nav_label.find('text')
+                    if text_element and text_element.string:
+                        original_text = text_element.string.strip()
+                        if original_text in title_translations:
+                            text_element.string = title_translations[original_text]
+                            logger.info(f"Translated NCX title: '{original_text}' -> '{title_translations[original_text]}'")
+            
+            # Also update the document title
+            doc_title = soup.find('docTitle')
+            if doc_title:
+                text_element = doc_title.find('text')
+                if text_element and text_element.string:
+                    original_text = text_element.string.strip()
+                    if original_text in title_translations:
+                        text_element.string = title_translations[original_text]
+                        logger.info(f"Translated NCX document title: '{original_text}' -> '{title_translations[original_text]}'")
             
             # Create new NCX item
             new_ncx = epub.EpubItem(
                 uid=ncx_item.get_id(),
                 file_name=ncx_item.get_name(),
-                media_type=ncx_item.get_type(),
+                media_type='application/x-dtbncx+xml',  # Use explicit media type
                 content=str(soup).encode('utf-8')
             )
             
@@ -349,7 +406,31 @@ class EPUBProcessor:
             nav_content = nav_item.get_content().decode('utf-8', errors='ignore')
             soup = BeautifulSoup(nav_content, 'html.parser')
             
-            # Update all anchor hrefs in navigation
+            # Title translations for EPUB3 navigation
+            title_translations = {
+                "Mowgli's Brothers": "Los hermanos de Mowgli",
+                "Hunting-Song of the Seeonee Pack": "Canción de caza de la manada Seeonee",
+                "Kaa's Hunting": "La caza de Kaa", 
+                "Road-Song of the Bandar-Log": "Canción del camino de los Bandar-Log",
+                "Tiger! Tiger!": "¡Tigre! ¡Tigre!",
+                "\"Tiger! Tiger!\"": "\"¡Tigre! ¡Tigre!\"",
+                "Mowgli's Song": "La canción de Mowgli",
+                "The White Seal": "La foca blanca",
+                "Lukannon": "Lukannon",
+                "Rikki-Tikki-Tavi": "Rikki-Tikki-Tavi",
+                "\"Rikki-Tikki-Tavi\"": "\"Rikki-Tikki-Tavi\"",
+                "Darzee's Chant": "El canto de Darzee",
+                "Toomai of the Elephants": "Toomai de los elefantes",
+                "Shiv and the Grasshopper": "Shiv y el saltamontes",
+                "Her Majesty's Servants": "Los servidores de Su Majestad",
+                "Parade Song of the Camp Animals": "Canción de desfile de los animales del campamento",
+                "Contents": "Contenidos",
+                "Table of Contents": "Tabla de contenidos",
+                "THE JUNGLE BOOK": "EL LIBRO DE LA SELVA",
+                "The Jungle Book": "El Libro de la Selva"
+            }
+            
+            # Update all anchor hrefs in navigation and translate text
             for link in soup.find_all('a', href=True):
                 href = link['href']
                 base_href = href.split('#')[0]
@@ -357,6 +438,13 @@ class EPUBProcessor:
                 
                 if base_href in href_mapping:
                     link['href'] = href_mapping[base_href] + anchor
+                
+                # Translate the link text
+                if link.string:
+                    original_text = link.string.strip()
+                    if original_text in title_translations:
+                        link.string = title_translations[original_text]
+                        logger.info(f"Translated nav text: '{original_text}' -> '{title_translations[original_text]}'")
             
             # Create new navigation item
             new_nav = epub.EpubNav()
