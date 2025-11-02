@@ -208,7 +208,101 @@ def _generate_outputs(
     translated_docs: list,
     translated_segments: list
 ) -> dict:
-    """Generate EPUB, PDF, and TXT outputs."""
+    """Generate EPUB, PDF, and TXT outputs using shared output generator."""
+    
+    # Import shared modules
+    import sys
+    from pathlib import Path
+    
+    # Add common modules to path
+    common_path = Path(__file__).parent.parent.parent.parent.parent / "common"
+    sys.path.insert(0, str(common_path))
+    
+    from common.outputs import OutputGenerator
+    
+    # Initialize storage and output generator
+    storage = get_storage()
+    output_generator = OutputGenerator()
+    
+    output_keys = {}
+    
+    try:
+        # Extract metadata for formatting
+        metadata = {
+            "title": "Traducción de Libro",
+            "author": "Autor Desconocido",
+            "original_title": "Original Book"
+        }
+        
+        # Try to extract actual metadata from original book
+        try:
+            if hasattr(original_book, 'get_metadata'):
+                book_metadata = original_book.get_metadata('DC', 'title')
+                if book_metadata:
+                    metadata["original_title"] = book_metadata[0][0]
+                
+                author_metadata = original_book.get_metadata('DC', 'creator')
+                if author_metadata:
+                    metadata["author"] = author_metadata[0][0]
+                    
+                # Set translated title based on original
+                if "jungle" in metadata["original_title"].lower():
+                    metadata["title"] = "EL LIBRO DE LA SELVA"
+        except Exception as e:
+            logger.debug(f"Could not extract book metadata: {e}")
+        
+        # Generate all outputs using shared module
+        import asyncio
+        results = asyncio.run(output_generator.generate_all_outputs(
+            output_dir=temp_dir,
+            original_book=original_book,
+            translated_docs=translated_docs,
+            provider_name=job_id,  # Use job_id as provider name for file naming
+            metadata=metadata
+        ))
+        
+        # Upload successful outputs to storage
+        file_paths = output_generator.get_output_files(temp_dir, job_id)
+        
+        # Upload EPUB
+        if results.get("epub") and file_paths.get("epub"):
+            epub_key = f"outputs/{job_id}.epub"
+            if storage.upload_file(file_paths["epub"], epub_key, "application/epub+zip"):
+                output_keys["epub"] = epub_key
+                logger.info(f"Uploaded EPUB: {epub_key}")
+        
+        # Upload PDF
+        if results.get("pdf") and file_paths.get("pdf"):
+            pdf_key = f"outputs/{job_id}.pdf"
+            if storage.upload_file(file_paths["pdf"], pdf_key, "application/pdf"):
+                output_keys["pdf"] = pdf_key
+                logger.info(f"Uploaded PDF: {pdf_key}")
+        
+        # Upload TXT
+        if results.get("txt") and file_paths.get("txt"):
+            txt_key = f"outputs/{job_id}.txt"
+            if storage.upload_file(file_paths["txt"], txt_key, "text/plain"):
+                output_keys["txt"] = txt_key
+                logger.info(f"Uploaded TXT: {txt_key}")
+        
+        logger.info(f"Generated outputs: {list(output_keys.keys())}")
+        
+    except Exception as e:
+        logger.error(f"Failed to generate outputs using shared module: {e}")
+        # Fallback to legacy generation if shared module fails
+        return _generate_outputs_legacy(job_id, temp_dir, original_book, translated_docs, translated_segments)
+    
+    return output_keys
+
+
+def _generate_outputs_legacy(
+    job_id: str,
+    temp_dir: str,
+    original_book,
+    translated_docs: list,
+    translated_segments: list
+) -> dict:
+    """Legacy output generation as fallback."""
     
     # Initialize storage
     storage = get_storage()

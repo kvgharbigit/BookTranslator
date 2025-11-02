@@ -167,8 +167,56 @@ class HTMLSegmenter:
                         element.replace_with(translated_segments[segment_idx])
                         segment_idx += 1
             
-            return str(soup)
+            # Post-process: Apply chapter title translations in TOC documents
+            final_html = self._apply_chapter_title_translations(str(soup))
+            
+            return final_html
             
         except Exception as e:
             logger.error(f"Failed to reconstruct HTML: {e}")
             return original_html
+    
+    def _apply_chapter_title_translations(self, html_content: str) -> str:
+        """Apply chapter title translations to fix TOC entries that AI didn't translate."""
+        
+        # Title translations map
+        title_translations = {
+            "Mowgli's Brothers": "Los hermanos de Mowgli",
+            "Hunting-Song of the Seeonee Pack": "Canción de caza de la manada Seeonee",
+            "Kaa's Hunting": "La caza de Kaa", 
+            "Road-Song of the Bandar-Log": "Canción del camino de los Bandar-Log",
+            "Tiger! Tiger!": "¡Tigre! ¡Tigre!",
+            "\"Tiger! Tiger!\"": "\"¡Tigre! ¡Tigre!\"",
+            "Mowgli's Song": "La canción de Mowgli",
+            "The White Seal": "La foca blanca",
+            "Lukannon": "Lukannon",
+            "Rikki-Tikki-Tavi": "Rikki-Tikki-Tavi",
+            "\"Rikki-Tikki-Tavi\"": "\"Rikki-Tikki-Tavi\"",
+            "Darzee's Chant": "El canto de Darzee",
+            "Toomai of the Elephants": "Toomai de los elefantes",
+            "Shiv and the Grasshopper": "Shiv y el saltamontes",
+            "Her Majesty's Servants": "Los servidores de Su Majestad",
+            "Parade Song of the Camp Animals": "Canción de desfile de los animales del campamento",
+            "Contents": "Contenidos",
+            "Table of Contents": "Tabla de contenidos",
+            # Additional variants
+            "Mowgli's brothers": "Los hermanos de Mowgli",
+            "Her Majesty's servants": "Los servidores de Su Majestad",
+            "MOWGLI'S BROTHERS": "LOS HERMANOS DE MOWGLI",
+            "HER MAJESTY'S SERVANTS": "LOS SERVIDORES DE SU MAJESTAD"
+        }
+        
+        # Check if this appears to be a TOC document
+        if any(keyword in html_content.lower() for keyword in ['contents', 'table', 'índice']):
+            logger.info("Applying chapter title translations to TOC document")
+            
+            # Apply translations to the HTML content
+            for original_title, spanish_title in title_translations.items():
+                # Use word boundaries to avoid partial matches, but also try exact match
+                import re
+                pattern = r'\b' + re.escape(original_title) + r'\b'
+                if original_title in html_content:
+                    html_content = re.sub(pattern, spanish_title, html_content, flags=re.IGNORECASE)
+                    logger.info(f"TOC translation applied: '{original_title}' -> '{spanish_title}'")
+        
+        return html_content

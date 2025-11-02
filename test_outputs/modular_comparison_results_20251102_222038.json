@@ -1,0 +1,193 @@
+{
+  "test_info": {
+    "test_type": "modular_dual_provider",
+    "epub_source": "/Users/kayvangharbi/PycharmProjects/BookTranslator/sample_books/pg236_first20pages.epub",
+    "target_language": "es",
+    "timestamp": "2025-11-02 22:20:38",
+    "shared_modules_used": true
+  },
+  "provider_results": {
+    "Gemini": {
+      "provider_name": "Gemini",
+      "success": true,
+      "translation_time": 28.69055986404419,
+      "total_time": 32.5905978679657,
+      "tokens_used": 12296,
+      "provider_used": "gemini",
+      "cost_analysis": {
+        "tokens_used": 12296,
+        "provider_name": "gemini",
+        "provider_cost_cents": 0,
+        "provider_cost_usd": 0.0,
+        "user_price_cents": 99,
+        "user_price_usd": 0.99,
+        "profit_cents": 99,
+        "profit_usd": 0.99,
+        "profit_margin_pct": 100.0,
+        "cost_per_million_tokens": 0.0
+      },
+      "outputs_generated": {
+        "epub": true,
+        "pdf": true,
+        "txt": true
+      },
+      "file_paths": {
+        "epub": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini.epub",
+        "pdf": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini_calibre_20251102_172922.pdf",
+        "txt": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini.txt"
+      },
+      "file_sizes": {
+        "epub": "10719.2 KB",
+        "pdf": "2.1 MB",
+        "txt": "26.0 KB"
+      },
+      "error_message": null
+    },
+    "Groq": {
+      "provider_name": "Groq",
+      "success": true,
+      "translation_time": 13.751122951507568,
+      "total_time": 17.574438333511353,
+      "tokens_used": 12398,
+      "provider_used": "groq",
+      "cost_analysis": {
+        "tokens_used": 12398,
+        "provider_name": "groq",
+        "provider_cost_cents": 0,
+        "provider_cost_usd": 0.0,
+        "user_price_cents": 99,
+        "user_price_usd": 0.99,
+        "profit_cents": 99,
+        "profit_usd": 0.99,
+        "profit_margin_pct": 100.0,
+        "cost_per_million_tokens": 0.0
+      },
+      "outputs_generated": {
+        "epub": true,
+        "pdf": true,
+        "txt": true
+      },
+      "file_paths": {
+        "epub": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq.epub",
+        "pdf": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq_calibre_20251102_221753.pdf",
+        "txt": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq.txt"
+      },
+      "file_sizes": {
+        "epub": "10719.3 KB",
+        "pdf": "2.1 MB",
+        "txt": "26.3 KB"
+      },
+      "error_message": null
+    }
+  },
+  "comparison_summary": {
+    "success_rate": {
+      "Gemini": "✅ Success",
+      "Groq": "✅ Success"
+    },
+    "performance": {
+      "Gemini": {
+        "translation_time": "28.7s",
+        "total_time": "32.6s",
+        "tokens_used": 12296
+      },
+      "Groq": {
+        "translation_time": "13.8s",
+        "total_time": "17.6s",
+        "tokens_used": 12398
+      },
+      "fastest_provider": "Groq"
+    },
+    "cost_comparison": {
+      "Gemini": {
+        "user_cost": "$0.99",
+        "provider_cost": "$0.0000",
+        "profit_margin": "100.0%"
+      },
+      "Groq": {
+        "user_cost": "$0.99",
+        "provider_cost": "$0.0000",
+        "profit_margin": "100.0%"
+      }
+    },
+    "output_generation": {
+      "epub": {
+        "Gemini": "✅",
+        "Groq": "✅"
+      },
+      "pdf": {
+        "Gemini": "✅",
+        "Groq": "✅"
+      },
+      "txt": {
+        "Gemini": "✅",
+        "Groq": "✅"
+      }
+    },
+    "recommendations": {
+      "speed": "Groq is 2.1x faster than Gemini",
+      "cost": "Gemini offers the lowest user cost",
+      "quality": "Gemini has the highest success rate"
+    }
+  },
+  "performance_metrics": {
+    "Gemini": {
+      "translation_time_seconds": 28.69055986404419,
+      "total_time_seconds": 32.5905978679657,
+      "tokens_processed": 12296,
+      "tokens_per_second": 428.5730239586468,
+      "success": true
+    },
+    "Groq": {
+      "translation_time_seconds": 13.751122951507568,
+      "total_time_seconds": 17.574438333511353,
+      "tokens_processed": 12398,
+      "tokens_per_second": 901.599094395471,
+      "success": true
+    }
+  },
+  "output_status": {
+    "formats": [
+      "epub",
+      "pdf",
+      "txt"
+    ],
+    "provider_status": {
+      "Gemini": {
+        "outputs_generated": {
+          "epub": true,
+          "pdf": true,
+          "txt": true
+        },
+        "file_paths": {
+          "epub": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini.epub",
+          "pdf": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini_calibre_20251102_172922.pdf",
+          "txt": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini/translated_gemini.txt"
+        },
+        "file_sizes": {
+          "epub": "10719.2 KB",
+          "pdf": "2.1 MB",
+          "txt": "26.0 KB"
+        }
+      },
+      "Groq": {
+        "outputs_generated": {
+          "epub": true,
+          "pdf": true,
+          "txt": true
+        },
+        "file_paths": {
+          "epub": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq.epub",
+          "pdf": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq_calibre_20251102_221753.pdf",
+          "txt": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq/translated_groq.txt"
+        },
+        "file_sizes": {
+          "epub": "10719.3 KB",
+          "pdf": "2.1 MB",
+          "txt": "26.3 KB"
+        }
+      }
+    }
+  },
+  "timestamp": "2025-11-02T22:20:38.141909"
+}
