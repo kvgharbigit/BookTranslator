@@ -30,7 +30,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # CORS middleware
 allowed_origins = [
     "http://localhost:3000",
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "https://polytext.site",
+    "https://www.polytext.site",
+    "https://api.polytext.site"
 ]
 
 if settings.env == "development":
