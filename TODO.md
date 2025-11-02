@@ -2,13 +2,14 @@
 
 ## 🔥 **IMMEDIATE (This Week)**
 
-### 1. Test R2 Integration End-to-End
-- [ ] Restart local backend/worker with new `.env.local`
-- [ ] Upload test EPUB via frontend
-- [ ] Verify file appears in R2 dashboard: https://dash.cloudflare.com/r2
-- [ ] Check batch progress updates work (0-100%)
-- [ ] Download all formats (EPUB, PDF, TXT)
-- [ ] Verify 5-day expiry notice shows
+### 1. Test R2 Integration End-to-End ✅ **COMPLETED**
+- [x] Restart local backend/worker with new `.env.local`
+- [x] Upload test EPUB via frontend
+- [x] Verify file appears in R2 dashboard: https://dash.cloudflare.com/r2
+- [x] Check batch progress updates work (0-100%)
+- [x] Download all formats (EPUB, PDF, TXT)
+- [x] Verify 5-day expiry notice shows
+- **Result:** 7/7 tests passed, R2 fully functional with public download URLs
 
 ### 2. Run Database Migration on Railway
 ```bash

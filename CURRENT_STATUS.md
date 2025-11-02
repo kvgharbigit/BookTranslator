@@ -21,13 +21,17 @@
   - Polling every 5 seconds
 
 ### **Storage & Infrastructure**
-- ✅ **Cloudflare R2 Object Storage:**
+- ✅ **Cloudflare R2 Object Storage:** **FULLY TESTED AND WORKING**
   - Bucket: `epub-translator-production`
   - Region: Eastern North America (ENAM)
   - **5-day automatic file deletion** (lifecycle policy)
   - Zero egress fees (unlimited downloads)
   - CORS configured for browser uploads
   - Cost: ~$0.02-4.50/month depending on volume
+  - ✅ End-to-end integration test passed (7/7 tests)
+  - ✅ Presigned upload URLs working
+  - ✅ File storage and retrieval tested
+  - ✅ Public download URLs confirmed accessible
 - ✅ **Railway PostgreSQL Database:**
   - Production database on Railway
   - External URL for local development
