@@ -92,9 +92,11 @@ class PreviewService:
 
             # Translate segments
             logger.info(f"Translating {len(segments)} segments with {provider}/{model}")
-            orchestrator = TranslationOrchestrator(translation_provider)
-            translated_segments = await orchestrator.translate_segments(
-                segments, target_lang
+            orchestrator = TranslationOrchestrator()
+            translated_segments, tokens_used, provider_used = await orchestrator.translate_segments(
+                segments=segments,
+                target_lang=target_lang,
+                primary_provider=translation_provider
             )
 
             # Reconstruct HTML with translations
