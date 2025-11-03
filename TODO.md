@@ -53,30 +53,57 @@
 - [ ] Verify webhook receives payment
 - [ ] Test end-to-end: Upload → Pay → Translate → Download
 
-### 5. Email Notifications (Resend)
-- [ ] Sign up at https://resend.com (free: 100 emails/day)
-- [ ] Get API key
-- [ ] Update Railway variables:
+### 5. Email Notifications (Resend) ✅ **COMPLETED**
+- [x] Sign up at https://resend.com (free: 100 emails/day)
+- [x] Get API key: `re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL`
+- [x] Update Railway variables:
   ```bash
-  RESEND_API_KEY=<real_key>
-  EMAIL_FROM=noreply@yourdomain.com  # or resend-provided email
+  RESEND_API_KEY=re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL
+  EMAIL_FROM=noreply@polytext.site
   ```
-- [ ] Test completion email
-- [ ] Test failure notification email
-- [ ] Verify download links in email work
+- [x] Configure DNS records (SPF, DKIM, MX)
+- [x] Verify domain: polytext.site (Nov 3, 2025)
+- [x] Test completion email (working)
+- [x] Test failure notification email (working)
+- [x] Verify download links in email work (confirmed)
+
+### 6. Email Retrieval System ✅ **COMPLETED - Nov 3, 2025**
+- [x] Create backend API endpoint `/jobs-by-email/{email}`
+- [x] Add rate limiting (10/minute) to prevent abuse
+- [x] Filter jobs to last 5 days only
+- [x] Generate presigned download URLs for each job
+- [x] Create frontend `/retrieve` page
+- [x] Add search form with email validation
+- [x] Display job list with status indicators
+- [x] Show download buttons for completed jobs
+- [x] Add link to retrieve page from homepage
+- [x] Test end-to-end functionality
+
+### 7. Download Experience Improvements ✅ **COMPLETED - Nov 3, 2025**
+- [x] Make download links open in new tabs
+- [x] Add `rel="noopener noreferrer"` for security
+- [x] Update all three download buttons (EPUB, PDF, TXT)
+- [x] Test on production
+
+### 8. R2 Upload Verification ✅ **COMPLETED - Nov 3, 2025**
+- [x] Add file size checking after uploads
+- [x] Compare local and remote file sizes
+- [x] Add detailed logging with emoji indicators
+- [x] Test verification logic
 
 ---
 
 ## 📦 **MEDIUM PRIORITY (2-4 Weeks)**
 
-### 6. Custom Domain Setup
-- [ ] Purchase domain (Namecheap/Cloudflare)
-- [ ] Configure DNS:
-  - Frontend: Point to Vercel
-  - Backend: Point to Railway
-- [ ] Update R2 CORS policy to use real domain
-- [ ] Update `EMAIL_FROM` to use custom domain
-- [ ] Test everything with new domain
+### 9. Custom Domain Setup ✅ **COMPLETED - Nov 3, 2025**
+- [x] Purchase domain: polytext.site (Namecheap)
+- [x] Configure DNS:
+  - Frontend: Point to Vercel (polytext.site, www.polytext.site)
+  - Backend: Point to Railway (api.polytext.site)
+- [x] Update R2 CORS policy to use real domain
+- [x] Update `EMAIL_FROM` to use custom domain
+- [x] Test everything with new domain
+- [x] SSL certificates active on all domains
 
 ### 7. Production Hardening
 - [ ] Add Sentry for error tracking
@@ -128,9 +155,12 @@
 
 - [x] ~~macOS PDF generation crash~~ **FIXED**: `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 - [x] ~~Progress jumps 30% → 60%~~ **FIXED**: Batch-level progress tracking
-- [ ] Database migration not run on Railway (progress_percent column missing)
-- [ ] Email notifications not working (fake API key)
-- [ ] PayPal payments not tested with real account
+- [x] ~~Database migration not run on Railway~~ **FIXED**: Migration completed Nov 2, 2025
+- [x] ~~Email notifications not working~~ **FIXED**: Resend configured & tested Nov 3, 2025
+- [x] ~~Users losing download links~~ **FIXED**: Email retrieval system Nov 3, 2025
+- [x] ~~Downloads don't open in new tab~~ **FIXED**: Added target="_blank" Nov 3, 2025
+- [x] ~~No upload verification~~ **FIXED**: File size checking added Nov 3, 2025
+- [ ] PayPal payments not tested with real account (pending live setup)
 
 ---
 
@@ -157,4 +187,4 @@ Once live, monitor:
 
 ---
 
-**Last Updated:** November 2, 2025
+**Last Updated:** November 3, 2025

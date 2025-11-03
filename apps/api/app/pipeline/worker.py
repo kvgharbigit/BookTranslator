@@ -60,7 +60,7 @@ def translate_epub(job_id: str):
             logger.error(f"Job {job_id} not found in database")
             return
             
-        logger.info(f"Starting translation for job {job_id}: {job.source_key} -> {job.target_lang}")
+        logger.info(f"🚀 Starting translation │ Job: {job_id[:13]}... │ Lang: {job.target_lang} │ Provider: {job.provider}")
         
         # Extract job parameters
         source_key = job.source_key
@@ -117,7 +117,7 @@ def translate_epub(job_id: str):
                 progress = 30 + int((batch_index / total_batches) * 30)
                 job.progress_percent = min(progress, 60)  # Cap at 60%
                 db.commit()
-                logger.info(f"Translation progress: {job.progress_percent}% (batch {batch_index}/{total_batches})")
+                logger.info(f"⚡ Translation progress: {job.progress_percent}% │ Batch: {batch_index}/{total_batches} │ Job: {job_id[:13]}...")
 
             translated_segments, tokens_actual, provider_used = asyncio.run(
                 orchestrator.translate_segments(
@@ -172,7 +172,7 @@ def translate_epub(job_id: str):
             job.progress_percent = 100
             db.commit()
             
-            logger.info(f"Job {job_id} completed successfully")
+            logger.info(f"✅ Job completed │ {job_id[:13]}... │ Tokens: {tokens_actual} │ Provider: {provider_used}")
             
             # Step 7: Send email notification
             if email:
@@ -183,7 +183,7 @@ def translate_epub(job_id: str):
                     # Don't fail the job for email issues
     
     except Exception as e:
-        logger.error(f"Job {job_id} failed: {e}")
+        logger.error(f"❌ Job failed │ {job_id[:13]}... │ Error: {str(e)[:100]}")
         
         # Update job status
         job.status = "failed"
@@ -412,7 +412,7 @@ def _send_completion_email(job: Job, email: str):
         ))
         
         if success:
-            logger.info(f"Sent completion email to {email} with {len(download_urls)} download links")
+            logger.info(f"📧 Sent completion email │ To: {email} │ {len(download_urls)} download links │ Job: {job.id[:13]}...")
         else:
             logger.error(f"Failed to send completion email to {email}")
     else:

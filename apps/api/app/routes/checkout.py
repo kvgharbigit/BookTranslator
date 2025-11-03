@@ -177,8 +177,7 @@ async def create_checkout(
         db.commit()
         
         logger.info(
-            f"Created PayPal checkout for job {job_id}: "
-            f"${server_price_cents/100:.2f}, provider={provider}"
+            f"💳 Checkout created │ Job: {job_id[:13]}... │ Price: ${server_price_cents/100:.2f} │ Provider: {provider} │ Lang: {data.target_lang}"
         )
         
         return CreateCheckoutResponse(

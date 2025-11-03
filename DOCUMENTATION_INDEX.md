@@ -1,6 +1,6 @@
 # 📚 BookTranslator Documentation Index
 
-**Last Updated:** November 2, 2025
+**Last Updated:** November 3, 2025
 
 ---
 
@@ -48,33 +48,67 @@
    - 5-day lifecycle policy
    - API credentials
    - Railway integration
-   - **Current Status:** Fully configured and ready to test
+   - **Current Status:** Fully configured and tested
 
-6. **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment options
+6. **[ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)** - ✅ **COMPLETE**
+   - Complete reference for all environment variables
+   - Required vs optional variables
+   - Railway production setup
+   - Local development setup
+   - Service-specific credentials
+   - **Current Status:** All documented and validated
+
+7. **[POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)** - ✅ **NEW**
+   - Complete post-translation workflow
+   - File generation (EPUB, PDF, TXT)
+   - Upload to R2 storage
+   - Email notification with download links
+   - Code implementation details
+   - **Current Status:** Fully implemented, tested, documented
+
+8. **[PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)** - ⚠️ **PENDING**
+   - PayPal Business account creation
+   - API credentials setup
+   - Micropayments pricing request
+   - Webhook configuration
+   - **Current Status:** Documented, awaiting live setup
+
+8. **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment options
    - MVP deployment (8 hours)
    - Production deployment (2 weeks)
    - Railway + Vercel setup
    - R2 storage (✅ already done)
    - Environment variables
 
-7. **[BUSINESS_SETUP.md](./BUSINESS_SETUP.md)** - Business integration
-   - ⚠️ PayPal live credentials (not done)
-   - ⚠️ Custom domain setup (not done)
-   - ⚠️ Email service (needs Resend key)
-   - Legal and compliance
+9. **[PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md)** - ✅ **COMPLETED**
+   - Custom domain setup (polytext.site)
+   - DNS configuration
+   - SSL certificates
+   - Current live status
+   - **Current Status:** Live at polytext.site
+
+10. **[BUSINESS_SETUP.md](./BUSINESS_SETUP.md)** - ✅ **UPDATED**
+    - Business operations guide
+    - Payment integration status
+    - Email notifications (complete)
+    - Custom domain (complete)
+    - Analytics and monitoring
+    - Legal and compliance requirements
+    - **Current Status:** Consolidated and updated Nov 3, 2025
 
 ---
 
 ## 🐛 **TROUBLESHOOTING**
 
-8. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem solving
-   - Railway deployment issues
-   - **Cloudflare R2 storage issues** (new section)
-   - Vercel frontend issues
-   - Payment processing
-   - AI API rate limits
-   - Progress bar stuck at 0%
-   - Database connection errors
+11. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem solving
+    - Railway deployment issues
+    - Cloudflare R2 storage issues
+    - Vercel frontend issues
+    - Payment processing
+    - AI API rate limits
+    - Progress bar stuck at 0%
+    - Database connection errors
+    - Email delivery issues
 
 ---
 
@@ -94,15 +128,19 @@ These are kept for historical reference but not relevant for current setup.
 ### Core Docs (Current)
 ```
 BookTranslator/
-├── README.md                    # Start here
-├── QUICK_REFERENCE.md           # Cheat sheet
-├── CURRENT_STATUS.md            # What's done
-├── TODO.md                      # What's next
-├── R2_SETUP_GUIDE.md           # R2 storage (DONE)
-├── DEPLOYMENT_GUIDE.md          # How to deploy
-├── BUSINESS_SETUP.md            # Business integration
-├── TROUBLESHOOTING.md           # Problem solving
-└── DOCUMENTATION_INDEX.md       # This file
+├── README.md                       # Start here
+├── QUICK_REFERENCE.md              # Cheat sheet
+├── CURRENT_STATUS.md               # What's done (UPDATED Nov 3, 2025)
+├── TODO.md                         # What's next (UPDATED Nov 3, 2025)
+├── R2_SETUP_GUIDE.md              # R2 storage (DONE)
+├── ENVIRONMENT_VARIABLES.md        # All env vars reference
+├── POST_TRANSLATION_WORKFLOW.md    # Email & file workflow
+├── PAYPAL_SETUP_GUIDE.md          # PayPal integration guide
+├── PRODUCTION_DEPLOYMENT.md        # Live deployment status
+├── DEPLOYMENT_GUIDE.md             # How to deploy
+├── BUSINESS_SETUP.md               # Business integration
+├── TROUBLESHOOTING.md              # Problem solving
+└── DOCUMENTATION_INDEX.md          # This file
 ```
 
 ### Archived Docs
@@ -141,7 +179,10 @@ BookTranslator/docs/archive/
 → Read [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
 
 **...set up PayPal payments:**
-→ Read [BUSINESS_SETUP.md](./BUSINESS_SETUP.md) (needs live credentials)
+→ Read [PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md) - Complete step-by-step guide
+
+**...understand environment variables:**
+→ Read [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) - Complete reference
 
 ---
 
@@ -170,6 +211,8 @@ BookTranslator/docs/archive/
 - **Cloudflare R2:** https://dash.cloudflare.com/r2
 - **Railway:** https://railway.app/dashboard
 - **Vercel:** https://vercel.com/dashboard
+- **Resend:** https://resend.com/domains
+- **PayPal Developer:** https://developer.paypal.com/dashboard
 - **Groq API:** https://console.groq.com/
 - **Gemini API:** https://aistudio.google.com/app/apikey
 

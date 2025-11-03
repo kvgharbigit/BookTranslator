@@ -83,7 +83,9 @@ async def get_job_status(
             # Apply stricter rate limiting for old completed jobs
             pass  # The limiter already handles this
     
-    logger.info(f"Retrieved status for job {job_id}: {job.status}")
+    # Only log significant status changes, not every poll
+    if job.status in ["done", "failed"]:
+        logger.info(f"Job {job_id[:13]}... status: {job.status.upper()}")
 
     return JobStatusResponse(**response_data)
 
@@ -107,10 +109,10 @@ async def get_jobs_by_email(
     ).order_by(Job.created_at.desc()).all()
 
     if not jobs:
-        logger.info(f"No jobs found for email: {email}")
+        logger.info(f"📧 Email lookup: {email} → No jobs found (last 5 days)")
         return []
 
-    logger.info(f"Found {len(jobs)} jobs for email: {email}")
+    logger.info(f"📧 Email lookup: {email} → Found {len(jobs)} job(s) (last 5 days)")
 
     # Build response for each job
     responses = []

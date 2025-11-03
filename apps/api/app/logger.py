@@ -20,28 +20,31 @@ class RequestIdFilter(logging.Filter):
 
 def setup_logging():
     """Configure structured logging with request ID correlation."""
-    
-    # Create formatter
+
+    # Create formatter with better readability
     formatter = logging.Formatter(
-        fmt="%(asctime)s [%(levelname)s] %(name)s (req:%(request_id)s) - %(message)s",
+        fmt="%(asctime)s │ %(levelname)-5s │ %(name)-25s │ %(request_id)-10s │ %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
-    
+
     # Create handler
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
     handler.addFilter(RequestIdFilter())
-    
+
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, settings.log_level.upper()))
     root_logger.addHandler(handler)
-    
+
     # Reduce noise from external libraries
     logging.getLogger("boto3").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("stripe").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)  # Reduce HTTP access log noise
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
 def get_logger(name: str) -> logging.Logger:

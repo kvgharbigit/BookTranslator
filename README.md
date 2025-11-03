@@ -21,7 +21,7 @@ poetry run python -m uvicorn app.main:app --reload --port 8000
 
 # Terminal 3: Worker (macOS fix included)
 cd apps/api
-OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
+PYTHONPATH=/Users/kayvangharbi/PycharmProjects/BookTranslator OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
 # Terminal 4: Frontend
 cd apps/web
@@ -256,7 +256,7 @@ poetry run python -m uvicorn app.main:app --reload --port 8000
 
 # Terminal 3: Translation Worker (macOS fix for PDF generation)
 cd apps/api
-OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
+PYTHONPATH=/Users/kayvangharbi/PycharmProjects/BookTranslator OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
 # Terminal 4: Frontend
 cd apps/web

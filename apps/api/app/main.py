@@ -63,19 +63,35 @@ async def add_request_id_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def log_requests_middleware(request: Request, call_next):
-    """Log all HTTP requests."""
+    """Log all HTTP requests with clear formatting."""
     start_time = time.time()
-    
-    logger.info(f"{request.method} {request.url.path} - Started")
-    
+
+    # Only log start for non-polling endpoints to reduce noise
+    is_job_poll = request.url.path.startswith("/job/") and request.method == "GET"
+
+    if not is_job_poll:
+        logger.info(f"➤ {request.method} {request.url.path}")
+
     response = await call_next(request)
-    
+
     process_time = time.time() - start_time
-    logger.info(
-        f"{request.method} {request.url.path} - "
-        f"Completed in {process_time:.3f}s with status {response.status_code}"
-    )
-    
+
+    # Status emoji for quick scanning
+    if response.status_code < 300:
+        status_emoji = "✓"
+    elif response.status_code < 400:
+        status_emoji = "↻"
+    elif response.status_code < 500:
+        status_emoji = "⚠"
+    else:
+        status_emoji = "✗"
+
+    # Only log completion for important endpoints or slow requests
+    if not is_job_poll or process_time > 0.5:
+        logger.info(
+            f"{status_emoji} {request.method} {request.url.path} → {response.status_code} ({process_time:.3f}s)"
+        )
+
     return response
 
 

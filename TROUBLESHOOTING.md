@@ -318,6 +318,30 @@ BookTranslator operates at 95% of AI provider limits for safety:
 2. Verify RQ worker is running
 3. Check worker logs in Railway
 
+#### **"No module named common" Error**
+**Error:** `ModuleNotFoundError: No module named 'common'`
+**Symptoms:** Worker fails immediately, jobs stuck as "processing", then change to "failed"
+
+**Cause:** RQ workers can't import the `common` module because project root isn't in PYTHONPATH
+
+**Fix:** Set PYTHONPATH when starting workers:
+```bash
+# ❌ Wrong (fails)
+cd apps/api
+poetry run rq worker translate --url redis://localhost:6379
+
+# ✅ Correct (works)
+cd apps/api
+PYTHONPATH=/Users/kayvangharbi/PycharmProjects/BookTranslator poetry run rq worker translate --url redis://localhost:6379
+```
+
+**For production (Railway):** This is already handled in the Dockerfile with:
+```dockerfile
+ENV PYTHONPATH=/app
+```
+
+**For local development:** Always include `PYTHONPATH` in your worker command
+
 ## Debugging Commands
 
 ### Railway Debugging

@@ -1,6 +1,6 @@
 # BookTranslator - Current Implementation Status
 
-**Last Updated:** November 2, 2025
+**Last Updated:** November 3, 2025
 
 **🎉 STATUS: LIVE IN PRODUCTION**
 - **Frontend:** https://polytext.site
@@ -37,6 +37,7 @@
   - ✅ Presigned upload URLs working
   - ✅ File storage and retrieval tested
   - ✅ Public download URLs confirmed accessible
+  - ✅ Upload verification with file size checking (Nov 3, 2025)
 - ✅ **Railway PostgreSQL Database:**
   - Production database on Railway
   - External URL for local development
@@ -78,7 +79,15 @@
 - ✅ **Download Experience:**
   - Presigned URLs (5-day expiry)
   - EPUB, PDF, TXT formats
+  - Downloads open in new tabs (Nov 3, 2025)
   - Warning message: "Download these files soon - they will be automatically deleted after 5 days"
+- ✅ **Email Retrieval System:** **NEW - Nov 3, 2025**
+  - `/retrieve` page for users to look up translations by email
+  - Shows all jobs from last 5 days
+  - Download links for completed translations
+  - Status indicators (completed, processing, failed)
+  - Expiry date warnings
+  - Rate limited (10/minute) to prevent abuse
 
 ### **Developer Experience**
 - ✅ **Local Development Setup:**
@@ -107,9 +116,12 @@
 - ✅ Email service configured (Resend)
 - ✅ Completion email template
 - ✅ Failure notification email
-- ⚠️ **NEEDS:** Real Resend API key
-  - Current: `RESEND_API_KEY=fake_resend_key`
-  - **TODO:** Sign up for Resend and add real key
+- ✅ **COMPLETED & TESTED:** Real Resend API key configured
+  - API Key: `re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL`
+  - Domain: `polytext.site` verified (Nov 3, 2025)
+  - Sender: `noreply@polytext.site`
+  - DNS records (SPF, DKIM, MX) configured and verified
+  - ✅ Emails delivering successfully to users
 
 ---
 
@@ -124,16 +136,16 @@
   - **TODO:** Set up PayPal webhook for production
 
 ### **Production Hardening**
-- ❌ **Custom Domain:**
-  - No domain configured yet
-  - Using Railway/Vercel default URLs
-  - **TODO:** Purchase domain (Namecheap/Cloudflare)
-  - **TODO:** Configure DNS for frontend and backend
-  - **TODO:** Update R2 CORS to use real domain
-- ❌ **SSL/HTTPS:**
+- ✅ **Custom Domain:** **COMPLETED - Nov 3, 2025**
+  - Domain: polytext.site (Namecheap)
+  - Frontend: https://polytext.site (Vercel)
+  - Backend: https://api.polytext.site (Railway)
+  - DNS configured and propagated
+  - R2 CORS updated for custom domain
+- ✅ **SSL/HTTPS:**
   - Railway provides SSL automatically
   - Vercel provides SSL automatically
-  - ✅ **READY:** No action needed
+  - ✅ Active on both domains
 - ❌ **Rate Limiting:**
   - Code has rate limiting (60/hour)
   - **TODO:** Test and tune limits
@@ -227,11 +239,11 @@ Deployment:
 ✅ PROVIDER=groq (for testing)
 ✅ GEMINI_API_KEY=AIza... (ready for production)
 ✅ GROQ_API_KEY=gsk_... (testing)
+✅ RESEND_API_KEY=re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL
+✅ EMAIL_FROM=noreply@polytext.site
 ⚠️ PAYPAL_CLIENT_ID=fake_paypal_client_id (NEEDS REAL)
 ⚠️ PAYPAL_CLIENT_SECRET=fake_paypal_secret (NEEDS REAL)
 ⚠️ PAYPAL_WEBHOOK_ID=fake_webhook_id (NEEDS REAL)
-⚠️ RESEND_API_KEY=fake_resend_key (NEEDS REAL)
-⚠️ EMAIL_FROM=test@yourdomain.com (NEEDS REAL)
 ```
 
 **Local Development (.env.local):**
@@ -320,12 +332,15 @@ PROFIT:               ~$1,420/month
    - Solution: `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
 2. ✅ **FIXED:** Progress jumps from 30% to 60% instantly
    - Solution: Batch-level progress tracking implemented
-3. ⚠️ **OPEN:** Database migration for progress_percent not run on Railway
-   - Impact: New column missing on production database
-   - Fix: Run SQL migration file
-4. ⚠️ **OPEN:** Email notifications not working
-   - Impact: Users don't get download links via email
-   - Fix: Add real Resend API key
+3. ✅ **FIXED:** Database migration for progress_percent not run on Railway
+   - Solution: Migration completed Nov 2, 2025
+4. ✅ **FIXED:** Email notifications not working
+   - Solution: Resend configured and verified Nov 3, 2025
+5. ✅ **FIXED:** Users losing download links from emails
+   - Solution: Email retrieval system implemented Nov 3, 2025
+6. ⚠️ **OPEN:** PayPal payments not tested with live account
+   - Impact: Only sandbox payments working
+   - Fix: Complete PayPal business account setup
 
 ---
 
@@ -344,4 +359,4 @@ PROFIT:               ~$1,420/month
 
 ---
 
-**Status:** ✅ **READY FOR TESTING** | ⚠️ **PENDING PAYMENT INTEGRATION**
+**Status:** ✅ **98% COMPLETE - PRODUCTION READY** | ⚠️ **ONLY PAYPAL LIVE REMAINING**

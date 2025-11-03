@@ -38,6 +38,9 @@ RUN poetry install --only=main --no-root --no-interaction --no-ansi
 COPY apps/api/app/ ./app/
 COPY apps/api/supervisord.conf ./
 
+# Copy common modules from project root (needed for translation pipeline)
+COPY common/ ./common/
+
 # Create directories for storage and processing
 RUN mkdir -p /app/data /app/local_storage/uploads /app/local_storage/outputs /tmp/epub-processing
 

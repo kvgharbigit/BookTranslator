@@ -1,423 +1,308 @@
-# 💼 EPUB Translator - Business Setup Guide
+# 💼 BookTranslator - Business Setup Guide
 
-Complete guide for setting up PayPal payments, domain, email, and business operations.
+**Last Updated:** November 3, 2025
+**Status:** ⚠️ PayPal pending, Email complete, Domain complete
 
-## 🎯 Business Setup Checklist
-
-- [ ] PayPal business account and live API credentials
-- [ ] Custom domain with SSL 
-- [ ] Email service for notifications
-- [ ] Analytics and monitoring
-- [ ] Legal and compliance setup
+Quick reference for business operations and service setup.
 
 ---
 
-## 💰 PayPal Integration Setup
+## 🎯 Setup Status Overview
 
-### **Step 1: PayPal Business Account (30 minutes)**
+| Service | Status | Guide | Notes |
+|---------|--------|-------|-------|
+| **PayPal Payments** | ⚠️ Pending | [PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md) | Awaiting live credentials |
+| **Custom Domain** | ✅ Complete | [PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md) | polytext.site |
+| **Email Notifications** | ✅ Complete | [POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md) | Resend configured |
+| **Environment Variables** | ✅ Complete | [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) | All documented |
+| **Error Monitoring** | ❌ Not Started | - | Sentry recommended |
+| **Usage Analytics** | ❌ Not Started | - | PostHog/Plausible |
+| **Legal Pages** | ❌ Not Started | - | Terms, Privacy Policy |
 
-**1.1: Create Business Account**
-1. Go to [PayPal Business](https://www.paypal.com/au/business)
-2. Select "Business Account" 
-3. Complete business registration:
-   - Business type: Individual/Sole Proprietor (easiest)
-   - Business category: Computer/Data Processing Services
-   - Business description: "Online document translation services"
+---
 
-**1.2: Verify Account**
-- Link bank account (required for live payments)
-- Complete identity verification
-- Enable PayPal micropayments (call PayPal support)
+## 💳 Payment Integration
 
-### **Step 2: PayPal Developer Setup (15 minutes)**
+### **PayPal (Primary Payment Processor)**
 
-**2.1: Create Developer App**
-1. Go to [PayPal Developer](https://developer.paypal.com/)
-2. Log in with your business account
-3. Create new app:
-   - App name: "EPUB Translator"
-   - Merchant: Your business account
-   - Features: Accept payments, Express Checkout
+**Current Status:**
+- ✅ Code implementation complete
+- ✅ Sandbox credentials configured
+- ✅ Webhook endpoints ready
+- ✅ Micropayments support configured
+- ⚠️ **Awaiting live business account setup**
 
-**2.2: Get API Credentials**
+**Complete Setup Guide:**
+→ **[PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)**
+
+**Quick Start:**
+1. Create PayPal Business account (30 min)
+2. Request Micropayments pricing: 5% + $0.05 (1-3 days)
+3. Get live API credentials (10 min)
+4. Create webhook (5 min)
+5. Update Railway variables (5 min)
+6. Test live payment (30 min)
+
+**Required Environment Variables:**
 ```bash
-# Live credentials (for production)
-PAYPAL_CLIENT_ID=your_live_client_id
-PAYPAL_CLIENT_SECRET=your_live_client_secret
+PAYPAL_CLIENT_ID=<live_client_id>
+PAYPAL_CLIENT_SECRET=<live_client_secret>
+PAYPAL_WEBHOOK_ID=<webhook_id>
 PAYPAL_ENVIRONMENT=live
-
-# Keep sandbox credentials for testing
-PAYPAL_CLIENT_ID_SANDBOX=your_sandbox_client_id
-PAYPAL_CLIENT_SECRET_SANDBOX=your_sandbox_client_secret
 ```
 
-### **Step 3: Micropayments Optimization**
+**Timeline:** 1-3 business days (account verification)
 
-**3.1: Enable Micropayments Pricing**
-- Call PayPal business support: 1800 073 263 (Australia)
-- Request micropayments pricing: 5% + $0.05 AUD
-- Explain business model: small digital transactions ($0.99-$3.99)
-- Wait 1-2 business days for approval
+---
 
-**3.2: Configure Webhooks**
-1. In PayPal Developer dashboard
-2. Create webhook endpoint: `https://yourdomain.com/api/paypal/webhook`
-3. Select events:
-   - Payment capture completed
-   - Payment capture denied
-   - Payment capture refunded
+## 📧 Email Notifications
 
-### **Step 4: Testing and Validation**
+### **Resend (Email Service Provider)**
 
-**4.1: Test Sandbox Payments**
-```bash
-# Use sandbox credentials in Railway
-PAYPAL_CLIENT_ID=your_sandbox_client_id
-PAYPAL_CLIENT_SECRET=your_sandbox_client_secret  
-PAYPAL_ENVIRONMENT=sandbox
+**Current Status:** ✅ **Fully Configured**
 
-# Test with PayPal sandbox personal account
-# Use test cards: 4032032577059114 (Visa)
+**Setup Completed:**
+- ✅ API Key: `re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL`
+- ✅ Domain: `polytext.site` (DNS configured)
+- ✅ Sender: `noreply@polytext.site`
+- ✅ SPF Record: Configured
+- ✅ DKIM Record: Configured
+- ⏳ Domain Verification: Pending (DNS propagated)
+
+**Email Types:**
+1. **Completion Email** - Sent when translation done
+   - Download links for EPUB, PDF, TXT
+   - 5-day expiry notice
+   - Professional HTML template
+
+2. **Failure Email** - Sent when translation fails
+   - Error details
+   - "Try Again" call-to-action
+   - No charge notice
+
+**Documentation:**
+→ **[POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)** - Complete email workflow
+
+**Test Email:**
+1. Verify domain at https://resend.com/domains
+2. Run translation with your email
+3. Check inbox for notification
+
+---
+
+## 🌐 Domain & DNS
+
+### **Custom Domain Setup**
+
+**Current Status:** ✅ **Complete**
+
+**Configured:**
+- Domain: `polytext.site` (Namecheap)
+- Frontend: `https://polytext.site`
+- API: `https://api.polytext.site`
+- SSL: ✅ Let's Encrypt (auto-renewal)
+
+**DNS Records:**
+| Type | Host | Target | Purpose |
+|------|------|--------|---------|
+| A | @ | 76.76.21.21 | Frontend (Vercel) |
+| CNAME | www | cname.vercel-dns.com | WWW redirect |
+| CNAME | api | n1vq2u2a.up.railway.app | Backend API |
+| TXT | @ | v=spf1 include:amazonses.com... | Email SPF |
+| TXT | resend._domainkey | p=MIGfMA0GCS... | Email DKIM |
+
+**Documentation:**
+→ **[PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md)** - Complete deployment status
+
+---
+
+## 📊 Analytics & Monitoring
+
+### **Error Tracking** ❌ Not Started
+
+**Recommended:** Sentry
+
+**Setup Steps:**
+1. Sign up at https://sentry.io (free tier)
+2. Create Python project
+3. Get DSN key
+4. Add to Railway: `SENTRY_DSN=<dsn>`
+5. Install SDK (already in requirements.txt)
+
+**Cost:** Free tier: 5,000 errors/month
+
+---
+
+### **Usage Analytics** ❌ Not Started
+
+**Options:**
+
+**1. Plausible (Recommended)**
+- Privacy-friendly
+- GDPR compliant
+- Cost: $9/month (10k page views)
+- Setup: Add script tag to frontend
+
+**2. PostHog**
+- Open-source
+- Self-hostable
+- Free tier: 1M events/month
+- Setup: Add JS snippet
+
+**3. Google Analytics**
+- Free
+- Comprehensive
+- Privacy concerns
+- Setup: Add GA4 tag
+
+---
+
+## 📄 Legal & Compliance
+
+### **Required Documents** ❌ Not Started
+
+**1. Terms of Service**
+- User agreement
+- Service limitations
+- Refund policy
+- Usage restrictions
+
+**2. Privacy Policy**
+- Data collection disclosure
+- Cookie usage
+- Third-party services (PayPal, Resend, R2)
+- GDPR compliance (if EU users)
+
+**3. Refund Policy**
+- Refund conditions
+- Processing timeline
+- Contact information
+
+**Tools:**
+- https://www.termsfeed.com/ (free generators)
+- https://www.freeprivacypolicy.com/
+- Or hire lawyer for custom policies
+
+**Timeline:** 2-4 hours (using generators)
+
+---
+
+### **Business Registration** ⚠️ Pending
+
+**For Australia:**
+1. **ABN Registration** (if revenue > $75k/year)
+   - Register at: https://abr.gov.au/
+   - Free for sole traders
+   - Takes 10-15 minutes
+
+2. **GST Registration** (if revenue > $75k/year)
+   - Included with ABN registration
+   - Quarterly GST returns required
+
+3. **Business Name** (optional)
+   - Register if using name other than personal
+   - Cost: ~$40 for 3 years
+
+**Note:** Can operate without ABN initially, but PayPal Business may require it
+
+---
+
+## 💰 Pricing Strategy
+
+### **Current Pricing Model**
+
+**Cost Structure:**
+```
+Translation Price = Provider Cost + Profit Margin
+Minimum Price: $0.50
+Target Profit: $0.40 per translation
 ```
 
-**4.2: Test Live Payments** 
-```bash
-# Switch to live credentials
-PAYPAL_CLIENT_ID=your_live_client_id
-PAYPAL_CLIENT_SECRET=your_live_client_secret
-PAYPAL_ENVIRONMENT=live
+**Price Examples:**
+| File Size | Tokens | Provider Cost | Price | Your Profit |
+|-----------|--------|---------------|-------|-------------|
+| Small (50k words) | ~100k | $0.10 | $0.50 | $0.40 |
+| Medium (100k words) | ~200k | $0.20 | $0.70 | $0.50 |
+| Large (200k words) | ~400k | $0.40 | $1.00 | $0.60 |
 
-# Test with real $0.99 payment (smallest tier)
-# Verify funds appear in PayPal business account
+**PayPal Fees (Micropayments):**
+- Fee: 5% + $0.05
+- Example: $1.00 sale → $0.10 fee → $0.90 net
+
+**Configuration:**
+```bash
+MIN_PRICE_CENTS=50  # $0.50 minimum
+TARGET_PROFIT_CENTS=40  # $0.40 profit
+MICROPAYMENTS_THRESHOLD_CENTS=800  # $8.00 threshold
 ```
 
 ---
 
-## 🌐 Domain and SSL Setup
+## 🔐 Security Checklist
 
-### **Step 1: Domain Purchase (15 minutes)**
+### **Before Going Live:**
 
-**Recommended Domain Registrars:**
-- **Cloudflare**: $8-12/year, best DNS management
-- **Namecheap**: $10-15/year, good support
-- **Google Domains**: $12-15/year, simple setup
+**Credentials:**
+- [ ] All API keys in Railway (not in code)
+- [ ] PayPal webhook signature verification enabled
+- [ ] Resend API key secured
+- [ ] R2 access keys secured
+- [ ] No secrets in git history
 
-**Domain Suggestions:**
-- `epubtranslator.com` (primary choice)
-- `booktranslator.com` 
-- `translatebooks.com`
-- `aiepubtranslator.com`
+**Application:**
+- [ ] HTTPS on all domains
+- [ ] CORS configured correctly
+- [ ] Rate limiting enabled (60/hour)
+- [ ] File size limits enforced (200MB)
+- [ ] Input validation on all endpoints
+- [ ] SQL injection protection (SQLAlchemy ORM)
 
-### **Step 2: DNS Configuration (30 minutes)**
-
-**2.1: Vercel Domain Setup**
-1. In Vercel dashboard → Project → Settings → Domains
-2. Add your domain: `yourdomain.com`
-3. Add www subdomain: `www.yourdomain.com` (optional)
-4. Copy DNS records provided by Vercel
-
-**2.2: Configure DNS Records**
-```bash
-# In your domain registrar's DNS settings:
-
-# For apex domain (yourdomain.com)
-Type: A
-Name: @
-Value: 76.76.21.21 (Vercel's IP)
-
-# For www subdomain  
-Type: CNAME
-Name: www
-Value: cname.vercel-dns.com
-
-# For backend subdomain (optional)
-Type: CNAME  
-Name: api
-Value: your-app.up.railway.app
-```
-
-**2.3: SSL Certificate**
-- Vercel automatically provides SSL certificates
-- Verify HTTPS works: `https://yourdomain.com`
-- Check SSL rating: [SSL Labs Test](https://www.ssllabs.com/ssltest/)
-
-### **Step 3: Update Application URLs**
-
-**3.1: Update Frontend Environment**
-```bash
-# In Vercel → Environment Variables
-NEXT_PUBLIC_API_BASE=https://your-railway-app.up.railway.app
-
-# Or if using api subdomain:
-NEXT_PUBLIC_API_BASE=https://api.yourdomain.com
-```
-
-**3.2: Update CORS Settings**
-```bash
-# In Railway → API service → Environment Variables
-FRONTEND_URL=https://yourdomain.com
-
-# Update CORS configuration in your FastAPI app
-# Allow origins: yourdomain.com, www.yourdomain.com
-```
+**Infrastructure:**
+- [ ] Database backups configured
+- [ ] Redis persistence enabled
+- [ ] Error monitoring active (Sentry)
+- [ ] Logging configured properly
+- [ ] Railway environment = production
 
 ---
 
-## 📧 Email Service Setup
+## 📞 Support Resources
 
-### **Step 1: Resend Account Setup (15 minutes)**
+### **Service Dashboards:**
+- **PayPal:** https://developer.paypal.com/dashboard
+- **Resend:** https://resend.com/domains
+- **Cloudflare R2:** https://dash.cloudflare.com/r2
+- **Railway:** https://railway.app/project/a3dd86d2-5ce5-43f4-885e-ddc63fcb5d14
+- **Vercel:** https://vercel.com/dashboard
+- **Namecheap:** https://ap.www.namecheap.com/
 
-**1.1: Create Account**
-1. Go to [Resend](https://resend.com/)
-2. Sign up with business email
-3. Choose free plan (3,000 emails/month)
-
-**1.2: Domain Verification**
-1. Add your domain in Resend dashboard
-2. Configure DNS records:
-```bash
-# SPF Record
-Type: TXT
-Name: @
-Value: v=spf1 include:_spf.resend.com ~all
-
-# DKIM Record
-Type: TXT  
-Name: resend._domainkey
-Value: [provided by Resend]
-
-# DMARC Record (optional but recommended)
-Type: TXT
-Name: _dmarc
-Value: v=DMARC1; p=quarantine; rua=mailto:admin@yourdomain.com
-```
-
-### **Step 2: Email Templates (30 minutes)**
-
-**2.1: Configure Environment Variables**
-```bash
-# In Railway → Environment Variables
-RESEND_API_KEY=your_resend_api_key
-EMAIL_FROM=noreply@yourdomain.com
-
-# Optional: Custom reply-to
-EMAIL_REPLY_TO=support@yourdomain.com
-```
-
-**2.2: Test Email Delivery**
-```bash
-# Send test email through Resend dashboard
-# Verify delivery to various email providers:
-# - Gmail
-# - Outlook  
-# - Yahoo
-# - Apple Mail
-```
-
-### **Step 3: Email Content Optimization**
-
-**3.1: Professional Email Templates**
-- Welcome/confirmation emails
-- Translation completion notifications
-- Error/failure notifications
-- Marketing emails (optional)
-
-**3.2: Deliverability Best Practices**
-- Use proper SPF/DKIM records
-- Maintain good sender reputation
-- Include unsubscribe links
-- Monitor bounce rates
+### **Documentation:**
+- **PayPal Setup:** [PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)
+- **Email Workflow:** [POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)
+- **Environment Vars:** [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)
+- **Production Status:** [PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md)
+- **All Docs:** [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)
 
 ---
 
-## 📊 Analytics and Monitoring
+## 🎯 Next Steps
 
-### **Step 1: Google Analytics (30 minutes)**
+### **Immediate (This Week):**
+1. ⏳ Verify Resend domain (5 min)
+2. ⏳ Test email notifications (15 min)
+3. ⏳ Start PayPal Business account (30 min)
 
-**1.1: Create Analytics Account**
-1. Go to [Google Analytics](https://analytics.google.com/)
-2. Create new property for your domain
-3. Get tracking ID (G-XXXXXXXXXX)
+### **Short Term (Next Week):**
+4. 🔄 Complete PayPal setup (1-3 business days)
+5. 🔄 Test live payment ($0.50)
+6. 🔄 Add Sentry error tracking (30 min)
 
-**1.2: Install Tracking**
-```bash
-# In Vercel → Environment Variables
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-
-# Add Google Analytics to your Next.js app
-# (assuming you have GA setup in your frontend)
-```
-
-**1.3: Configure Goals**
-- File uploads (engagement)
-- Payment completions (conversions)
-- Download completions (success)
-
-### **Step 2: Business Monitoring (45 minutes)**
-
-**2.1: Revenue Tracking**
-```bash
-# Track key metrics:
-- Daily/monthly revenue
-- Translation volume
-- Average order value
-- Customer acquisition cost
-- Profit margins
-```
-
-**2.2: System Health Monitoring**
-```bash
-# Use Railway built-in monitoring
-- API response times
-- Error rates
-- Queue processing times
-- Database performance
-
-# Optional: External monitoring
-- UptimeRobot (free)
-- Pingdom (paid)
-- DataDog (enterprise)
-```
-
-### **Step 3: Customer Support Setup**
-
-**2.1: Support Channels**
-```bash
-# Minimum viable support:
-- Email: support@yourdomain.com
-- FAQ page on website
-- GitHub issues for technical problems
-
-# Enhanced support (future):
-- Live chat widget
-- Knowledge base
-- Video tutorials
-```
+### **Medium Term (2-4 Weeks):**
+7. 📄 Create legal pages (2-4 hours)
+8. 📊 Add analytics (1 hour)
+9. 🧪 Load testing (2 hours)
+10. 🚀 Remove "Skip Payment" button
 
 ---
 
-## ⚖️ Legal and Compliance
-
-### **Step 1: Terms of Service and Privacy Policy**
-
-**1.1: Required Legal Pages**
-- Terms of Service
-- Privacy Policy  
-- Refund Policy
-- Copyright/DMCA Policy
-
-**1.2: Content Guidelines**
-```bash
-# Key points to include:
-- User warranties about content ownership
-- DRM-free content requirement
-- File retention/deletion policy (7 days)
-- Payment terms and refund conditions
-- Limitation of liability
-```
-
-### **Step 2: Business Registration (Australia)**
-
-**2.1: ABN Registration (if applicable)**
-- Register for Australian Business Number
-- Consider GST registration if revenue >$75k
-- Business insurance (professional indemnity)
-
-**2.2: International Considerations**
-- GDPR compliance (EU users)
-- Data residency requirements
-- Tax obligations for international sales
-
----
-
-## 🚀 Marketing and Launch Setup
-
-### **Step 1: Pre-Launch Preparation**
-
-**1.1: Content Marketing**
-- Blog posts about translation
-- Social media presence
-- SEO optimization
-- Google Business listing
-
-**1.2: Launch Strategy**
-```bash
-# Soft launch (Week 1):
-- Friends and family testing
-- Social media announcement
-- Product Hunt submission
-
-# Public launch (Week 2):
-- Press release
-- Industry blog outreach
-- Paid advertising (Google Ads)
-- Influencer partnerships
-```
-
-### **Step 2: Growth Optimization**
-
-**2.1: Conversion Optimization**
-- A/B testing landing pages
-- Pricing optimization
-- User experience improvements
-- Customer feedback integration
-
-**2.2: Scaling Preparation**
-- Customer service processes
-- Technical scaling plans
-- International expansion
-- Enterprise feature development
-
----
-
-## 📋 Business Launch Checklist
-
-### **Pre-Launch (All Required)**
-- [ ] PayPal live payments working
-- [ ] Custom domain with SSL active
-- [ ] Email notifications functioning
-- [ ] Analytics tracking implemented
-- [ ] Legal pages published
-- [ ] Terms of service accepted by users
-- [ ] Backup and monitoring systems active
-
-### **Launch Day**
-- [ ] All systems tested and verified
-- [ ] Customer support channels ready
-- [ ] Social media accounts active
-- [ ] Launch announcement prepared
-- [ ] Emergency procedures documented
-
-### **Post-Launch (First Week)**
-- [ ] Monitor system performance daily
-- [ ] Respond to customer inquiries promptly
-- [ ] Track key business metrics
-- [ ] Gather user feedback actively
-- [ ] Plan feature improvements
-- [ ] Scale infrastructure as needed
-
----
-
-## 💡 Business Tips
-
-### **Revenue Optimization**
-- Monitor which book types are most popular
-- Adjust pricing based on demand
-- Offer bulk discounts for repeat customers
-- Consider subscription models for heavy users
-
-### **Customer Acquisition**
-- Target students and researchers (high demand)
-- Partner with language learning platforms
-- Reach out to small publishers
-- Build referral programs
-
-### **Operational Excellence**
-- Automate as much as possible
-- Monitor profit margins closely
-- Plan for seasonal demand variations
-- Build customer loyalty programs
-
----
-
-**Questions?** Create an issue on GitHub or email support@yourdomain.com
+**Status:** 🟢 **80% Complete** - Only PayPal and legal pages remaining!

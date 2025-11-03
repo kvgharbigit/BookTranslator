@@ -53,7 +53,7 @@ poetry run uvicorn app.main:app --reload --port 8000
 
 # 3. Start Worker (Terminal 3 - macOS)
 cd apps/api
-OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
+PYTHONPATH=/Users/kayvangharbi/PycharmProjects/BookTranslator OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 
 # 4. Start Frontend (Terminal 4)
 cd apps/web
@@ -138,9 +138,10 @@ Net Profit:       $941.50/month
 
 ## 🐛 **TROUBLESHOOTING**
 
-### **Worker crashes on macOS:**
+### **Worker crashes on macOS or "no module named common" error:**
 ```bash
-OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
+cd apps/api
+PYTHONPATH=/Users/kayvangharbi/PycharmProjects/BookTranslator OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES poetry run rq worker translate --url redis://localhost:6379
 ```
 
 ### **Can't connect to PostgreSQL:**
