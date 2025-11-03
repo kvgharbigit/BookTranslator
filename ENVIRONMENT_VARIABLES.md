@@ -21,7 +21,7 @@ This document lists all environment variables required by the BookTranslator app
 |----------|-------------|----------|---------|
 | `R2_ACCOUNT_ID` | Cloudflare account ID | ✅ Yes | `3537af84a0b983711ac3cfe7599a33f1` |
 | `R2_ACCESS_KEY_ID` | R2 access key | ✅ Yes | `e055fe74e4ce9dafd50d8ed171c31c77` |
-| `R2_SECRET_ACCESS_KEY` | R2 secret key | ✅ Yes | `9e8a048e70d60f032c9d9f17e7445bff0d9260a8...` |
+| `R2_SECRET_ACCESS_KEY` | R2 secret key | ✅ Yes | `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...` (see .env files) |
 | `R2_BUCKET` | Bucket name | ✅ Yes | `epub-translator-production` |
 | `R2_REGION` | R2 region | No | `auto` |
 | `SIGNED_GET_TTL_SECONDS` | Download URL expiry (5 days) | No | `432000` |
@@ -46,9 +46,9 @@ This document lists all environment variables required by the BookTranslator app
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
 | `PROVIDER` | Active provider | No | `groq` / `gemini` |
-| `GEMINI_API_KEY` | Google Gemini API key | ✅ Yes | `AIzaSyB4sFb0GdUQ3MbWcSF68GEdnaVO36Lh5Y8` |
+| `GEMINI_API_KEY` | Google Gemini API key | ✅ Yes | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXX` (see .env files) |
 | `GEMINI_MODEL` | Gemini model name | No | `gemini-2.5-flash-lite` |
-| `GROQ_API_KEY` | Groq API key | ✅ Yes | `gsk_M1j1InCqDpDNdDz3rukZWGdyb3FYcntZ59G7...` |
+| `GROQ_API_KEY` | Groq API key | ✅ Yes | `gsk_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...` (see .env files) |
 | `GROQ_MODEL` | Groq model name | No | `llama-3.1-8b-instant` |
 | `MAX_BATCH_TOKENS` | Max tokens per batch | `6000` | `6000` |
 | `MAX_JOB_TOKENS` | Max tokens per job | `1000000` | `1000000` |
@@ -73,7 +73,7 @@ This document lists all environment variables required by the BookTranslator app
 | Variable | Description | Required | Example |
 |----------|-------------|----------|---------|
 | `EMAIL_PROVIDER` | Email service provider | No | `resend` |
-| `RESEND_API_KEY` | Resend API key | ✅ Yes | `re_gPd9MAH3_6pbxEa3Ag7x67MgB4ojW9WaL` |
+| `RESEND_API_KEY` | Resend API key | ✅ Yes | `re_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` (see .env files) |
 | `EMAIL_FROM` | Sender email address | ✅ Yes | `noreply@polytext.site` |
 
 ### **Security & Rate Limiting**
@@ -158,10 +158,15 @@ python run_api.py
 - ❌ `R2_SECRET_ACCESS_KEY`
 - ❌ Any `DATABASE_URL` with credentials
 
+### **Where to Find Secret Values:**
+- 📁 **Local Development**: Check `apps/api/.env` or `apps/api/.env.local`
+- ☁️ **Production**: Stored in Railway environment variables
+- ⚠️ **This file**: Contains only placeholder examples with XXXXX
+
 ### **Safe to Commit:**
 - ✅ Variable names and descriptions
 - ✅ Default values
-- ✅ Example formats
+- ✅ Example formats with placeholders
 - ✅ Public IDs (R2_ACCOUNT_ID, etc.)
 
 ---
