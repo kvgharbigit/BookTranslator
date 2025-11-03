@@ -114,12 +114,12 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Upload. Translate.
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
           </h2>
-          <p className="text-xl text-neutral-600 mb-4 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-600 mb-6 max-w-2xl mx-auto leading-relaxed">
             No account needed. No subscription. Just upload your EPUB and get it translated to any language.
           </p>
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-semibold mb-8">
@@ -164,11 +164,11 @@ export default function HomePage() {
         <div className="flex flex-col items-center space-y-8">
           {step === 'upload' && (
             <div className="w-full max-w-lg">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+              <div className="text-center mb-8">
+                <h3 className="text-xl font-semibold text-neutral-900 mb-2">
                   Step 1: Upload Your EPUB
                 </h3>
-                <p className="text-neutral-600">
+                <p className="text-neutral-600 leading-relaxed">
                   Select your EPUB file to get an instant price estimate
                 </p>
               </div>
@@ -190,11 +190,11 @@ export default function HomePage() {
 
           {step === 'estimate' && estimate && (
             <div className="w-full max-w-lg">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+              <div className="text-center mb-8">
+                <h3 className="text-xl font-semibold text-neutral-900 mb-2">
                   Step 2: Choose Language & Pay
                 </h3>
-                <p className="text-neutral-600">
+                <p className="text-neutral-600 leading-relaxed">
                   Select your target language and proceed with payment
                 </p>
               </div>
@@ -222,79 +222,79 @@ export default function HomePage() {
             <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <BookOpen className="w-7 h-7 text-white" />
             </div>
-            <h4 className="font-semibold text-neutral-900 mb-2">Multiple Formats</h4>
-            <p className="text-sm text-neutral-600">
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Multiple Formats</h4>
+            <p className="text-sm text-neutral-600 leading-relaxed">
               Get your translated book in EPUB, PDF, and TXT formats
             </p>
           </div>
-          
+
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
             <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h4 className="font-semibold text-neutral-900 mb-2">Fast & Simple</h4>
-            <p className="text-sm text-neutral-600">
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Fast & Simple</h4>
+            <p className="text-sm text-neutral-600 leading-relaxed">
               Upload your file and get professional translation in minutes
             </p>
           </div>
-          
+
           <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1">
             <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Shield className="w-7 h-7 text-white" />
             </div>
-            <h4 className="font-semibold text-neutral-900 mb-2">No Strings Attached</h4>
-            <p className="text-sm text-neutral-600">
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">No Strings Attached</h4>
+            <p className="text-sm text-neutral-600 leading-relaxed">
               No account, no subscription, no personal data required
             </p>
           </div>
         </div>
 
         {/* Pricing Info */}
-        <div className="mt-16 bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-neutral-200 shadow-sm">
+        <div className="mt-20 bg-white/80 backdrop-blur-sm rounded-xl p-8 border-2 border-neutral-200 shadow-sm">
           <div className="text-center">
-            <div className="text-center mb-6">
+            <div className="text-center mb-8">
               <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 rounded-full text-sm font-medium mb-3">
                 🏆 Best Value on the Market
               </div>
-              <h3 className="text-2xl font-bold text-neutral-900 mb-3">
+              <h3 className="text-2xl font-bold text-neutral-900 mb-4">
                 Fair, Transparent Pricing
               </h3>
-              <p className="text-neutral-600 mb-4">
+              <p className="text-neutral-600 mb-4 leading-relaxed">
                 Created by language lovers who understand the real cost of quality translation.
               </p>
               <p className="text-sm text-green-700 font-medium">
                 Pay once, get your translation. No hidden fees, no subscriptions, no surprises.
               </p>
             </div>
-            
+
             {/* Pricing Tiers */}
-            <div className="flex flex-wrap justify-center gap-4 lg:gap-6 mb-12">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-blue-600 mb-2">$0.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🧾 Short Book</div>
                 <div className="text-xs text-neutral-600 mb-2">0-40K words</div>
                 <div className="text-xs text-blue-700 italic">"Animal Farm" (30K)</div>
               </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative w-full sm:w-64">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 relative">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">POPULAR</div>
                 <div className="text-3xl font-bold text-green-600 mb-2">$1.49</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📘 Standard Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">40K-120K words</div>
                 <div className="text-xs text-green-700 italic">"Great Gatsby" (47K)</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-purple-600 mb-2">$2.19</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📕 Long Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">120K-200K words</div>
                 <div className="text-xs text-purple-700 italic">"Pride & Prejudice" (122K)</div>
               </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-orange-600 mb-2">$2.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">🏛️ Epic Novel</div>
                 <div className="text-xs text-neutral-600 mb-2">200K-350K words</div>
                 <div className="text-xs text-orange-700 italic">"The Stand" (240K)</div>
               </div>
-              <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-64">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-2xl p-4 text-center hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                 <div className="text-3xl font-bold text-red-600 mb-2">$3.99</div>
                 <div className="text-sm font-semibold text-neutral-900 mb-1">📚 Grand Epic</div>
                 <div className="text-xs text-neutral-600 mb-2">350K-750K words</div>
@@ -408,21 +408,21 @@ export default function HomePage() {
                         <span className="text-neutral-600">BookTranslator.ai:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">$5.99</div>
-                          <div className="text-red-600">4x more</div>
+                          <div className="text-orange-600 font-semibold">4x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$5.00</div>
-                          <div className="text-red-600">3.4x more</div>
+                          <div className="text-orange-600 font-semibold">3.4x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
                         <span className="text-neutral-600">NovelTranslator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$2.99</div>
-                          <div className="text-red-600">2x more</div>
+                          <div className="text-orange-600 font-semibold">2x more</div>
                         </div>
                       </div>
                     </div>
@@ -452,7 +452,7 @@ export default function HomePage() {
                         <span className="text-neutral-600">O.Translator:</span>
                         <div className="text-right">
                           <div className="font-semibold text-neutral-800">~$7.50</div>
-                          <div className="text-red-600">3.4x more</div>
+                          <div className="text-orange-600 font-semibold">3.4x more</div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-neutral-50 rounded">
