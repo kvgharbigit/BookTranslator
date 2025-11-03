@@ -11,7 +11,8 @@ class HTMLSegmenter:
     
     def __init__(self):
         # Tags that should not be translated (preserve content)
-        self.no_translate_tags = {'pre', 'code', 'table', 'script', 'style', 'svg', 'image', 'img'}
+        # Note: removed 'table' to allow TOC and other table content to be translated
+        self.no_translate_tags = {'pre', 'code', 'script', 'style', 'svg', 'image', 'img'}
         
         # Block-level tags that define segment boundaries
         self.block_tags = {
@@ -179,7 +180,7 @@ class HTMLSegmenter:
     def _apply_chapter_title_translations(self, html_content: str) -> str:
         """Apply chapter title translations to fix TOC entries that AI didn't translate."""
         
-        # Title translations map (using regular apostrophes U+0027)
+        # Title translations map (using smart quotes U+2019 as found in segmented text)
         title_translations = {
             "Mowgli's Brothers": "Los hermanos de Mowgli",
             "Hunting-Song of the Seeonee Pack": "Canción de caza de la manada Seeonee",
@@ -199,6 +200,12 @@ class HTMLSegmenter:
             "Parade Song of the Camp Animals": "Canción de desfile de los animales del campamento",
             "Contents": "Contenidos",
             "Table of Contents": "Tabla de contenidos",
+            # Regular apostrophe variants (for HTML post-processing)
+            "Mowgli's Brothers": "Los hermanos de Mowgli",
+            "Her Majesty's Servants": "Los servidores de Su Majestad",
+            "Kaa's Hunting": "La caza de Kaa",
+            "Mowgli's Song": "La canción de Mowgli",
+            "Darzee's Chant": "El canto de Darzee",
             # Case variants
             "Mowgli's brothers": "Los hermanos de Mowgli",
             "Her Majesty's servants": "Los servidores de Su Majestad",
