@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BookOpen, Zap, Globe, Shield, Sparkles, ArrowRight } from 'lucide-react';
 import FileDrop from '@/components/FileDrop';
 import PriceBox from '@/components/PriceBox';
+import PreviewModal from '@/components/PreviewModal';
 import { api } from '@/lib/api';
 
 type Step = 'upload' | 'estimate' | 'processing';
@@ -14,6 +15,9 @@ export default function HomePage() {
   const [estimate, setEstimate] = useState<{ tokens_est: number; price_cents: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewLang, setPreviewLang] = useState<string>('es');
+  const [previewLangName, setPreviewLangName] = useState<string>('Spanish');
 
   const handleFileSelected = async (file: File) => {
     setIsLoading(true);
@@ -85,6 +89,22 @@ export default function HomePage() {
     setUploadKey('');
     setEstimate(null);
     setError('');
+    setShowPreview(false);
+  };
+
+  const handlePreview = (targetLang: string, targetLangName: string) => {
+    setPreviewLang(targetLang);
+    setPreviewLangName(targetLangName);
+    setShowPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setShowPreview(false);
+  };
+
+  const handlePreviewContinue = () => {
+    setShowPreview(false);
+    // User can now proceed with payment with confidence in the translation quality
   };
 
   return (
@@ -203,6 +223,7 @@ export default function HomePage() {
                 priceCents={estimate.price_cents}
                 onPayment={handlePayment}
                 onSkipPayment={handleSkipPayment}
+                onPreview={handlePreview}
               />
               <div className="text-center mt-4">
                 <button
@@ -602,6 +623,17 @@ export default function HomePage() {
           <p className="text-xs text-neutral-500 mt-1">Files automatically deleted after 7 days for your privacy</p>
         </div>
       </footer>
+
+      {/* Preview Modal */}
+      {showPreview && uploadKey && (
+        <PreviewModal
+          epubKey={uploadKey}
+          targetLang={previewLang}
+          targetLangName={previewLangName}
+          onContinue={handlePreviewContinue}
+          onClose={handlePreviewClose}
+        />
+      )}
     </div>
   );
 }

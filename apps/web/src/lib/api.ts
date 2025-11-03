@@ -135,4 +135,25 @@ export const api = {
   async getJobStatus(jobId: string): Promise<JobStatusResponse> {
     return apiCall(`/job/${jobId}`);
   },
+
+  // Generate preview translation
+  async generatePreview(
+    key: string,
+    targetLang: string,
+    maxWords: number = 1000
+  ): Promise<{
+    preview_html: string;
+    word_count: number;
+    provider: string;
+    model: string;
+  }> {
+    return apiCall('/preview', {
+      method: 'POST',
+      body: JSON.stringify({
+        key,
+        target_lang: targetLang,
+        max_words: maxWords,
+      }),
+    });
+  },
 };

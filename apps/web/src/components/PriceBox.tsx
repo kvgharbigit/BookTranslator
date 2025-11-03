@@ -2,40 +2,18 @@
 
 import { useState } from 'react';
 import { CreditCard, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { LANGUAGES } from '@/lib/languages';
 
 interface PriceBoxProps {
   tokensEst: number;
   priceCents: number;
   onPayment: (email: string, targetLang: string) => Promise<void>;
   onSkipPayment?: (email: string, targetLang: string) => Promise<void>;
+  onPreview?: (targetLang: string, targetLangName: string) => void;
   disabled?: boolean;
 }
 
-// Language options for translation
-const LANGUAGES = [
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'zh', name: 'Chinese' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'ar', name: 'Arabic' },
-  { code: 'hi', name: 'Hindi' },
-  { code: 'nl', name: 'Dutch' },
-  { code: 'sv', name: 'Swedish' },
-  { code: 'da', name: 'Danish' },
-  { code: 'no', name: 'Norwegian' },
-  { code: 'fi', name: 'Finnish' },
-  { code: 'pl', name: 'Polish' },
-  { code: 'tr', name: 'Turkish' },
-  { code: 'he', name: 'Hebrew' },
-  { code: 'th', name: 'Thai' },
-];
-
-export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayment, disabled = false }: PriceBoxProps) {
+export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayment, onPreview, disabled = false }: PriceBoxProps) {
   const [email, setEmail] = useState('');
   const [targetLang, setTargetLang] = useState('es');
   const [hasRights, setHasRights] = useState(false);
@@ -84,6 +62,18 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayme
       alert('Failed to start translation. Please try again.');
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handlePreview = () => {
+    if (!targetLang) {
+      alert('Please select a target language.');
+      return;
+    }
+
+    const langName = LANGUAGES.find(lang => lang.code === targetLang)?.name || targetLang;
+    if (onPreview) {
+      onPreview(targetLang, langName);
     }
   };
 
@@ -222,6 +212,18 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayme
             Optional but recommended
           </p>
         </div>
+
+        {/* Preview Button */}
+        {onPreview && (
+          <button
+            onClick={handlePreview}
+            disabled={disabled || isProcessing || !targetLang}
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>Preview Translation (Free)</span>
+          </button>
+        )}
 
         {/* Rights Confirmation */}
         <div className="flex items-start space-x-2">
