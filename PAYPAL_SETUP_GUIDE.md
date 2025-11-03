@@ -3,6 +3,12 @@
 **Date:** November 2, 2025
 **Status:** ⚠️ Using sandbox credentials - needs live setup
 
+**💡 IMPORTANT:** You're using **PayPal Micropayments** pricing (5% + $0.05) which is perfect for small transactions!
+- Regular PayPal: 6.4% + $0.30 (bad for small amounts)
+- **Micropayments: 5% + $0.05** (great for $0.50-$3 transactions) ✅
+
+**You must specifically request Micropayments pricing when setting up your account!**
+
 ---
 
 ## 📋 Prerequisites
@@ -218,25 +224,45 @@ Job <job_id> marked as paid
 
 ---
 
-## 💰 PayPal Fee Structure
+## 💰 PayPal Micropayments Fee Structure
 
-### **Australian PayPal Micropayments Fees**
+### **PayPal Micropayments (What You're Using) ✅**
 
-For transactions **under $10 AUD** (our use case):
-- **Fee:** 6.4% + $0.30 AUD
+For transactions **under $10 AUD** - you need to apply for Micropayments pricing:
+- **Fee:** **5% + $0.05 AUD** (much better for small amounts!)
 
-### **Examples:**
+### **Fee Comparison:**
 
-| Translation Price | PayPal Fee | You Receive |
-|-------------------|------------|-------------|
-| $0.50 | $0.33 (66%) | $0.17 |
-| $0.99 | $0.36 (36%) | $0.63 |
-| $1.49 | $0.40 (27%) | $1.09 |
-| $2.99 | $0.49 (16%) | $2.50 |
+| Translation Price | Micropayments Fee (5% + $0.05) | You Receive | vs Regular (6.4% + $0.30) |
+|-------------------|--------------------------------|-------------|---------------------------|
+| $0.50 | $0.08 (16%) | **$0.42** ✅ | $0.33 (you'd get $0.17) |
+| $0.99 | $0.10 (10%) | **$0.89** ✅ | $0.36 (you'd get $0.63) |
+| $1.49 | $0.12 (8%) | **$1.37** ✅ | $0.40 (you'd get $1.09) |
+| $2.99 | $0.20 (7%) | **$2.79** ✅ | $0.49 (you'd get $2.50) |
 
-**Note:** For small transactions like $0.50, PayPal takes a large percentage. Consider:
-- Minimum price of $0.99 or $1.49
-- Or use different payment processor for small amounts
+**Micropayments is MUCH better for your use case! You keep 84-93% instead of 34-84%**
+
+### **How to Apply for Micropayments Pricing:**
+
+**IMPORTANT:** You must specifically request this when setting up your account.
+
+1. During PayPal Business account setup, or after account is created
+2. Contact PayPal Customer Support: 1800 073 263
+3. Say: **"I need to enable Micropayments pricing for my account"**
+4. Explain: "Most transactions will be under $3, average around $1-2"
+5. They'll review and activate it (usually 1-2 business days)
+
+**Or via email:**
+1. Log into PayPal Business account
+2. Go to Help → Contact Us
+3. Select "Account Settings" → "Micropayments"
+4. Request activation
+
+**Your code is already configured for Micropayments!** See `apps/api/app/config.py`:
+```python
+micropayments_threshold_cents: int = Field(default=800)  # $8.00
+```
+Transactions under $8 will use PayPal Micropayments pricing.
 
 ---
 
