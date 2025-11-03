@@ -6,9 +6,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import get_db
 from app.storage import get_storage as get_storage_instance
-from app.providers.base import TranslationProvider
-from app.providers.gemini import GeminiFlashProvider
-from app.providers.groq import GroqLlamaProvider
+from app.providers.factory import get_provider  # Import from centralized factory
 
 # Payment processing is handled by PayPal
 
@@ -24,20 +22,6 @@ def get_queue():
     """Get RQ queue instance."""
     redis_client = get_redis_client()
     return Queue(settings.rq_queues, connection=redis_client)
-
-
-def get_provider(name: str) -> TranslationProvider:
-    """Get translation provider instance."""
-    if name == "groq":
-        return GroqLlamaProvider(
-            api_key=settings.groq_api_key,
-            model=settings.groq_model
-        )
-    else:  # Default to Gemini
-        return GeminiFlashProvider(
-            api_key=settings.gemini_api_key,
-            model=settings.gemini_model
-        )
 
 
 def get_storage():

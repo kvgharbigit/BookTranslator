@@ -14,7 +14,7 @@ from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
 from app.pipeline.translate import TranslationOrchestrator
 from app.storage import get_storage
-from app.deps import get_provider
+from app.providers.factory import get_provider
 from app.logger import get_logger
 
 logger = get_logger(__name__)

@@ -24,7 +24,7 @@ from app.config import settings
 from app.db import SessionLocal
 from app.models import Job
 from app.storage import get_storage
-from app.deps import get_provider
+from app.providers.factory import get_provider
 from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
 from app.pipeline.translate import TranslationOrchestrator
