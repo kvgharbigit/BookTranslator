@@ -62,30 +62,32 @@ async def generate_preview(
             f"max_words={data.max_words}"
         )
 
-        # Use Groq Llama 3.1 8B for fast, cheap previews
-        provider = "groq"
-        model = "llama-3.1-8b-instant"
-
-        # Generate preview
+        # Generate preview (Groq primary, Gemini fallback)
         preview_service = PreviewService()
-        preview_html, actual_words = await preview_service.generate_preview(
+        preview_html, actual_words, provider_used = await preview_service.generate_preview(
             r2_key=data.key,
             target_lang=data.target_lang,
-            max_words=data.max_words,
-            provider=provider,
-            model=model
+            max_words=data.max_words
         )
 
+        # Parse provider name and model from provider_used string (e.g., "groq" or "gemini")
+        provider_name = provider_used.lower()
+        if "groq" in provider_name:
+            model_name = "llama-3.1-8b-instant"
+        elif "gemini" in provider_name:
+            model_name = "gemini-2.5-flash-lite"
+        else:
+            model_name = "unknown"
+
         logger.info(
-            f"Preview generated successfully: {actual_words} words, "
-            f"provider={provider}, model={model}"
+            f"✅ Preview generated successfully: {actual_words} words using {provider_used}"
         )
 
         return PreviewResponse(
             preview_html=preview_html,
             word_count=actual_words,
-            provider=provider,
-            model=model
+            provider=provider_name,
+            model=model_name
         )
 
     except Exception as e:

@@ -14,8 +14,7 @@ from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
 from app.pipeline.translate import TranslationOrchestrator
 from app.storage import get_storage
-from app.providers.groq import GroqLlamaProvider
-from app.config import settings
+from app.deps import get_provider
 from app.logger import get_logger
 
 logger = get_logger(__name__)
@@ -58,9 +57,13 @@ class PreviewService:
         """
         logger.info(f"Generating preview for {r2_key}, lang={target_lang}, max_words={max_words}")
 
-        # Use Groq Llama 3.1 8B by default for fast, cheap previews
-        if provider == "groq" and model is None:
-            model = "llama-3.1-8b-instant"
+        # Use Gemini Flash as primary (fast and reliable), Groq as fallback
+        # Default models for each provider
+        if model is None:
+            if provider == "groq":
+                model = "llama-3.1-8b-instant"
+            else:
+                model = "gemini-2.0-flash-exp"  # Use Gemini by default
 
         # Download EPUB from R2 to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as tmp:
@@ -84,20 +87,22 @@ class PreviewService:
             segments, segment_maps = self.segmenter.segment_documents(limited_docs)
             logger.info(f"Extracted {len(segments)} segments")
 
-            # Get translation provider (use Groq with specific model for preview)
-            translation_provider = GroqLlamaProvider(
-                api_key=settings.groq_api_key,
-                model=model
-            )
+            # Setup providers: Groq primary (cheap), Gemini fallback (reliable)
+            # Same pattern as worker.py lines 108-131
+            primary_provider = get_provider("groq")
+            fallback_provider = get_provider("gemini")
 
             # Translate segments
-            logger.info(f"Translating {len(segments)} segments with {provider}/{model}")
+            logger.info(f"Translating {len(segments)} segments with Groq (primary) + Gemini (fallback)")
             orchestrator = TranslationOrchestrator()
             translated_segments, tokens_used, provider_used = await orchestrator.translate_segments(
                 segments=segments,
                 target_lang=target_lang,
-                primary_provider=translation_provider
+                primary_provider=primary_provider,
+                fallback_provider=fallback_provider
             )
+
+            logger.info(f"✅ Translation completed using {provider_used}")
 
             # Reconstruct HTML with translations
             logger.info("Reconstructing HTML with translations")
@@ -108,8 +113,8 @@ class PreviewService:
             # Format as single HTML document for preview display
             preview_html = self._format_preview_html(translated_docs)
 
-            logger.info(f"Preview generated successfully: {actual_words} words")
-            return preview_html, actual_words
+            logger.info(f"Preview generated successfully: {actual_words} words using {provider_used}")
+            return preview_html, actual_words, provider_used
 
         except Exception as e:
             logger.error(f"Preview generation failed: {e}", exc_info=True)

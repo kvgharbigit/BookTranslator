@@ -40,6 +40,7 @@ export default function PreviewModal({
       setError(null);
 
       const data = await api.generatePreview(epubKey, targetLang, 1000);
+      console.log(`✅ Preview generated using: ${data.provider}/${data.model}`);
       setPreview(data);
     } catch (err) {
       console.error('Preview generation error:', err);
