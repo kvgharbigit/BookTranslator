@@ -71,16 +71,28 @@ class R2Storage:
     def upload_file(self, local_path: str, key: str, content_type: str = "application/octet-stream") -> bool:
         """Upload file to R2."""
         try:
+            # Get local file size for comparison
+            import os
+            local_size = os.path.getsize(local_path)
+
+            # Upload to R2
             self.client.upload_file(
                 local_path,
                 self.bucket,
                 key,
                 ExtraArgs={"ContentType": content_type}
             )
-            logger.info(f"Uploaded file to R2: {local_path} -> {key}")
+
+            # Verify upload by checking remote file size
+            remote_size = self.get_object_size(key)
+            if remote_size and remote_size == local_size:
+                logger.info(f"✅ Successfully uploaded and verified: {key} ({local_size} bytes) to bucket '{self.bucket}'")
+            else:
+                logger.warning(f"⚠️ Upload completed but size mismatch: {key} (local: {local_size}, remote: {remote_size})")
+
             return True
         except ClientError as e:
-            logger.error(f"Failed to upload file to R2: {e}")
+            logger.error(f"❌ Failed to upload file to R2: {key} - {e}")
             return False
     
     def download_file(self, key: str, local_path: str) -> bool:

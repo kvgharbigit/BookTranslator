@@ -129,7 +129,8 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
           {job.download_urls.epub && (
             <a
               href={job.download_urls.epub}
-              download
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group"
             >
               <BookOpen className="w-6 h-6 text-blue-600" />
@@ -145,7 +146,8 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
           {job.download_urls.pdf && (
             <a
               href={job.download_urls.pdf}
-              download
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center space-x-3 p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors group"
             >
               <Image className="w-6 h-6 text-purple-600" />
@@ -161,7 +163,8 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
           {job.download_urls.txt && (
             <a
               href={job.download_urls.txt}
-              download
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors group"
             >
               <FileText className="w-6 h-6 text-green-600" />

@@ -92,14 +92,22 @@ export default function HomePage() {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl shadow-sm">
-              <BookOpen className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl shadow-sm">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</h1>
+                <p className="text-sm text-neutral-600">Made by polyglots, for polyglots</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</h1>
-              <p className="text-sm text-neutral-600">Made by polyglots, for polyglots</p>
-            </div>
+            <a
+              href="/retrieve"
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Retrieve Downloads →
+            </a>
           </div>
         </div>
       </header>

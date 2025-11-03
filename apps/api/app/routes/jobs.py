@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List
 from fastapi import APIRouter, HTTPException, Request, Depends
 from sqlalchemy.orm import Session
 from slowapi import Limiter
@@ -83,5 +84,78 @@ async def get_job_status(
             pass  # The limiter already handles this
     
     logger.info(f"Retrieved status for job {job_id}: {job.status}")
-    
+
     return JobStatusResponse(**response_data)
+
+
+@router.get("/jobs-by-email/{email}", response_model=List[JobStatusResponse])
+@limiter.limit("10/minute")  # Prevent email scraping/abuse
+async def get_jobs_by_email(
+    email: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    storage = Depends(get_storage)
+):
+    """Get all translation jobs for an email address (last 5 days only)."""
+
+    # Only return jobs from last 5 days (matching file retention period)
+    cutoff_date = datetime.utcnow() - timedelta(days=5)
+
+    jobs = db.query(Job).filter(
+        Job.email == email,
+        Job.created_at >= cutoff_date
+    ).order_by(Job.created_at.desc()).all()
+
+    if not jobs:
+        logger.info(f"No jobs found for email: {email}")
+        return []
+
+    logger.info(f"Found {len(jobs)} jobs for email: {email}")
+
+    # Build response for each job
+    responses = []
+    for job in jobs:
+        response_data = {
+            "id": job.id,
+            "status": job.status,
+            "progress_step": job.progress_step,
+            "progress_percent": job.progress_percent,
+            "created_at": job.created_at,
+            "download_urls": None,
+            "expires_at": None,
+            "error": job.error
+        }
+
+        # Add download URLs if job is complete
+        if job.status == "done":
+            download_urls = {}
+            expires_at = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
+
+            try:
+                # Generate presigned URLs for each available format
+                if job.output_epub_key:
+                    download_urls["epub"] = storage.generate_presigned_download_url(
+                        job.output_epub_key
+                    )
+
+                if job.output_pdf_key:
+                    download_urls["pdf"] = storage.generate_presigned_download_url(
+                        job.output_pdf_key
+                    )
+
+                if job.output_txt_key:
+                    download_urls["txt"] = storage.generate_presigned_download_url(
+                        job.output_txt_key
+                    )
+
+                if download_urls:
+                    response_data["download_urls"] = download_urls
+                    response_data["expires_at"] = expires_at
+
+            except Exception as e:
+                logger.error(f"Failed to generate download URLs for job {job.id}: {e}")
+                # Don't fail the request, just log the error
+
+        responses.append(JobStatusResponse(**response_data))
+
+    return responses
