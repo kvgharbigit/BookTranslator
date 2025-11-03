@@ -41,6 +41,9 @@ COPY apps/api/supervisord.conf ./
 # Copy common modules from project root (needed for translation pipeline)
 COPY common/ ./common/
 
+# Copy PDF generator from project root (needed for enhanced PDF output)
+COPY epub_to_pdf_with_images.py ./
+
 # Create directories for storage and processing
 RUN mkdir -p /app/data /app/local_storage/uploads /app/local_storage/outputs /tmp/epub-processing
 
