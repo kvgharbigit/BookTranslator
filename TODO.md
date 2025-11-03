@@ -11,27 +11,34 @@
 - [x] Verify 5-day expiry notice shows
 - **Result:** 7/7 tests passed, R2 fully functional with public download URLs
 
-### 2. Run Database Migration on Railway
-```bash
-# Add progress_percent column to production database
-railway run --service booktranslator-api psql $DATABASE_URL -f apps/api/add_progress_percent.sql
-```
-- [ ] Run migration command
-- [ ] Verify column exists in Railway database
-- [ ] Test progress tracking on production
+### 2. Run Database Migration on Railway ✅ **COMPLETED**
+- [x] Run migration command via `railway connect postgres`
+- [x] Verify column exists in Railway database
+- [x] Test progress tracking on production
+- **Result:** Migration completed Nov 2, 2025 - `progress_percent` column active
 
-### 3. Deploy to Railway
-- [ ] Remove `STORAGE_TYPE=local` from Railway variables (if exists)
-- [ ] Verify all R2 variables are set
-- [ ] Trigger new deployment: `railway up` or via dashboard
-- [ ] Check Railway logs for R2 connection
-- [ ] Test upload/download on production URL
+### 3. Deploy to Railway ✅ **COMPLETED**
+- [x] Configure railway.json to use Dockerfile builder
+- [x] Verify all R2 variables are set
+- [x] Auto-deploy configured on git push
+- [x] Check Railway logs for R2 connection
+- [x] Test upload/download on production URL
+- **Result:** Live at https://api.polytext.site with R2 storage
+
+### 4. Custom Domain Setup ✅ **COMPLETED**
+- [x] Add custom domain to Railway: api.polytext.site
+- [x] Configure DNS records in Namecheap
+- [x] Add custom domain to Vercel: polytext.site, www.polytext.site
+- [x] Update R2 CORS policy for custom domain
+- [x] Update backend CORS allowed origins
+- [x] Wait for SSL certificate provisioning
+- **Result:** Live at https://polytext.site and https://api.polytext.site
 
 ---
 
 ## 🎯 **HIGH PRIORITY (Next Week)**
 
-### 4. PayPal Live Integration
+### 5. PayPal Live Integration
 - [ ] Create Australian PayPal business account
 - [ ] Generate live API credentials (Client ID, Secret)
 - [ ] Get PayPal Webhook ID

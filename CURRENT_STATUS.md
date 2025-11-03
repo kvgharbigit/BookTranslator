@@ -2,6 +2,11 @@
 
 **Last Updated:** November 2, 2025
 
+**🎉 STATUS: LIVE IN PRODUCTION**
+- **Frontend:** https://polytext.site
+- **API:** https://api.polytext.site
+- **Deployment:** Fully automated via git push
+
 ---
 
 ## ✅ **COMPLETED FEATURES**
@@ -40,9 +45,12 @@
   - Local Redis for development
   - Railway Redis for production
   - Handles async translation jobs
-- ✅ **Deployment:**
-  - Backend: Railway (FastAPI)
-  - Frontend: Vercel (Next.js 14)
+- ✅ **Deployment:** **LIVE IN PRODUCTION**
+  - Backend: Railway (https://api.polytext.site)
+  - Frontend: Vercel (https://polytext.site)
+  - Custom Domain: polytext.site with SSL
+  - Auto-deploy on git push to main branch
+  - Database migration completed (progress_percent column)
 
 ### **Payment & Pricing**
 - ✅ **Dynamic Pricing Engine:**
@@ -90,10 +98,10 @@
 
 ### **Database Schema**
 - ✅ Job model with progress tracking
-- ⚠️ **NEEDS:** Migration to add `progress_percent` column on Railway
-  - SQL migration file created: `apps/api/add_progress_percent.sql`
-  - Works locally with new jobs
-  - **TODO:** Run migration on Railway PostgreSQL
+- ✅ **COMPLETED:** Database migration on Railway
+  - SQL migration file: `apps/api/add_progress_percent.sql`
+  - Migration executed on Railway PostgreSQL (Nov 2, 2025)
+  - `progress_percent` column active in production
 
 ### **Email Notifications**
 - ✅ Email service configured (Resend)

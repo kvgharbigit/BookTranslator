@@ -1,8 +1,11 @@
 # 📚 BookTranslator - AI-Powered EPUB Translation Service
 
-> Transform EPUBs into any language with AI - **Testing Ready** with Cloudflare R2 storage
+> Transform EPUBs into any language with AI - **🎉 LIVE IN PRODUCTION**
 
-[![Status](https://img.shields.io/badge/Status-Testing%20Ready-yellow)](./CURRENT_STATUS.md) [![R2](https://img.shields.io/badge/Storage-Cloudflare%20R2-orange)](.) [![License](https://img.shields.io/badge/License-MIT-blue)](.)
+[![Status](https://img.shields.io/badge/Status-Production%20Live-brightgreen)](https://polytext.site) [![R2](https://img.shields.io/badge/Storage-Cloudflare%20R2-orange)](.) [![License](https://img.shields.io/badge/License-MIT-blue)](.)
+
+**🌐 Live at:** [https://polytext.site](https://polytext.site)
+**🔌 API:** [https://api.polytext.site](https://api.polytext.site)
 
 ## 🚀 Quick Start
 
