@@ -14,7 +14,8 @@ from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
 from app.pipeline.translate import TranslationOrchestrator
 from app.storage import get_storage
-from app.deps import get_provider
+from app.providers.groq import GroqLlamaProvider
+from app.config import settings
 from app.logger import get_logger
 
 logger = get_logger(__name__)
@@ -83,8 +84,11 @@ class PreviewService:
             segments, segment_maps = self.segmenter.segment_documents(limited_docs)
             logger.info(f"Extracted {len(segments)} segments")
 
-            # Get translation provider
-            translation_provider = get_provider(provider, model)
+            # Get translation provider (use Groq with specific model for preview)
+            translation_provider = GroqLlamaProvider(
+                api_key=settings.groq_api_key,
+                model=model
+            )
 
             # Translate segments
             logger.info(f"Translating {len(segments)} segments with {provider}/{model}")
