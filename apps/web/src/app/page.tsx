@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { BookOpen, Zap, Globe, Shield, Sparkles, ArrowRight } from 'lucide-react';
 import FileDrop from '@/components/FileDrop';
 import PriceBox from '@/components/PriceBox';
-import PreviewModal from '@/components/PreviewModal';
+import PreviewSection from '@/components/PreviewSection';
 import { api } from '@/lib/api';
+import { LANGUAGES } from '@/lib/languages';
 
 type Step = 'upload' | 'estimate' | 'processing';
 
@@ -15,7 +16,6 @@ export default function HomePage() {
   const [estimate, setEstimate] = useState<{ tokens_est: number; price_cents: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const [showPreview, setShowPreview] = useState(false);
   const [previewLang, setPreviewLang] = useState<string>('es');
   const [previewLangName, setPreviewLangName] = useState<string>('Spanish');
 
@@ -36,9 +36,6 @@ export default function HomePage() {
       setUploadKey(key);
       setEstimate(estimateResponse);
       setStep('estimate');
-
-      // Step 4: Automatically show preview
-      setShowPreview(true);
       
     } catch (err) {
       console.error('Upload failed:', err);
@@ -92,22 +89,8 @@ export default function HomePage() {
     setUploadKey('');
     setEstimate(null);
     setError('');
-    setShowPreview(false);
-  };
-
-  const handlePreview = (targetLang: string, targetLangName: string) => {
-    setPreviewLang(targetLang);
-    setPreviewLangName(targetLangName);
-    setShowPreview(true);
-  };
-
-  const handlePreviewClose = () => {
-    setShowPreview(false);
-  };
-
-  const handlePreviewContinue = () => {
-    setShowPreview(false);
-    // User can now proceed with payment with confidence in the translation quality
+    setPreviewLang('es');
+    setPreviewLangName('Spanish');
   };
 
   return (
@@ -212,29 +195,63 @@ export default function HomePage() {
           )}
 
           {step === 'estimate' && estimate && (
-            <div className="w-full max-w-lg">
+            <div className="w-full max-w-7xl">
               <div className="text-center mb-8">
                 <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                  Step 2: Choose Language & Pay
+                  Step 2: Review Preview & Choose Language
                 </h3>
                 <p className="text-neutral-600 leading-relaxed">
-                  Select your target language and proceed with payment
+                  See how your translation will look, then select language and pay
                 </p>
               </div>
-              <PriceBox
-                tokensEst={estimate.tokens_est}
-                priceCents={estimate.price_cents}
-                onPayment={handlePayment}
-                onSkipPayment={handleSkipPayment}
-                onPreview={handlePreview}
-              />
-              <div className="text-center mt-4">
-                <button
-                  onClick={resetForm}
-                  className="text-neutral-500 underline hover:text-neutral-700"
-                >
-                  Upload a different file
-                </button>
+
+              {/* Two-column layout: Preview on left, PriceBox on right */}
+              <div className="grid lg:grid-cols-[1fr,400px] gap-8 items-start">
+                {/* Preview Section */}
+                <div className="w-full">
+                  {uploadKey && (
+                    <div className="bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-xl shadow-md overflow-hidden">
+                      <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-6 py-4">
+                        <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
+                          <Sparkles className="w-5 h-5" />
+                          <span>Live Preview - First 1500 Words</span>
+                        </h4>
+                        <p className="text-primary-50 text-sm mt-1">
+                          Translated to {previewLangName} • Changes when you select a different language
+                        </p>
+                      </div>
+                      <PreviewSection
+                        uploadKey={uploadKey}
+                        targetLang={previewLang}
+                        onClose={() => {}}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Price Box */}
+                <div className="lg:sticky lg:top-20">
+                  <PriceBox
+                    tokensEst={estimate.tokens_est}
+                    priceCents={estimate.price_cents}
+                    onPayment={handlePayment}
+                    onSkipPayment={handleSkipPayment}
+                    targetLang={previewLang}
+                    onLanguageChange={(langCode) => {
+                      setPreviewLang(langCode);
+                      const lang = LANGUAGES.find(l => l.code === langCode);
+                      if (lang) setPreviewLangName(lang.name);
+                    }}
+                  />
+                  <div className="text-center mt-4">
+                    <button
+                      onClick={resetForm}
+                      className="text-neutral-500 underline hover:text-neutral-700"
+                    >
+                      Upload a different file
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -626,17 +643,6 @@ export default function HomePage() {
           <p className="text-xs text-neutral-500 mt-1">Files automatically deleted after 7 days for your privacy</p>
         </div>
       </footer>
-
-      {/* Preview Modal */}
-      {showPreview && uploadKey && (
-        <PreviewModal
-          epubKey={uploadKey}
-          targetLang={previewLang}
-          targetLangName={previewLangName}
-          onContinue={handlePreviewContinue}
-          onClose={handlePreviewClose}
-        />
-      )}
     </div>
   );
 }
