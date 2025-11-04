@@ -7,8 +7,10 @@ file for preview purposes, reusing the existing translation pipeline.
 import os
 import tempfile
 import asyncio
-from typing import Optional, Tuple, List
-from bs4 import BeautifulSoup
+import base64
+import re
+from typing import Optional, Tuple, List, Dict
+from bs4 import BeautifulSoup, NavigableString
 
 from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
@@ -36,10 +38,10 @@ class PreviewService:
         self,
         r2_key: str,
         target_lang: str,
-        max_words: int = 1000,
+        max_words: int = 1500,
         provider: str = "groq",
         model: Optional[str] = None
-    ) -> Tuple[str, int]:
+    ) -> Tuple[str, int, str]:
         """Generate a preview translation of the first N words of an EPUB.
 
         Args:
@@ -78,6 +80,13 @@ class PreviewService:
             logger.info("Reading EPUB structure")
             book, spine_docs = self.epub_processor.read_epub(epub_path)
 
+            # Extract original CSS and images from EPUB
+            css_content = self._extract_css_from_epub(book)
+            logger.info(f"Extracted {len(css_content)} chars of CSS from EPUB")
+
+            image_map = self._extract_images_from_epub(book)
+            logger.info(f"Extracted {len(set(image_map.values()))} unique images from EPUB")
+
             # Limit documents to first N words
             limited_docs, actual_words = self._limit_to_words(spine_docs, max_words)
             logger.info(f"Limited to {len(limited_docs)} documents, {actual_words} words")
@@ -110,8 +119,8 @@ class PreviewService:
                 translated_segments, segment_maps, limited_docs
             )
 
-            # Format as single HTML document for preview display
-            preview_html = self._format_preview_html(translated_docs)
+            # Format as single HTML document for preview display with images
+            preview_html = self._format_preview_html(translated_docs, css_content, image_map)
 
             logger.info(f"Preview generated successfully: {actual_words} words using {provider_used}")
             return preview_html, actual_words, provider_used
@@ -132,6 +141,7 @@ class PreviewService:
         """Limit spine documents to approximately max_words.
 
         Reads documents sequentially until word count reaches max_words.
+        Truncates the last document mid-content if needed to hit the word limit.
 
         Args:
             spine_docs: List of spine document dicts with 'content' key
@@ -150,32 +160,147 @@ class PreviewService:
             word_count = len(text.split())
 
             if total_words + word_count > max_words:
-                # This document would exceed limit
-                if len(limited_docs) == 0:
-                    # Include at least one document even if it exceeds limit
-                    limited_docs.append(doc)
-                    total_words += word_count
+                # This document would exceed limit - truncate it
+                words_remaining = max_words - total_words
+                if words_remaining > 0:
+                    truncated_doc = self._truncate_document_to_words(doc, words_remaining)
+                    limited_docs.append(truncated_doc)
+                    total_words += words_remaining
                 break
 
+            # Include full document
             limited_docs.append(doc)
             total_words += word_count
 
-            # Stop if we've hit the target
+            # Stop if we've hit the target exactly
             if total_words >= max_words:
                 break
 
         return limited_docs, total_words
 
-    def _format_preview_html(self, translated_docs: List[dict]) -> str:
-        """Format translated documents into a single HTML preview.
+    def _truncate_document_to_words(self, doc: dict, max_words: int) -> dict:
+        """Truncate a document's content to approximately max_words.
 
         Args:
-            translated_docs: List of translated spine document dicts
+            doc: Document dict with 'content' key
+            max_words: Maximum words to include
+
+        Returns:
+            New document dict with truncated content
+        """
+        soup = BeautifulSoup(doc['content'], 'html.parser')
+
+        # Find all text nodes and truncate at word boundary
+        words_collected = 0
+
+        for element in soup.find_all(string=True):
+            if isinstance(element, NavigableString):
+                text = str(element)
+                words = text.split()
+
+                if words_collected + len(words) > max_words:
+                    # Truncate this text node
+                    words_to_take = max_words - words_collected
+                    truncated_text = ' '.join(words[:words_to_take]) + '...'
+                    element.replace_with(truncated_text)
+                    words_collected = max_words
+
+                    # Remove all subsequent siblings and their content
+                    parent = element.parent
+                    if parent:
+                        # Remove all following siblings
+                        for sibling in list(element.next_siblings):
+                            if hasattr(sibling, 'extract'):
+                                sibling.extract()
+                    break
+                else:
+                    words_collected += len(words)
+
+        return {
+            'id': doc['id'],
+            'href': doc['href'],
+            'title': doc['title'],
+            'content': str(soup)
+        }
+
+    def _extract_css_from_epub(self, book) -> str:
+        """Extract CSS stylesheets from EPUB for preview display.
+
+        Args:
+            book: EbookLib Book object
+
+        Returns:
+            Combined CSS content from all stylesheets
+        """
+        import ebooklib
+
+        css_content = []
+        for item in book.get_items():
+            if item.get_type() == ebooklib.ITEM_STYLE:
+                try:
+                    css = item.get_content().decode('utf-8')
+                    css_content.append(css)
+                except Exception as e:
+                    logger.warning(f"Failed to extract CSS: {e}")
+
+        return '\n\n'.join(css_content)
+
+    def _extract_images_from_epub(self, book) -> Dict[str, str]:
+        """Extract images from EPUB and encode as base64 data URIs.
+
+        Args:
+            book: EbookLib Book object
+
+        Returns:
+            Dictionary mapping image paths to base64 data URIs
+        """
+        import ebooklib
+
+        image_map = {}
+        for item in book.get_items():
+            if item.get_type() == ebooklib.ITEM_IMAGE:
+                try:
+                    img_path = item.get_name()
+                    img_content = item.get_content()
+
+                    # Determine MIME type from extension
+                    ext = img_path.lower().split('.')[-1]
+                    mime_types = {
+                        'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+                        'png': 'image/png', 'gif': 'image/gif',
+                        'svg': 'image/svg+xml', 'webp': 'image/webp'
+                    }
+                    mime_type = mime_types.get(ext, 'image/jpeg')
+
+                    # Encode as base64 data URI
+                    img_base64 = base64.b64encode(img_content).decode('utf-8')
+                    data_uri = f"data:{mime_type};base64,{img_base64}"
+
+                    # Store with multiple path variations for matching
+                    image_map[img_path] = data_uri
+                    image_map[img_path.lstrip('/')] = data_uri
+                    image_map[img_path.lstrip('../')] = data_uri
+                    image_map[os.path.basename(img_path)] = data_uri
+
+                except Exception as e:
+                    logger.warning(f"Failed to extract image {item.get_name()}: {e}")
+
+        return image_map
+
+    def _format_preview_html(self, translated_docs: List[dict], css_content: str = "", image_map: Optional[Dict[str, str]] = None) -> str:
+        """Format translated documents into a single HTML preview.
+
+        Uses the EXACT same HTML from reconstruct_documents() plus the original EPUB CSS
+        to ensure the preview looks identical to the final EPUB.
+
+        Args:
+            translated_docs: List of translated spine document dicts (from reconstruct_documents)
+            css_content: Original CSS from the EPUB
 
         Returns:
             Single HTML string suitable for iframe display
         """
-        # Combine all document contents
+        # Combine all document contents (using EXACT reconstructed HTML)
         combined_html = []
 
         for i, doc in enumerate(translated_docs):
@@ -183,50 +308,83 @@ class PreviewService:
 
             # Add visual separator between documents (chapters)
             if i > 0:
-                combined_html.append('<hr style="margin: 2em 0; border: 1px solid #e5e7eb;" />')
+                combined_html.append('<hr style="margin: 2em 0; border: 1px solid #e5e7eb; opacity: 0.5;" />')
 
             combined_html.append(content)
 
-        # Wrap in basic HTML structure with minimal styling
-        preview_html = f"""
-<!DOCTYPE html>
+        # Join HTML and replace image src attributes with base64 data URIs
+        combined_html_str = ''.join(combined_html)
+
+        if image_map:
+            # Replace all <img> tags with base64 data URIs
+            def replace_img_src(match):
+                img_tag = match.group(0)
+                src_match = re.search(r'src=(?:"([^"]*)"|\'([^\']*)\')', img_tag, re.IGNORECASE)
+                if not src_match:
+                    return img_tag
+
+                src = src_match.group(1) or src_match.group(2)
+
+                # Try different path variations to find the image
+                for variant in [src, src.lstrip('/'), src.lstrip('../'), os.path.basename(src)]:
+                    if variant in image_map:
+                        data_uri = image_map[variant]
+                        # Replace src in the tag
+                        return img_tag.replace(f'src="{src}"', f'src="{data_uri}"').replace(f"src='{src}'", f"src='{data_uri}'")
+
+                logger.warning(f"Image not found in image_map: {src}")
+                return img_tag
+
+            combined_html_str = re.sub(
+                r'<img[^>]*>',
+                replace_img_src,
+                combined_html_str,
+                flags=re.IGNORECASE
+            )
+
+        # Wrap with original EPUB CSS plus minimal responsive wrapper
+        preview_html = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* Original EPUB CSS */
+        {css_content}
+
+        /* Minimal responsive wrapper - don't override EPUB styles */
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            color: #1f2937;
         }}
-        h1, h2, h3, h4, h5, h6 {{
-            color: #111827;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-        }}
-        p {{
-            margin-bottom: 1em;
-        }}
+
+        /* Ensure images are responsive */
         img {{
-            max-width: 100%;
-            height: auto;
+            max-width: 100% !important;
+            height: auto !important;
+        }}
+
+        /* Preview banner */
+        .preview-banner {{
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1em;
+            margin-bottom: 2em;
+            border-radius: 4px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }}
     </style>
 </head>
 <body>
-    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1em; margin-bottom: 2em; border-radius: 4px;">
-        <strong>📖 Preview - First ~1000 Words</strong>
+    <div class="preview-banner">
+        <strong>📖 Preview - First ~1500 Words</strong>
         <p style="margin: 0.5em 0 0 0; font-size: 0.9em; color: #92400e;">
-            This is a sample showing translation quality. The full book will be translated with the same quality.
+            This shows exactly how your translated book will look with the same styling and formatting.
         </p>
     </div>
-    {''.join(combined_html)}
+    {combined_html_str}
 </body>
-</html>
-"""
+</html>"""
 
         return preview_html
