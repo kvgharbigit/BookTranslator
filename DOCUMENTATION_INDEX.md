@@ -1,6 +1,6 @@
 # 📚 BookTranslator Documentation Index
 
-**Last Updated:** November 3, 2025
+**Last Updated:** November 4, 2025
 
 ---
 
@@ -96,11 +96,19 @@
     - Legal and compliance requirements
     - **Current Status:** Consolidated and updated Nov 3, 2025
 
+11. **[PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md)** - ✅ **NEW Nov 4, 2025**
+    - Complete technical documentation for preview translation
+    - Architecture and implementation details
+    - Word truncation algorithm
+    - Image embedding and CSS extraction
+    - Design decisions and performance metrics
+    - **Current Status:** Production-ready, fully tested
+
 ---
 
 ## 🐛 **TROUBLESHOOTING**
 
-11. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem solving
+12. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem solving
     - Railway deployment issues
     - Cloudflare R2 storage issues
     - Vercel frontend issues
@@ -129,9 +137,10 @@ These are kept for historical reference but not relevant for current setup.
 ```
 BookTranslator/
 ├── README.md                       # Start here
-├── QUICK_REFERENCE.md              # Cheat sheet
-├── CURRENT_STATUS.md               # What's done (UPDATED Nov 3, 2025)
-├── TODO.md                         # What's next (UPDATED Nov 3, 2025)
+├── QUICK_REFERENCE.md              # Cheat sheet (UPDATED Nov 4, 2025)
+├── CURRENT_STATUS.md               # What's done (UPDATED Nov 4, 2025)
+├── TODO.md                         # What's next (UPDATED Nov 4, 2025)
+├── PREVIEW_FEATURE.md              # Preview translation docs (NEW Nov 4, 2025)
 ├── R2_SETUP_GUIDE.md              # R2 storage (DONE)
 ├── ENVIRONMENT_VARIABLES.md        # All env vars reference
 ├── POST_TRANSLATION_WORKFLOW.md    # Email & file workflow
@@ -183,6 +192,9 @@ BookTranslator/docs/archive/
 
 **...understand environment variables:**
 → Read [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) - Complete reference
+
+**...understand the preview feature:**
+→ Read [PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md) - Complete technical docs
 
 ---
 

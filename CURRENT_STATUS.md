@@ -1,6 +1,6 @@
 # BookTranslator - Current Implementation Status
 
-**Last Updated:** November 3, 2025
+**Last Updated:** November 4, 2025
 
 **🎉 STATUS: LIVE IN PRODUCTION**
 - **Frontend:** https://polytext.site
@@ -13,7 +13,12 @@
 
 ### **Core Translation System**
 - ✅ **EPUB Processing:** Full extraction, translation, and reconstruction
-- ✅ **Multi-format Output:** EPUB, PDF (WeasyPrint), and TXT generation
+- ✅ **Multi-format Output:** EPUB, PDF (enhanced Calibre), and TXT generation
+- ✅ **UTF-8 Encoding:** **FIXED Nov 4, 2025**
+  - ✅ Proper character encoding across all output formats
+  - ✅ HTML reconstruction uses `soup.decode(formatter='minimal')`
+  - ✅ TXT generation uses `html.parser` instead of `xml` parser
+  - ✅ Spanish characters (á, é, í, ó, ú, ñ, ¡, ¿) display correctly
 - ✅ **AI Translation Providers:**
   - ✅ Groq Llama 3.1 8B Instant ($0.074/1M tokens) - **PRIMARY FOR TESTING**
   - ✅ Gemini 2.5 Flash-Lite ($0.34/1M tokens) - **PRODUCTION READY**
@@ -24,6 +29,16 @@
   - Backend tracks progress after each translation batch
   - Frontend shows smooth progress bar with percentage
   - Polling every 5 seconds
+- ✅ **Free Preview Translation:** **NEW Nov 4, 2025**
+  - ✅ Auto-displays on EPUB upload
+  - ✅ Translates first 1000 words instantly
+  - ✅ Exact reproduction of final EPUB:
+    - Original CSS preserved
+    - Images embedded as base64 data URIs
+    - Same HTML reconstruction as production
+  - ✅ Two-column layout: Preview (right) + Pricing (left)
+  - ✅ Uses Groq primary, Gemini fallback
+  - ✅ Provider info shown to user
 
 ### **Storage & Infrastructure**
 - ✅ **Cloudflare R2 Object Storage:** **FULLY TESTED AND WORKING**
@@ -338,7 +353,12 @@ PROFIT:               ~$1,420/month
    - Solution: Resend configured and verified Nov 3, 2025
 5. ✅ **FIXED:** Users losing download links from emails
    - Solution: Email retrieval system implemented Nov 3, 2025
-6. ⚠️ **OPEN:** PayPal payments not tested with live account
+6. ✅ **FIXED:** UTF-8 encoding corruption in TXT files (Nov 4, 2025)
+   - Problem: Spanish characters showing as Ã­ instead of í
+   - Root cause: BeautifulSoup XML parser and str() conversion
+   - Solution: Changed to html.parser + soup.decode(formatter='minimal')
+   - Files fixed: `html_segment.py:172`, `text.py:75,119,197`
+7. ⚠️ **OPEN:** PayPal payments not tested with live account
    - Impact: Only sandbox payments working
    - Fix: Complete PayPal business account setup
 

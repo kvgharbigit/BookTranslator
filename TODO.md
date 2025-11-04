@@ -160,6 +160,7 @@
 - [x] ~~Users losing download links~~ **FIXED**: Email retrieval system Nov 3, 2025
 - [x] ~~Downloads don't open in new tab~~ **FIXED**: Added target="_blank" Nov 3, 2025
 - [x] ~~No upload verification~~ **FIXED**: File size checking added Nov 3, 2025
+- [x] ~~UTF-8 encoding corruption (Ã­ → í)~~ **FIXED**: Parser changes in html_segment.py + text.py Nov 4, 2025
 - [ ] PayPal payments not tested with real account (pending live setup)
 
 ---

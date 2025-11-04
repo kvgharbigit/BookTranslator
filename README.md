@@ -46,12 +46,13 @@ Visit **http://localhost:3000** → Upload EPUB → Click **"Skip Payment (Test)
 Transform any EPUB book into any language in **under 5 minutes** with professional quality:
 
 - **📚 Upload EPUB** → Get instant price estimate ($0.50-$1.50)
+- **🎯 Free Preview** → See first 1000 words translated instantly (NEW!)
 - **💳 Pay via PayPal** → ⚠️ *Configured but needs live credentials*
 - **⚡ AI Translation** → Groq Llama 3.1 (testing) + Gemini 2.5 Flash (production ready)
 - **📱 Real-time Progress** → Smooth batch-level progress tracking (0-100%)
-- **📦 Multi-format Output** → Download EPUB + PDF + TXT
+- **📦 Multi-format Output** → Download EPUB + PDF + TXT (UTF-8 verified)
 - **☁️ Cloudflare R2 Storage** → Zero egress fees, 5-day retention
-- **📧 Email Delivery** → ⚠️ *Configured but needs Resend API key*
+- **📧 Email Delivery** → ✅ *Fully working with Resend*
 
 ## 🎯 Key Features
 

@@ -1,6 +1,6 @@
 # BookTranslator - Quick Reference
 
-**Last Updated:** November 2, 2025
+**Last Updated:** November 4, 2025
 
 ---
 
@@ -8,36 +8,35 @@
 
 ### **Core Features**
 - ✅ EPUB upload and translation
-- ✅ Multi-format output (EPUB, PDF, TXT)
+- ✅ Multi-format output (EPUB, PDF, TXT) with proper UTF-8 encoding
+- ✅ **Free preview translation** (first 1000 words, auto-shows on upload)
 - ✅ Real-time batch progress tracking (0-100%)
 - ✅ Cloudflare R2 storage (5-day retention)
-- ✅ AI translation (Groq Llama + Gemini)
+- ✅ AI translation (Groq primary + Gemini fallback)
 - ✅ Price estimation
 - ✅ Skip payment (testing mode)
+- ✅ Email notifications with Resend
+- ✅ Email-based download retrieval system
 
 ### **Infrastructure**
 - ✅ Railway PostgreSQL (production database)
-- ✅ Local Redis (job queue)
-- ✅ FastAPI backend
-- ✅ Next.js frontend
+- ✅ Railway Redis (production job queue)
+- ✅ FastAPI backend (api.polytext.site)
+- ✅ Next.js frontend (polytext.site)
 - ✅ Cloudflare R2 (file storage)
+- ✅ Custom domain with SSL
 
 ---
 
 ## ⚠️ **WHAT'S CONFIGURED BUT NOT TESTED**
 
-- ⚠️ PayPal payments (sandbox credentials)
-- ⚠️ Email notifications (fake Resend key)
-- ⚠️ Railway deployment with R2
+- ⚠️ PayPal live payments (only sandbox tested)
 
 ---
 
 ## ❌ **WHAT'S NOT WORKING**
 
-- ❌ Database migration on Railway (progress_percent column)
-- ❌ Live PayPal payments (no business account)
-- ❌ Email delivery (no Resend API key)
-- ❌ Custom domain (none purchased)
+- ❌ Live PayPal payments (awaiting business account setup)
 
 ---
 
