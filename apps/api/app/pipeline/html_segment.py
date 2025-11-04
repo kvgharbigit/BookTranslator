@@ -139,38 +139,41 @@ class HTMLSegmenter:
         return reconstructed_docs
     
     def _reconstruct_html(
-        self, 
-        original_html: str, 
+        self,
+        original_html: str,
         translated_segments: List[str],
         segment_map: Dict
     ) -> str:
         """Reconstruct HTML with translated segments."""
-        
+
         try:
             soup = BeautifulSoup(original_html, 'xml')
             segment_idx = 0
-            
+
             # Replace text content with translations
             for element in soup.find_all(string=True):
                 if isinstance(element, NavigableString) and element.strip():
                     parent = element.parent
-                    
+
                     if self._should_skip_translation(parent):
                         continue
-                    
+
                     text = element.strip()
                     # Use same criteria as segmentation to maintain alignment
-                    if (len(text) >= 3 and 
-                        not text.isdigit() and 
-                        text.lower() not in ['html', 'head', 'body', 'div', 'span'] and 
+                    if (len(text) >= 3 and
+                        not text.isdigit() and
+                        text.lower() not in ['html', 'head', 'body', 'div', 'span'] and
                         segment_idx < len(translated_segments)):
                         # Replace with translated text
                         element.replace_with(translated_segments[segment_idx])
                         segment_idx += 1
-            
+
+            # Convert to string with proper UTF-8 encoding
+            final_html = soup.decode(formatter='minimal')
+
             # Post-process: Apply chapter title translations in TOC documents
-            final_html = self._apply_chapter_title_translations(str(soup))
-            
+            final_html = self._apply_chapter_title_translations(final_html)
+
             return final_html
             
         except Exception as e:
