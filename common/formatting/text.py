@@ -70,9 +70,9 @@ class TextFormatter:
     
     def extract_chapter_title(self, content: str) -> Optional[str]:
         """Extract chapter title from HTML content."""
-        
+
         try:
-            soup = BeautifulSoup(content, 'xml')
+            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
             for heading in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
                 heading_text = heading.get_text(strip=True)
                 if (heading_text and len(heading_text) > 3 and 
@@ -108,15 +108,15 @@ class TextFormatter:
     
     def format_toc_section(self, content: str) -> List[str]:
         """Format table of contents section with translations."""
-        
+
         formatted_content = [
             f"\n{'='*60}",
             "TABLA DE CONTENIDOS".center(60),
             f"{'='*60}\n"
         ]
-        
+
         try:
-            soup = BeautifulSoup(content, 'xml')
+            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
             
             # Extract TOC entries and translate them
             toc_entries = []
@@ -190,11 +190,11 @@ class TextFormatter:
     
     def extract_document_content(self, content: str, chapter_title: Optional[str] = None) -> List[str]:
         """Extract and format text from HTML content with proper structure."""
-        
+
         formatted_content = []
-        
+
         try:
-            soup = BeautifulSoup(content, 'xml')
+            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
             
             # Track seen text to avoid duplicates
             seen_texts: Set[str] = set()
