@@ -38,7 +38,7 @@ class PreviewService:
         self,
         r2_key: str,
         target_lang: str,
-        max_words: int = 1500,
+        max_words: int = 1000,
         provider: str = "groq",
         model: Optional[str] = None
     ) -> Tuple[str, int, str]:

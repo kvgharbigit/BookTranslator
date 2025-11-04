@@ -243,7 +243,7 @@ export default function HomePage() {
                           <span>Live Translation Preview</span>
                         </h4>
                         <p className="text-primary-50 text-sm mt-1">
-                          First 1500 words • Translated to {previewLangName} • Updates when you change language →
+                          First 1000 words • Translated to {previewLangName} • Updates when you change language →
                         </p>
                       </div>
                       <PreviewSection
