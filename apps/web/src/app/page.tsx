@@ -32,10 +32,13 @@ export default function HomePage() {
       
       // Step 3: Get price estimate
       const estimateResponse = await api.getEstimate(key, 'es'); // Default to Spanish for estimate
-      
+
       setUploadKey(key);
       setEstimate(estimateResponse);
       setStep('estimate');
+
+      // Step 4: Automatically show preview
+      setShowPreview(true);
       
     } catch (err) {
       console.error('Upload failed:', err);

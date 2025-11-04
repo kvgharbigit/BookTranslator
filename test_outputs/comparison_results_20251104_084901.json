@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-11-04T08:49:01.341688",
+  "epub_file": "/Users/kayvangharbi/PycharmProjects/BookTranslator/sample_books/pg236_first20pages.epub",
+  "target_language": "es",
+  "gemini": {
+    "provider": "Gemini",
+    "success": false,
+    "error": "Translation failed after 2 attempts",
+    "provider_cost_cents": 0,
+    "provider_cost_usd": 0.0,
+    "user_price_cents": 0,
+    "user_price_usd": 0.0,
+    "profit_cents": 0,
+    "profit_usd": 0.0,
+    "profit_margin_pct": 0.0
+  },
+  "groq": {
+    "provider": "Groq",
+    "success": true,
+    "documents": 4,
+    "segments": 133,
+    "tokens_used": 12545,
+    "provider_cost_cents": 0,
+    "provider_cost_usd": 0.0,
+    "user_price_cents": 99,
+    "user_price_usd": 0.99,
+    "profit_cents": 99,
+    "profit_usd": 0.99,
+    "profit_margin_pct": 100.0,
+    "translation_time": 14.955842018127441,
+    "total_time": 18.8041889667511,
+    "outputs": {
+      "epub": true,
+      "pdf": true,
+      "txt": true
+    },
+    "quality": {
+      "segments_analyzed": 10,
+      "avg_original_length": 54.3,
+      "avg_translated_length": 61.9,
+      "length_ratio": 1.14,
+      "substantial_segments": 8,
+      "sample_translations": [
+        {
+          "original": "The Project Gutenberg eBook of",
+          "translated": "El libro electr\u00f3nico de Proyecto Gutenberg de"
+        },
+        {
+          "original": "The Jungle Book",
+          "translated": "El Libro de la Selva"
+        },
+        {
+          "original": "This ebook is for the use of anyone anywhere in the United States and\nmost other parts of the world ...",
+          "translated": "Este libro electr\u00f3nico est\u00e1 para el uso de cualquier persona en los Estados Unidos y\nla mayor\u00eda de o..."
+        }
+      ]
+    },
+    "provider_used": "groq",
+    "output_dir": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq"
+  }
+}
