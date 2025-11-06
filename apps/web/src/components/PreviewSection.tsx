@@ -45,7 +45,7 @@ export default function PreviewSection({
       api.streamPreview(
         epubKey,
         targetLang,
-        250,
+        300,
         // onProgress
         (message: string) => {
           console.log('📊 Progress update:', message);
@@ -81,7 +81,7 @@ export default function PreviewSection({
             {progressMessage}
           </p>
           <p className="text-sm text-neutral-600 text-center">
-            Translating first 250 words with AI
+            Translating first 300 words with AI
           </p>
         </div>
       )}

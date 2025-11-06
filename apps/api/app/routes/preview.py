@@ -109,7 +109,7 @@ async def stream_preview(
     request: Request,
     key: str,
     target_lang: str,
-    max_words: int = 250
+    max_words: int = 300
 ):
     """Stream preview generation with real-time progress updates via SSE.
 
@@ -124,7 +124,7 @@ async def stream_preview(
         request: FastAPI request object (for rate limiting)
         key: R2 storage key for the EPUB file
         target_lang: Target language code (e.g., 'es', 'fr', 'de')
-        max_words: Maximum words to translate (default: 250)
+        max_words: Maximum words to translate (default: 300)
 
     Returns:
         StreamingResponse with SSE events

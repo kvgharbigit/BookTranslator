@@ -162,7 +162,7 @@ export default function HomePage() {
               <Sparkles className="w-5 h-5" />
               <span>Try It Free Now</span>
             </button>
-            <p className="text-sm text-neutral-600 mt-2">250-word preview • No payment needed</p>
+            <p className="text-sm text-neutral-600 mt-2">300-word preview • No payment needed</p>
           </div>
 
           {/* Social Proof */}
@@ -260,7 +260,7 @@ export default function HomePage() {
                   Choose Language & Translate
                 </h3>
                 <p className="text-lg text-neutral-600 leading-relaxed">
-                  Select your language and <strong className="text-primary-600">try it free with a 250-word preview</strong>—see the quality before you pay
+                  Select your language and <strong className="text-primary-600">try it free with a 300-word preview</strong>—see the quality before you pay
                 </p>
               </div>
 
@@ -299,7 +299,7 @@ export default function HomePage() {
                       <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-6 py-4">
                         <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
                           <Sparkles className="w-5 h-5" />
-                          <span>Free 250-Word Preview</span>
+                          <span>Free 300-Word Preview</span>
                         </h4>
                         <p className="text-primary-50 text-sm mt-1">
                           Try before you buy • Translated to {previewLangName}
