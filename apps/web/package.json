@@ -20,7 +20,8 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
     "lucide-react": "^0.290.0",
-    "@stripe/stripe-js": "^2.1.0"
+    "@stripe/stripe-js": "^2.1.0",
+    "epubjs": "^0.3.93"
   },
   "devDependencies": {
     "eslint": "^8.52.0",
