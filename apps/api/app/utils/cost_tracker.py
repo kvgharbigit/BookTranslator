@@ -2,44 +2,23 @@
 
 This module provides utilities to estimate and track the costs of API calls
 to various LLM providers (Groq, Gemini, etc.).
+
+NOTE: All pricing data and model configurations are now centralized in
+app.config.models. This module uses that as the single source of truth.
 """
 
 from typing import Optional
 from app.logger import get_logger
+from app.config.models import estimate_cost as calculate_cost, get_model_pricing
 
 logger = get_logger(__name__)
 
 
 class CostTracker:
-    """Track and estimate costs for LLM API usage."""
+    """Track and estimate costs for LLM API usage.
 
-    # Pricing per 1M tokens (as of 2025)
-    PRICING = {
-        "groq": {
-            "llama-3.1-8b-instant": {
-                "input": 0.05,   # $0.05 per 1M input tokens
-                "output": 0.08,  # $0.08 per 1M output tokens
-            },
-            "llama-3.1-70b-versatile": {
-                "input": 0.59,   # $0.59 per 1M input tokens
-                "output": 0.79,  # $0.79 per 1M output tokens
-            },
-        },
-        "gemini": {
-            "gemini-2.0-flash-exp": {
-                "input": 0.00,   # Free during preview
-                "output": 0.00,  # Free during preview
-            },
-            "gemini-1.5-flash": {
-                "input": 0.075,  # $0.075 per 1M input tokens
-                "output": 0.30,  # $0.30 per 1M output tokens
-            },
-            "gemini-1.5-pro": {
-                "input": 1.25,   # $1.25 per 1M input tokens
-                "output": 5.00,  # $5.00 per 1M output tokens
-            },
-        },
-    }
+    Uses centralized model configuration from app.config.models for pricing.
+    """
 
     @classmethod
     def estimate_tokens(cls, text: str) -> int:
@@ -65,6 +44,8 @@ class CostTracker:
     ) -> float:
         """Estimate cost for an LLM API call.
 
+        Uses centralized pricing from app.config.models.
+
         Args:
             provider: Provider name (e.g., 'groq', 'gemini')
             model: Model name (e.g., 'llama-3.1-8b-instant')
@@ -74,22 +55,12 @@ class CostTracker:
         Returns:
             Estimated cost in USD
         """
-        provider_pricing = cls.PRICING.get(provider.lower(), {})
-        model_pricing = provider_pricing.get(model, {})
+        cost = calculate_cost(provider, model, input_tokens, output_tokens)
 
-        if not model_pricing:
+        if cost == 0.0 and get_model_pricing(provider, model) is None:
             logger.warning(f"No pricing data for {provider}/{model}, using $0.00")
-            return 0.0
 
-        input_cost_per_m = model_pricing.get("input", 0.0)
-        output_cost_per_m = model_pricing.get("output", 0.0)
-
-        # Calculate cost (pricing is per 1M tokens)
-        input_cost = (input_tokens / 1_000_000) * input_cost_per_m
-        output_cost = (output_tokens / 1_000_000) * output_cost_per_m
-        total_cost = input_cost + output_cost
-
-        return total_cost
+        return cost
 
     @classmethod
     def log_api_call(

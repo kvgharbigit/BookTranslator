@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.config import settings
 from app.pipeline.preview import PreviewService
 from app.logger import get_logger
+from app.config.models import get_default_model
 
 logger = get_logger(__name__)
 
@@ -71,11 +72,12 @@ async def generate_preview(
         )
 
         # Parse provider name and model from provider_used string (e.g., "groq" or "gemini")
+        # Use centralized model configuration
         provider_name = provider_used.lower()
         if "groq" in provider_name:
-            model_name = "llama-3.1-8b-instant"
+            model_name = get_default_model("groq")
         elif "gemini" in provider_name:
-            model_name = "gemini-2.5-flash-lite"
+            model_name = get_default_model("gemini")
         else:
             model_name = "unknown"
 

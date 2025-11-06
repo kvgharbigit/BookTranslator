@@ -18,6 +18,7 @@ from app.pipeline.translate import TranslationOrchestrator
 from app.storage import get_storage
 from app.providers.factory import get_provider
 from app.logger import get_logger
+from app.config.models import get_default_model
 
 logger = get_logger(__name__)
 
@@ -60,12 +61,9 @@ class PreviewService:
         logger.info(f"Generating preview for {r2_key}, lang={target_lang}, max_words={max_words}")
 
         # Use Gemini Flash as primary (fast and reliable), Groq as fallback
-        # Default models for each provider
+        # Default models for each provider - use centralized configuration
         if model is None:
-            if provider == "groq":
-                model = "llama-3.1-8b-instant"
-            else:
-                model = "gemini-2.0-flash-exp"  # Use Gemini by default
+            model = get_default_model(provider)
 
         # Download EPUB from R2 to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as tmp:

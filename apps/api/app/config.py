@@ -32,11 +32,13 @@ class Settings(BaseSettings):
     micropayments_threshold_cents: int = Field(default=800, alias="MICROPAYMENTS_THRESHOLD_CENTS")
     
     # Translation Providers
+    # NOTE: Default models are defined in app.config.models (single source of truth)
+    # These defaults should match DEFAULT_GEMINI_MODEL and DEFAULT_GROQ_MODEL
     provider: str = Field(default="gemini", alias="PROVIDER")
     gemini_api_key: str = Field(alias="GEMINI_API_KEY")
-    gemini_model: str = Field(default="gemini-2.5-flash-lite", alias="GEMINI_MODEL")
+    gemini_model: str = Field(default="gemini-2.5-flash-lite", alias="GEMINI_MODEL")  # Should match app.config.models.DEFAULT_GEMINI_MODEL
     groq_api_key: str = Field(alias="GROQ_API_KEY")
-    groq_model: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")
+    groq_model: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")  # Should match app.config.models.DEFAULT_GROQ_MODEL
     max_batch_tokens: int = Field(default=6000, alias="MAX_BATCH_TOKENS")
     max_job_tokens: int = Field(default=1000000, alias="MAX_JOB_TOKENS")
     max_file_tokens: int = Field(default=1000000, alias="MAX_FILE_TOKENS")  # 1M token limit for pricing tiers
