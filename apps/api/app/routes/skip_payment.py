@@ -37,10 +37,9 @@ async def skip_payment(
     """
 
     try:
-        # Determine provider
-        provider = settings.provider
-        if provider not in ["gemini", "groq"]:
-            provider = "gemini"
+        # ALWAYS use Gemini for full book translations (best quality)
+        # Previews use Llama for speed/cost, but full books deserve the best
+        provider = "gemini"
 
         # Get file size
         size_bytes = storage.get_object_size(data.key)

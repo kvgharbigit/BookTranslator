@@ -95,13 +95,15 @@ class PreviewService:
             segments, segment_maps = self.segmenter.segment_documents(limited_docs)
             logger.info(f"Extracted {len(segments)} segments")
 
-            # Setup providers: Groq primary (cheap), Gemini fallback (reliable)
-            # Same pattern as worker.py lines 108-131
+            # Setup providers for PREVIEW translations:
+            # - Groq Llama 3.1 8B (primary) - Fast & cheap for previews
+            # - Gemini 2.5 Flash Lite (fallback) - For Tier 4 languages (auto-switched by TranslationOrchestrator)
+            # Note: Full book translations ALWAYS use Gemini for best quality
             primary_provider = get_provider("groq")
             fallback_provider = get_provider("gemini")
 
             # Translate segments with fun progress messages
-            logger.info(f"Translating {len(segments)} segments with Groq (primary) + Gemini (fallback)")
+            logger.info(f"Translating preview with Groq (Llama) primary + Gemini fallback (auto for Tier 4 langs)")
 
             # Create fun progress callback with language-specific emojis
             def batch_progress_callback(current_batch: int, total_batches: int):
@@ -318,83 +320,283 @@ class PreviewService:
         Returns:
             Fun progress message with emojis
         """
-        # Language-specific emojis and suffixes
-        language_emojis = {
-            'es': ('🇪🇸', 'Spanish-ifying'),
-            'fr': ('🇫🇷', 'French-ifying'),
-            'de': ('🇩🇪', 'German-ifying'),
-            'it': ('🇮🇹', 'Italian-ifying'),
-            'pt': ('🇵🇹', 'Portuguese-ifying'),
-            'ru': ('🇷🇺', 'Russian-ifying'),
-            'ja': ('🇯🇵', 'Japanese-ifying'),
-            'zh': ('🇨🇳', 'Chinese-ifying'),
-            'ko': ('🇰🇷', 'Korean-ifying'),
-            'ar': ('🇸🇦', 'Arabic-ifying'),
-            'hi': ('🇮🇳', 'Hindi-ifying'),
-            'nl': ('🇳🇱', 'Dutch-ifying'),
-            'pl': ('🇵🇱', 'Polish-ifying'),
-            'tr': ('🇹🇷', 'Turkish-ifying'),
-            'sv': ('🇸🇪', 'Swedish-ifying'),
-            'da': ('🇩🇰', 'Danish-ifying'),
-            'fi': ('🇫🇮', 'Finnish-ifying'),
-            'no': ('🇳🇴', 'Norwegian-ifying'),
-            'cs': ('🇨🇿', 'Czech-ifying'),
-            'el': ('🇬🇷', 'Greek-ifying'),
-            'he': ('🇮🇱', 'Hebrew-ifying'),
-            'th': ('🇹🇭', 'Thai-ifying'),
-            'vi': ('🇻🇳', 'Vietnamese-ifying'),
-            'id': ('🇮🇩', 'Indonesian-ifying'),
-            'uk': ('🇺🇦', 'Ukrainian-ifying'),
-            'ro': ('🇷🇴', 'Romanian-ifying'),
-            'hu': ('🇭🇺', 'Hungarian-ifying'),
-            'bg': ('🇧🇬', 'Bulgarian-ifying'),
+        # Language-specific configurations with cultural references
+        language_config = {
+            'es': {
+                'emoji': '🇪🇸',
+                'start': ['¡Hola! Starting Spanish magic...', '🌮 Sprinkling some español...', '💃 ¡Vámonos! Let\'s translate...'],
+                'progress': ['Making it muy bonito...', '🎸 Getting that Spanish rhythm...', 'Adding some sabor...'],
+                'finish': ['¡Perfecto! Spanish translation complete!', '🎉 ¡Olé! All done!', '✨ ¡Excelente! Finished!']
+            },
+            'fr': {
+                'emoji': '🇫🇷',
+                'start': ['Bonjour! Starting French elegance...', '🥐 Baking some beautiful français...', '🗼 Channeling Parisian charm...'],
+                'progress': ['Making it très magnifique...', '🎨 Painting with French flair...', 'Adding that je ne sais quoi...'],
+                'finish': ['Voilà! French perfection achieved!', '🎊 C\'est fini! All done!', '✨ Magnifique! Complete!']
+            },
+            'de': {
+                'emoji': '🇩🇪',
+                'start': ['Guten Tag! Beginning German precision...', '🍺 Starting the Deutsch journey...', '⚙️ German engineering engaged...'],
+                'progress': ['Making it wunderbar...', '🏰 Building with German precision...', 'Adding some gemütlichkeit...'],
+                'finish': ['Ausgezeichnet! German translation done!', '🎉 Perfekt! All finished!', '✨ Wunderbar! Complete!']
+            },
+            'it': {
+                'emoji': '🇮🇹',
+                'start': ['Ciao! Starting Italian artistry...', '🍝 Cooking up some italiano...', '🎭 Italian opera of words begins...'],
+                'progress': ['Making it bellissimo...', '🎨 Painting with Italian passion...', 'Adding that dolce vita touch...'],
+                'finish': ['Perfetto! Italian masterpiece done!', '🎉 Bravo! All finished!', '✨ Fantastico! Complete!']
+            },
+            'pt': {
+                'emoji': '🇵🇹',
+                'start': ['Olá! Starting Portuguese soul...', '⚽ Kicking off português...', '🎵 Portuguese saudade begins...'],
+                'progress': ['Making it muito bonito...', '🌊 Flowing like Portuguese waves...', 'Adding some alegria...'],
+                'finish': ['Perfeito! Portuguese beauty complete!', '🎉 Ótimo! All done!', '✨ Maravilhoso! Finished!']
+            },
+            'ja': {
+                'emoji': '🇯🇵',
+                'start': ['こんにちは! Starting Japanese harmony...', '🍜 Preparing 日本語 magic...', '🏯 Japanese precision activated...'],
+                'progress': ['Making it 美しい (beautiful)...', '🎌 Weaving Japanese elegance...', 'Adding that 和 (harmony)...'],
+                'finish': ['完璧! (Perfect!) Japanese done!', '🎉 素晴らしい! All complete!', '✨ できた! Finished!']
+            },
+            'zh': {
+                'emoji': '🇨🇳',
+                'start': ['你好! Starting Chinese wisdom...', '🏮 Beginning 中文 journey...', '🐉 Chinese dragon awakening...'],
+                'progress': ['Making it 美丽 (beautiful)...', '🎎 Crafting with Chinese art...', 'Adding that 和谐 (harmony)...'],
+                'finish': ['完美! (Perfect!) Chinese complete!', '🎉 好极了! All done!', '✨ 成功! Success!']
+            },
+            'ko': {
+                'emoji': '🇰🇷',
+                'start': ['안녕! Starting Korean flow...', '🎤 Beginning 한글 K-magic...', '🌸 Korean cherry blossoms blooming...'],
+                'progress': ['Making it 아름다운 (beautiful)...', '💜 Adding K-style charm...', 'Channeling 정 (heart)...'],
+                'finish': ['완벽! (Perfect!) Korean complete!', '🎉 대박! Amazing work!', '✨ 성공! Success!']
+            },
+            'ru': {
+                'emoji': '🇷🇺',
+                'start': ['Привет! Starting Russian grandeur...', '❄️ Beginning русский magic...', '🪆 Russian matryoshka unfolding...'],
+                'progress': ['Making it прекрасно (beautiful)...', '🎭 Adding Russian soul...', 'Channeling that широта...'],
+                'finish': ['Отлично! (Excellent!) Russian done!', '🎉 Замечательно! Wonderful!', '✨ Готово! Complete!']
+            },
+            'ar': {
+                'emoji': '🇸🇦',
+                'start': ['السلام عليكم! Arabic beauty begins...', '🕌 Starting عربي elegance...', '🌙 Arabic magic awakening...'],
+                'progress': ['Making it جميل (beautiful)...', '✨ Weaving Arabic poetry...', 'Adding that روح (soul)...'],
+                'finish': ['ممتاز! (Excellent!) Arabic complete!', '🎉 رائع! Wonderful!', '✨ تم! Done!']
+            },
+            'hi': {
+                'emoji': '🇮🇳',
+                'start': ['नमस्ते! Starting Hindi magic...', '🪔 Beginning हिंदी journey...', '🕉️ Hindi harmony begins...'],
+                'progress': ['Making it सुंदर (beautiful)...', '🎨 Adding Indian colors...', 'Channeling that रस (essence)...'],
+                'finish': ['बहुत बढ़िया! (Excellent!) Hindi done!', '🎉 शानदार! Wonderful!', '✨ पूरा! Complete!']
+            },
+            'nl': {
+                'emoji': '🇳🇱',
+                'start': ['Hallo! Starting Dutch directness...', '🌷 Beginning Nederlands charm...', '🚴 Dutch cycling through words...'],
+                'progress': ['Making it mooi (beautiful)...', '🧀 Adding Dutch flavor...', 'Gezellig vibes flowing...'],
+                'finish': ['Perfect! Dutch translation klaar!', '🎉 Geweldig! All done!', '✨ Fantastisch! Complete!']
+            },
+            'pl': {
+                'emoji': '🇵🇱',
+                'start': ['Cześć! Starting Polish spirit...', '🥟 Beginning polski journey...', '🦅 Polish eagle soaring...'],
+                'progress': ['Making it piękny (beautiful)...', '🎨 Polish artistry flowing...', 'Adding that dusza (soul)...'],
+                'finish': ['Doskonale! Polish perfection done!', '🎉 Wspaniale! Wonderful!', '✨ Gotowe! Complete!']
+            },
+            'tr': {
+                'emoji': '🇹🇷',
+                'start': ['Merhaba! Starting Turkish delight...', '☕ Beginning Türkçe magic...', '🌉 Bridging East and West...'],
+                'progress': ['Making it güzel (beautiful)...', '🎭 Turkish elegance flowing...', 'Adding that keyif (pleasure)...'],
+                'finish': ['Mükemmel! Turkish perfection done!', '🎉 Harika! Wonderful!', '✨ Tamam! Complete!']
+            },
+            'el': {
+                'emoji': '🇬🇷',
+                'start': ['Γεια σου! Starting Greek wisdom...', '🏛️ Beginning Ελληνικά magic...', '⚡ Zeus-level translation power...'],
+                'progress': ['Making it όμορφος (beautiful)...', '🎨 Greek artistry flowing...', 'Channeling ancient wisdom...'],
+                'finish': ['Τέλειο! (Perfect!) Greek complete!', '🎉 Υπέροχο! Wonderful!', '✨ Έτοιμο! Done!']
+            },
+            'he': {
+                'emoji': '🇮🇱',
+                'start': ['שלום! Starting Hebrew beauty...', '✡️ Beginning עברית journey...', '📜 Ancient meets modern...'],
+                'progress': ['Making it יפה (beautiful)...', '🎨 Hebrew artistry flowing...', 'Adding that נשמה (soul)...'],
+                'finish': ['מושלם! (Perfect!) Hebrew complete!', '🎉 נהדר! Wonderful!', '✨ גמור! Done!']
+            },
+            'th': {
+                'emoji': '🇹🇭',
+                'start': ['สวัสดี! Starting Thai grace...', '🙏 Beginning ไทย journey...', '🐘 Thai elegance awakening...'],
+                'progress': ['Making it สวย (beautiful)...', '🌺 Thai artistry blooming...', 'Adding that สนุก (joy)...'],
+                'finish': ['สมบูรณ์แบบ! (Perfect!) Thai done!', '🎉 ยอดเยี่ยม! Excellent!', '✨ เสร็จ! Complete!']
+            },
+            'vi': {
+                'emoji': '🇻🇳',
+                'start': ['Xin chào! Starting Vietnamese flow...', '🍜 Beginning Tiếng Việt magic...', '🏮 Vietnamese beauty begins...'],
+                'progress': ['Making it đẹp (beautiful)...', '🎨 Vietnamese grace flowing...', 'Adding that tình (love)...'],
+                'finish': ['Hoàn hảo! Vietnamese perfection!', '🎉 Tuyệt vời! Wonderful!', '✨ Xong! Done!']
+            },
+            'sv': {
+                'emoji': '🇸🇪',
+                'start': ['Hej! Starting Swedish hygge...', '☕ Beginning Svenska journey...', '🌲 Nordic magic awakening...'],
+                'progress': ['Making it vacker (beautiful)...', '🎨 Swedish style flowing...', 'Adding that lagom balance...'],
+                'finish': ['Perfekt! Swedish translation klar!', '🎉 Underbart! Wonderful!', '✨ Färdig! Complete!']
+            },
+            'da': {
+                'emoji': '🇩🇰',
+                'start': ['Hej! Starting Danish hygge...', '🧁 Beginning Dansk delight...', '🏰 Danish fairytale begins...'],
+                'progress': ['Making it smuk (beautiful)...', '🎨 Danish charm flowing...', 'Adding that hygge warmth...'],
+                'finish': ['Perfekt! Danish translation færdig!', '🎉 Fantastisk! Wonderful!', '✨ Klar! Complete!']
+            },
+            'fi': {
+                'emoji': '🇫🇮',
+                'start': ['Hei! Starting Finnish sisu...', '🧖 Beginning Suomi journey...', '🌲 Forest magic awakening...'],
+                'progress': ['Making it kaunis (beautiful)...', '❄️ Finnish precision flowing...', 'Channeling that sisu...'],
+                'finish': ['Täydellinen! Finnish perfection!', '🎉 Mahtava! Wonderful!', '✨ Valmis! Complete!']
+            },
+            'no': {
+                'emoji': '🇳🇴',
+                'start': ['Hei! Starting Norwegian charm...', '⛷️ Beginning Norsk adventure...', '🏔️ Norwegian fjords guiding...'],
+                'progress': ['Making it vakker (beautiful)...', '❄️ Norwegian elegance flowing...', 'Adding that koselig warmth...'],
+                'finish': ['Perfekt! Norwegian translation ferdig!', '🎉 Fantastisk! Wonderful!', '✨ Klar! Complete!']
+            },
+            'cs': {
+                'emoji': '🇨🇿',
+                'start': ['Ahoj! Starting Czech magic...', '🍺 Beginning Čeština journey...', '🏰 Prague castle awakening...'],
+                'progress': ['Making it krásný (beautiful)...', '🎨 Czech artistry flowing...', 'Adding that pohoda vibes...'],
+                'finish': ['Výborně! Czech perfection done!', '🎉 Skvělé! Wonderful!', '✨ Hotovo! Complete!']
+            },
+            'uk': {
+                'emoji': '🇺🇦',
+                'start': ['Привіт! Starting Ukrainian soul...', '🌻 Beginning українська magic...', '🎨 Ukrainian beauty blooming...'],
+                'progress': ['Making it гарний (beautiful)...', '💛💙 Ukrainian spirit flowing...', 'Adding that душа (soul)...'],
+                'finish': ['Чудово! Ukrainian perfection!', '🎉 Прекрасно! Wonderful!', '✨ Готово! Complete!']
+            },
+            'ro': {
+                'emoji': '🇷🇴',
+                'start': ['Salut! Starting Romanian charm...', '🎻 Beginning Română melody...', '🏔️ Carpathian magic awakening...'],
+                'progress': ['Making it frumos (beautiful)...', '🎨 Romanian grace flowing...', 'Adding that dor feeling...'],
+                'finish': ['Perfect! Romanian beauty complete!', '🎉 Minunat! Wonderful!', '✨ Gata! Done!']
+            },
+            'hu': {
+                'emoji': '🇭🇺',
+                'start': ['Szia! Starting Hungarian magic...', '🎻 Beginning Magyar journey...', '🏛️ Budapest elegance begins...'],
+                'progress': ['Making it szép (beautiful)...', '🎨 Hungarian artistry flowing...', 'Adding that csodás touch...'],
+                'finish': ['Tökéletes! Hungarian perfection!', '🎉 Nagyszerű! Wonderful!', '✨ Kész! Complete!']
+            },
+            'bg': {
+                'emoji': '🇧🇬',
+                'start': ['Здравей! Starting Bulgarian soul...', '🌹 Beginning Български magic...', '⛰️ Balkan beauty awakening...'],
+                'progress': ['Making it красив (beautiful)...', '🎨 Bulgarian grace flowing...', 'Adding that топлина warmth...'],
+                'finish': ['Отлично! Bulgarian perfection!', '🎉 Страхотно! Wonderful!', '✨ Готово! Complete!']
+            },
+            'id': {
+                'emoji': '🇮🇩',
+                'start': ['Halo! Starting Indonesian flow...', '🏝️ Beginning Bahasa journey...', '🌺 Indonesian warmth begins...'],
+                'progress': ['Making it indah (beautiful)...', '🎨 Indonesian grace flowing...', 'Adding that ramah spirit...'],
+                'finish': ['Sempurna! Indonesian perfection!', '🎉 Luar biasa! Wonderful!', '✨ Selesai! Complete!']
+            },
+            'ms': {
+                'emoji': '🇲🇾',
+                'start': ['Apa khabar! Starting Malay magic...', '🌴 Beginning Bahasa Melayu...', '🏝️ Malaysian harmony begins...'],
+                'progress': ['Making it cantik (beautiful)...', '🎨 Malay elegance flowing...', 'Adding that mesra warmth...'],
+                'finish': ['Sempurna! Malay perfection!', '🎉 Hebat! Wonderful!', '✨ Siap! Complete!']
+            },
+            'bn': {
+                'emoji': '🇧🇩',
+                'start': ['নমস্কার! Starting Bengali beauty...', '🌸 Beginning বাংলা journey...', '🎨 Bengali poetry awakening...'],
+                'progress': ['Making it সুন্দর (beautiful)...', '🎭 Bengali artistry flowing...', 'Adding that ভাব (emotion)...'],
+                'finish': ['নিখুঁত! Bengali perfection!', '🎉 চমৎকার! Wonderful!', '✨ সম্পূর্ণ! Complete!']
+            },
+            'ta': {
+                'emoji': '🇮🇳',
+                'start': ['வணக்கம்! Starting Tamil heritage...', '🎭 Beginning தமிழ் journey...', '🏛️ Ancient Tamil wisdom flows...'],
+                'progress': ['Making it அழகான (beautiful)...', '🎨 Tamil artistry flowing...', 'Adding that இனிமை sweetness...'],
+                'finish': ['சிறப்பு! Tamil perfection!', '🎉 அருமை! Wonderful!', '✨ முடிந்தது! Complete!']
+            },
+            'te': {
+                'emoji': '🇮🇳',
+                'start': ['నమస్కారం! Starting Telugu elegance...', '🎭 Beginning తెలుగు magic...', '🌺 Telugu beauty blooms...'],
+                'progress': ['Making it అందమైన (beautiful)...', '🎨 Telugu grace flowing...', 'Adding that మధురం sweetness...'],
+                'finish': ['పరిపూర్ణం! Telugu perfection!', '🎉 అద్భుతం! Wonderful!', '✨ పూర్తయింది! Complete!']
+            },
+            'ur': {
+                'emoji': '🇵🇰',
+                'start': ['السلام علیکم! Starting Urdu poetry...', '🌙 Beginning اردو elegance...', '📜 Urdu beauty awakening...'],
+                'progress': ['Making it خوبصورت (beautiful)...', '✨ Urdu artistry flowing...', 'Adding that شان (grace)...'],
+                'finish': ['بہترین! Urdu perfection!', '🎉 شاندار! Wonderful!', '✨ مکمل! Complete!']
+            },
+            'fa': {
+                'emoji': '🇮🇷',
+                'start': ['سلام! Starting Persian poetry...', '🌹 Beginning فارسی elegance...', '📖 Persian wisdom flows...'],
+                'progress': ['Making it زیبا (beautiful)...', '✨ Persian artistry flowing...', 'Adding that عشق (love)...'],
+                'finish': ['عالی! Persian perfection!', '🎉 فوق‌العاده! Wonderful!', '✨ تمام! Complete!']
+            },
+            'sk': {
+                'emoji': '🇸🇰',
+                'start': ['Ahoj! Starting Slovak charm...', '⛰️ Beginning Slovenčina journey...', '🏔️ Tatra mountains guiding...'],
+                'progress': ['Making it krásny (beautiful)...', '🎨 Slovak artistry flowing...', 'Adding that pohoda vibes...'],
+                'finish': ['Výborne! Slovak perfection!', '🎉 Skvelé! Wonderful!', '✨ Hotovo! Complete!']
+            },
+            'hr': {
+                'emoji': '🇭🇷',
+                'start': ['Bok! Starting Croatian beauty...', '🌊 Beginning Hrvatski journey...', '⚓ Adriatic magic flows...'],
+                'progress': ['Making it lijep (beautiful)...', '🎨 Croatian grace flowing...', 'Adding that živahan energy...'],
+                'finish': ['Savršeno! Croatian perfection!', '🎉 Odlično! Wonderful!', '✨ Gotovo! Complete!']
+            },
+            'sr': {
+                'emoji': '🇷🇸',
+                'start': ['Здраво! Starting Serbian soul...', '🎭 Beginning Српски journey...', '🏛️ Serbian spirit awakening...'],
+                'progress': ['Making it леп (beautiful)...', '🎨 Serbian artistry flowing...', 'Adding that душа (soul)...'],
+                'finish': ['Савршено! Serbian perfection!', '🎉 Одлично! Wonderful!', '✨ Готово! Complete!']
+            },
+            'lt': {
+                'emoji': '🇱🇹',
+                'start': ['Labas! Starting Lithuanian charm...', '🌲 Beginning Lietuvių journey...', '🏰 Baltic magic awakening...'],
+                'progress': ['Making it gražus (beautiful)...', '🎨 Lithuanian grace flowing...', 'Adding that šiluma warmth...'],
+                'finish': ['Tobula! Lithuanian perfection!', '🎉 Puiku! Wonderful!', '✨ Baigta! Complete!']
+            },
+            'lv': {
+                'emoji': '🇱🇻',
+                'start': ['Sveiki! Starting Latvian beauty...', '🌲 Beginning Latviešu magic...', '⚓ Baltic charm flows...'],
+                'progress': ['Making it skaists (beautiful)...', '🎨 Latvian artistry flowing...', 'Adding that dvēsele soul...'],
+                'finish': ['Lieliski! Latvian perfection!', '🎉 Brīnišķīgi! Wonderful!', '✨ Pabeigts! Complete!']
+            },
+            'et': {
+                'emoji': '🇪🇪',
+                'start': ['Tere! Starting Estonian magic...', '🌲 Beginning Eesti journey...', '💻 Digital nation wizardry...'],
+                'progress': ['Making it ilus (beautiful)...', '🎨 Estonian precision flowing...', 'Adding that hing (spirit)...'],
+                'finish': ['Suurepärane! Estonian perfection!', '🎉 Fantastiline! Wonderful!', '✨ Valmis! Complete!']
+            },
+            'sl': {
+                'emoji': '🇸🇮',
+                'start': ['Živjo! Starting Slovenian charm...', '⛰️ Beginning Slovenski journey...', '🏔️ Alpine magic awakening...'],
+                'progress': ['Making it lep (beautiful)...', '🎨 Slovenian grace flowing...', 'Adding that ljubezen love...'],
+                'finish': ['Odlično! Slovenian perfection!', '🎉 Čudovito! Wonderful!', '✨ Končano! Complete!']
+            },
+            'ca': {
+                'emoji': '🏴',
+                'start': ['Hola! Starting Catalan pride...', '🎨 Beginning Català journey...', '🏛️ Barcelona magic flows...'],
+                'progress': ['Making it bonic (beautiful)...', '🎭 Catalan artistry flowing...', 'Adding that seny wisdom...'],
+                'finish': ['Perfecte! Catalan perfection!', '🎉 Fantàstic! Wonderful!', '✨ Acabat! Complete!']
+            }
         }
 
-        # Get language-specific emoji and suffix, or use default
-        emoji, lang_suffix = language_emojis.get(target_lang.lower(), ('🌍', f'{target_lang.upper()}-ifying'))
+        # Get language config or use default
+        config = language_config.get(target_lang.lower(), {
+            'emoji': '🌍',
+            'start': [f'✨ Starting {target_lang.upper()} translation...'],
+            'progress': [f'🎨 {target_lang.upper()} magic in progress...'],
+            'finish': [f'🎉 {target_lang.upper()} translation complete!']
+        })
 
-        # Progress percentage
+        emoji = config['emoji']
         progress_pct = int((current_batch / total_batches) * 100)
 
-        # Fun messages based on progress
+        # Select message based on progress stage
         if current_batch == 1:
-            messages = [
-                f"{emoji} ✨ Starting the magic...",
-                f"{emoji} 🎨 Warming up the translation engines...",
-                f"{emoji} 🚀 Beginning the {lang_suffix} journey...",
-                f"{emoji} 📚 Opening the linguistic toolbox...",
-            ]
+            message = config['start'][current_batch % len(config['start'])]
         elif current_batch == total_batches:
-            messages = [
-                f"{emoji} 🎉 {lang_suffix} complete! Adding final touches...",
-                f"{emoji} ✅ Making it beautiful... Done!",
-                f"{emoji} 🌟 Polishing the masterpiece...",
-                f"{emoji} 🎊 Finishing touches applied!",
-            ]
-        elif progress_pct < 33:
-            messages = [
-                f"{emoji} 🔄 {lang_suffix} in progress... ({progress_pct}%)",
-                f"{emoji} 💫 Sprinkling linguistic magic... ({progress_pct}%)",
-                f"{emoji} 🎯 Finding the perfect words... ({progress_pct}%)",
-                f"{emoji} 📖 Turning pages... ({progress_pct}%)",
-            ]
-        elif progress_pct < 66:
-            messages = [
-                f"{emoji} 🎨 Making it beautiful... ({progress_pct}%)",
-                f"{emoji} ⚡ Halfway through the {lang_suffix}! ({progress_pct}%)",
-                f"{emoji} 🔥 On a roll now... ({progress_pct}%)",
-                f"{emoji} 🌈 Words flowing beautifully... ({progress_pct}%)",
-            ]
+            message = config['finish'][current_batch % len(config['finish'])]
         else:
-            messages = [
-                f"{emoji} 🏁 Almost there... ({progress_pct}%)",
-                f"{emoji} 💪 Final stretch of {lang_suffix}... ({progress_pct}%)",
-                f"{emoji} ✨ Perfecting the translation... ({progress_pct}%)",
-                f"{emoji} 🎯 Crossing the finish line... ({progress_pct}%)",
-            ]
+            base_msg = config['progress'][current_batch % len(config['progress'])]
+            message = f"{base_msg} ({progress_pct}%)"
 
-        # Rotate through messages based on batch number for variety
-        return messages[current_batch % len(messages)]
+        return f"{emoji} {message}"
 
     def _format_preview_html(
         self,

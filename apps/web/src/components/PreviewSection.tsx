@@ -27,23 +27,46 @@ export default function PreviewSection({
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progressMessage, setProgressMessage] = useState<string>('🎬 Starting translation...');
 
   useEffect(() => {
     generatePreview();
   }, [targetLang]);
 
-  async function generatePreview() {
+  function generatePreview() {
     try {
       setLoading(true);
       setError(null);
+      setProgressMessage('🎬 Starting translation...');
 
-      const data = await api.generatePreview(epubKey, targetLang, 250);
-      console.log(`✅ Preview generated using: ${data.provider}/${data.model}`);
-      setPreview(data);
+      console.log('🚀 Starting SSE preview stream for', targetLang);
+
+      // Use SSE streaming for real-time progress updates
+      api.streamPreview(
+        epubKey,
+        targetLang,
+        250,
+        // onProgress
+        (message: string) => {
+          console.log('📊 Progress update:', message);
+          setProgressMessage(message);
+        },
+        // onComplete
+        (data) => {
+          console.log(`✅ Preview generated using: ${data.provider}/${data.model}`);
+          setPreview(data);
+          setLoading(false);
+        },
+        // onError
+        (errorMsg: string) => {
+          console.error('❌ Preview generation error:', errorMsg);
+          setError(errorMsg);
+          setLoading(false);
+        }
+      );
     } catch (err) {
-      console.error('Preview generation error:', err);
+      console.error('❌ Preview generation error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate preview');
-    } finally {
       setLoading(false);
     }
   }
@@ -54,8 +77,10 @@ export default function PreviewSection({
       {loading && (
         <div className="flex flex-col items-center justify-center flex-1 py-20">
           <Loader className="w-12 h-12 text-primary-600 animate-spin mb-4" />
-          <p className="text-lg font-semibold text-neutral-900">Generating Preview...</p>
-          <p className="text-sm text-neutral-600 mt-2 text-center">
+          <p className="text-lg font-semibold text-neutral-900 mb-2">
+            {progressMessage}
+          </p>
+          <p className="text-sm text-neutral-600 text-center">
             Translating first 250 words with AI
           </p>
         </div>

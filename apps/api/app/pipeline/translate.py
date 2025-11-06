@@ -15,10 +15,35 @@ class TranslationOrchestrator:
     def __init__(self):
         self.placeholder_manager = PlaceholderManager()
         self.max_validation_failures = 2
-        
-        # Low-resource languages that should use Gemini only
+
+        # Low-resource languages that should use Gemini only for better quality
+        # These languages have limited training data in Llama models
         self.gemini_only_languages = {
-            'km', 'lo', 'eu', 'gl', 'ga', 'tg', 'uz', 'hy', 'ka'
+            # Original low-resource languages
+            'km',  # Khmer
+            'lo',  # Lao
+            'eu',  # Basque
+            'gl',  # Galician
+            'ga',  # Irish
+            'tg',  # Tajik
+            'uz',  # Uzbek
+            'hy',  # Armenian
+            'ka',  # Georgian
+
+            # Additional languages that perform better with Gemini
+            'he',  # Hebrew - Complex morphology, RTL
+            'bn',  # Bengali - Less common in training
+            'ta',  # Tamil - Ancient language, complex script
+            'te',  # Telugu - Less represented
+            'ur',  # Urdu - RTL, less common
+            'fa',  # Persian/Farsi - RTL, less common
+            'bg',  # Bulgarian - Smaller corpus
+            'hr',  # Croatian - Low resource
+            'sr',  # Serbian - Cyrillic + low resource
+            'lt',  # Lithuanian - Low resource
+            'lv',  # Latvian - Low resource
+            'et',  # Estonian - Low resource
+            'sl',  # Slovenian - Low resource
         }
     
     async def translate_segments(

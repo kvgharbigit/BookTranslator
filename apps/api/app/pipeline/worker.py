@@ -105,6 +105,9 @@ def translate_epub(job_id: str):
             job.progress_percent = 30
             db.commit()
 
+            # Full book translations ALWAYS use Gemini for best quality
+            # (provider_name is set to "gemini" in checkout.py and skip_payment.py)
+            # Fallback to Groq only for error recovery (should rarely happen)
             primary_provider = get_provider(provider_name)
             fallback_provider = get_provider("groq" if provider_name == "gemini" else "gemini")
 

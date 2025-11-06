@@ -31,10 +31,9 @@ async def create_checkout(
     """Create PayPal payment session for EPUB translation."""
     
     try:
-        # Determine provider first
-        provider = data.provider or settings.provider
-        if provider not in ["gemini", "groq"]:
-            provider = settings.provider
+        # ALWAYS use Gemini for full book translations (best quality)
+        # Previews use Llama for speed/cost, but full books deserve the best
+        provider = "gemini"
             
         # Get file size for server-side price validation
         size_bytes = storage.get_object_size(data.key)
