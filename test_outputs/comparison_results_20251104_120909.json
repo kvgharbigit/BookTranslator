@@ -1,0 +1,93 @@
+{
+  "timestamp": "2025-11-04T12:09:09.561635",
+  "epub_file": "/Users/kayvangharbi/PycharmProjects/BookTranslator/sample_books/pg236_first20pages.epub",
+  "target_language": "es",
+  "gemini": {
+    "provider": "Gemini",
+    "success": true,
+    "documents": 4,
+    "segments": 133,
+    "tokens_used": 12470,
+    "provider_cost_cents": 0,
+    "provider_cost_usd": 0.0,
+    "user_price_cents": 99,
+    "user_price_usd": 0.99,
+    "profit_cents": 99,
+    "profit_usd": 0.99,
+    "profit_margin_pct": 100.0,
+    "translation_time": 30.648982048034668,
+    "total_time": 34.51814913749695,
+    "outputs": {
+      "epub": true,
+      "pdf": true,
+      "txt": true
+    },
+    "quality": {
+      "segments_analyzed": 10,
+      "avg_original_length": 54.3,
+      "avg_translated_length": 62.5,
+      "length_ratio": 1.15,
+      "substantial_segments": 8,
+      "sample_translations": [
+        {
+          "original": "The Project Gutenberg eBook of",
+          "translated": "El libro electr\u00f3nico de Project Gutenberg de"
+        },
+        {
+          "original": "The Jungle Book",
+          "translated": "El libro de la selva"
+        },
+        {
+          "original": "This ebook is for the use of anyone anywhere in the United States and\nmost other parts of the world ...",
+          "translated": "Este libro electr\u00f3nico es para uso de cualquier persona en cualquier lugar de los Estados Unidos y\ne..."
+        }
+      ]
+    },
+    "provider_used": "gemini",
+    "output_dir": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/gemini"
+  },
+  "groq": {
+    "provider": "Groq",
+    "success": true,
+    "documents": 4,
+    "segments": 133,
+    "tokens_used": 12503,
+    "provider_cost_cents": 0,
+    "provider_cost_usd": 0.0,
+    "user_price_cents": 99,
+    "user_price_usd": 0.99,
+    "profit_cents": 99,
+    "profit_usd": 0.99,
+    "profit_margin_pct": 100.0,
+    "translation_time": 17.6200749874115,
+    "total_time": 21.487918853759766,
+    "outputs": {
+      "epub": true,
+      "pdf": true,
+      "txt": true
+    },
+    "quality": {
+      "segments_analyzed": 10,
+      "avg_original_length": 54.3,
+      "avg_translated_length": 61.7,
+      "length_ratio": 1.14,
+      "substantial_segments": 8,
+      "sample_translations": [
+        {
+          "original": "The Project Gutenberg eBook of",
+          "translated": "El libro electr\u00f3nico de Proyecto Gutenberg de"
+        },
+        {
+          "original": "The Jungle Book",
+          "translated": "El Libro de la Selva"
+        },
+        {
+          "original": "This ebook is for the use of anyone anywhere in the United States and\nmost other parts of the world ...",
+          "translated": "Este libro electr\u00f3nico es para el uso de cualquier persona en los Estados Unidos y\nla mayor\u00eda de otr..."
+        }
+      ]
+    },
+    "provider_used": "groq",
+    "output_dir": "/Users/kayvangharbi/PycharmProjects/BookTranslator/test_outputs/groq"
+  }
+}

@@ -1,240 +1,274 @@
 # 📚 BookTranslator Documentation Index
 
-**Last Updated:** November 4, 2025
+**Last Updated:** November 6, 2025
+**Status:** ✅ Consolidated and Current
 
 ---
 
-## 🚀 **GETTING STARTED**
+## 🚀 Quick Navigation
 
-### For New Users
-1. **[README.md](./README.md)** - Start here!
-   - Quick start guide
-   - What the project does
-   - How to run locally
+### New User? Start Here:
+1. **[README.md](./README.md)** - Project overview and quick start
+2. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide
 
-2. **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Cheat sheet
-   - What's working vs what's not
-   - How to test locally
-   - Where files are stored
-   - Troubleshooting basics
-
----
-
-## 📋 **STATUS & PLANNING**
-
-### Current State
-3. **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** - Complete implementation overview
-   - ✅ Completed features
-   - ⚠️ Partially complete
-   - ❌ Not yet implemented
-   - Architecture diagrams
-   - Cost breakdowns
-   - Next steps
-
-4. **[TODO.md](./TODO.md)** - Action items checklist
-   - 🔥 Immediate tasks (this week)
-   - 🎯 High priority (next week)
-   - 📦 Medium priority (2-4 weeks)
-   - 🌟 Nice to have (future)
+### Need Something Specific?
+- **Deploy to production** → [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **Set up storage** → [R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md)
+- **Configure payments** → [PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)
+- **Fix an error** → [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+- **Understand env vars** → [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)
 
 ---
 
-## 🛠️ **SETUP GUIDES**
+## 📖 Core Documentation
 
-### Infrastructure Setup
-5. **[R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md)** - ✅ **COMPLETED**
-   - Cloudflare R2 account creation
-   - Bucket configuration
-   - 5-day lifecycle policy
-   - API credentials
-   - Railway integration
-   - **Current Status:** Fully configured and tested
+### Essential Reading (Start Here)
 
-6. **[ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)** - ✅ **COMPLETE**
-   - Complete reference for all environment variables
-   - Required vs optional variables
-   - Railway production setup
-   - Local development setup
-   - Service-specific credentials
-   - **Current Status:** All documented and validated
+**[README.md](./README.md)** - Main Documentation
+- What the project does
+- Quick local setup (5 minutes)
+- Architecture overview
+- Tech stack
+- Prerequisites
+- Links to all other docs
 
-7. **[POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)** - ✅ **NEW**
-   - Complete post-translation workflow
-   - File generation (EPUB, PDF, TXT)
-   - Upload to R2 storage
-   - Email notification with download links
-   - Code implementation details
-   - **Current Status:** Fully implemented, tested, documented
-
-8. **[PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)** - ⚠️ **PENDING**
-   - PayPal Business account creation
-   - API credentials setup
-   - Micropayments pricing request
-   - Webhook configuration
-   - **Current Status:** Documented, awaiting live setup
-
-8. **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Deployment options
-   - MVP deployment (8 hours)
-   - Production deployment (2 weeks)
-   - Railway + Vercel setup
-   - R2 storage (✅ already done)
-   - Environment variables
-
-9. **[PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md)** - ✅ **COMPLETED**
-   - Custom domain setup (polytext.site)
-   - DNS configuration
-   - SSL certificates
-   - Current live status
-   - **Current Status:** Live at polytext.site
-
-10. **[BUSINESS_SETUP.md](./BUSINESS_SETUP.md)** - ✅ **UPDATED**
-    - Business operations guide
-    - Payment integration status
-    - Email notifications (complete)
-    - Custom domain (complete)
-    - Analytics and monitoring
-    - Legal and compliance requirements
-    - **Current Status:** Consolidated and updated Nov 3, 2025
-
-11. **[PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md)** - ✅ **NEW Nov 4, 2025**
-    - Complete technical documentation for preview translation
-    - Architecture and implementation details
-    - Word truncation algorithm
-    - Image embedding and CSS extraction
-    - Design decisions and performance metrics
-    - **Current Status:** Production-ready, fully tested
+**[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment Guide ⭐ NEW
+- Local testing setup
+- Production deployment (2-4 hours)
+- Railway backend setup
+- Vercel frontend setup
+- Custom domain configuration
+- Cost breakdown
+- Security checklist
+- Monitoring & maintenance
 
 ---
 
-## 🐛 **TROUBLESHOOTING**
+## 🛠️ Setup Guides
 
-12. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem solving
-    - Railway deployment issues
-    - Cloudflare R2 storage issues
-    - Vercel frontend issues
-    - Payment processing
-    - AI API rate limits
-    - Progress bar stuck at 0%
-    - Database connection errors
-    - Email delivery issues
+**[R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md)** - Cloudflare R2 Storage
+- Account creation
+- Bucket configuration
+- 5-day lifecycle policy
+- CORS setup
+- API credentials
+- Railway integration
+- **Status:** ✅ Complete and tested
+
+**[PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)** - Payment Integration
+- PayPal Business account creation
+- Micropayments pricing request (5% + $0.05)
+- API credentials generation
+- Webhook configuration
+- Testing payments
+- **Status:** ⚠️ Documented, awaiting live setup
+
+**[ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)** - Configuration Reference
+- Complete list of all environment variables
+- Required vs optional variables
+- Railway production setup
+- Local development setup
+- Service-specific credentials
+- **Status:** ✅ Complete reference
 
 ---
 
-## 📦 **ARCHIVED DOCUMENTATION**
+## 📋 Technical Documentation
 
-Older docs moved to `docs/archive/`:
-- **AUDIT_REPORT.md** - Historical translation quality audit (Nov 2, 2025)
-- **IMAGE_CAPTION_ANALYSIS.md** - Technical bug analysis (resolved)
-- **DOMAIN_SETUP.md** - Old domain-specific setup (polytext.site)
+**[POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)** - Post-Translation Flow
+- File generation (EPUB, PDF, TXT)
+- R2 storage upload
+- Presigned URL generation
+- Email notification system
+- Code implementation details
+- **Status:** ✅ Fully implemented
 
-These are kept for historical reference but not relevant for current setup.
+**[PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md)** - Preview Translation
+- Free 1000-word preview feature
+- Architecture and implementation
+- Word truncation algorithm
+- Image embedding
+- CSS extraction
+- Provider selection logic
+- **Status:** ✅ Production-ready
+
+**[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Problem Solving
+- Railway deployment issues
+- Docker build failures
+- Runtime errors
+- Frontend connection problems
+- Translation failures
+- Email delivery issues
+- Common fixes and solutions
+- **Status:** ✅ Regularly updated
 
 ---
 
-## 📊 **DOCUMENTATION STRUCTURE**
+## 📊 Documentation Structure
 
-### Core Docs (Current)
 ```
 BookTranslator/
-├── README.md                       # Start here
-├── QUICK_REFERENCE.md              # Cheat sheet (UPDATED Nov 4, 2025)
-├── CURRENT_STATUS.md               # What's done (UPDATED Nov 4, 2025)
-├── TODO.md                         # What's next (UPDATED Nov 4, 2025)
-├── PREVIEW_FEATURE.md              # Preview translation docs (NEW Nov 4, 2025)
-├── R2_SETUP_GUIDE.md              # R2 storage (DONE)
-├── ENVIRONMENT_VARIABLES.md        # All env vars reference
-├── POST_TRANSLATION_WORKFLOW.md    # Email & file workflow
-├── PAYPAL_SETUP_GUIDE.md          # PayPal integration guide
-├── PRODUCTION_DEPLOYMENT.md        # Live deployment status
-├── DEPLOYMENT_GUIDE.md             # How to deploy
-├── BUSINESS_SETUP.md               # Business integration
-├── TROUBLESHOOTING.md              # Problem solving
-└── DOCUMENTATION_INDEX.md          # This file
-```
-
-### Archived Docs
-```
-BookTranslator/docs/archive/
-├── AUDIT_REPORT.md
-├── IMAGE_CAPTION_ANALYSIS.md
-└── DOMAIN_SETUP.md
+├── README.md                      # Start here!
+├── DOCUMENTATION_INDEX.md         # This file
+├── DEPLOYMENT.md                  # Complete deployment guide ⭐ NEW
+│
+├── Setup Guides/
+│   ├── R2_SETUP_GUIDE.md         # Cloudflare R2 storage
+│   ├── PAYPAL_SETUP_GUIDE.md     # PayPal payments
+│   └── ENVIRONMENT_VARIABLES.md   # Env var reference
+│
+├── Technical Docs/
+│   ├── POST_TRANSLATION_WORKFLOW.md  # Post-translation flow
+│   ├── PREVIEW_FEATURE.md            # Preview feature docs
+│   └── TROUBLESHOOTING.md            # Problem solving
+│
+└── docs/archive/                  # Historical reference only
+    ├── AUDIT_REPORT.md           # Old translation audit
+    ├── IMAGE_CAPTION_ANALYSIS.md # Old bug analysis
+    └── DOMAIN_SETUP.md           # Old domain setup
 ```
 
 ---
 
-## 🎯 **QUICK NAVIGATION**
+## 🗂️ What Changed (Nov 6, 2025)
+
+### ✅ New Documentation
+- **DEPLOYMENT.md** - Consolidated deployment guide merging:
+  - DEPLOYMENT_GUIDE.md
+  - PRODUCTION_DEPLOYMENT.md
+
+### ♻️ Updated Documentation
+- **README.md** - Streamlined to focus on essentials
+- **DOCUMENTATION_INDEX.md** - This file, reorganized
+
+### 🗑️ Removed/Archived
+- ❌ **CURRENT_STATUS.md** - Duplicated README content
+- ❌ **QUICK_REFERENCE.md** - Redundant with README
+- ❌ **TODO.md** - Use GitHub Issues instead
+- ❌ **DEPLOYMENT_GUIDE.md** - Merged into DEPLOYMENT.md
+- ❌ **PRODUCTION_DEPLOYMENT.md** - Merged into DEPLOYMENT.md
+- ❌ **BUSINESS_SETUP.md** - Content distributed to other docs
+
+All deleted files had overlapping content now consolidated in fewer, better-organized documents.
+
+---
+
+## 🎯 Common Tasks
 
 ### I want to...
 
-**...understand the current state:**
-→ Read [CURRENT_STATUS.md](./CURRENT_STATUS.md)
+**...understand what this project does:**
+→ Read **[README.md](./README.md)** - Sections: "What This Does" and "Architecture"
 
 **...run the app locally:**
-→ Read [README.md](./README.md) Quick Start section
+→ Read **[README.md](./README.md)** - Section: "Quick Start"
 
 **...deploy to production:**
-→ Read [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+→ Read **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete step-by-step guide
 
-**...set up Cloudflare R2:** ✅
-→ Already done! See [R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md) for details
+**...set up Cloudflare R2 storage:**
+→ Read **[R2_SETUP_GUIDE.md](./R2_SETUP_GUIDE.md)** - 5 steps, 30 minutes
+
+**...configure PayPal payments:**
+→ Read **[PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md)** - Business account setup
 
 **...fix an error:**
-→ Read [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
-
-**...see what needs to be done:**
-→ Read [TODO.md](./TODO.md)
-
-**...get quick answers:**
-→ Read [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
-
-**...set up PayPal payments:**
-→ Read [PAYPAL_SETUP_GUIDE.md](./PAYPAL_SETUP_GUIDE.md) - Complete step-by-step guide
+→ Read **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues & solutions
 
 **...understand environment variables:**
-→ Read [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) - Complete reference
+→ Read **[ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md)** - Complete reference
 
 **...understand the preview feature:**
-→ Read [PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md) - Complete technical docs
+→ Read **[PREVIEW_FEATURE.md](./PREVIEW_FEATURE.md)** - Technical implementation
+
+**...understand email workflow:**
+→ Read **[POST_TRANSLATION_WORKFLOW.md](./POST_TRANSLATION_WORKFLOW.md)** - Email & file flow
 
 ---
 
-## 🔄 **DOCUMENTATION MAINTENANCE**
-
-### When to Update
-- **After completing a major feature** → Update CURRENT_STATUS.md
-- **After fixing a bug** → Add to TROUBLESHOOTING.md
-- **After deploying** → Update DEPLOYMENT_GUIDE.md
-- **When priorities change** → Update TODO.md
-- **When adding new features** → Update README.md
-
-### How to Keep Docs Current
-1. Mark completed items with ✅
-2. Mark in-progress items with ⚠️
-3. Mark not-started items with ❌
-4. Archive old docs to `docs/archive/`
-5. Update "Last Updated" dates
-6. Link related docs together
-
----
-
-## 📞 **EXTERNAL RESOURCES**
+## 🔗 External Resources
 
 ### Dashboards
 - **Cloudflare R2:** https://dash.cloudflare.com/r2
 - **Railway:** https://railway.app/dashboard
 - **Vercel:** https://vercel.com/dashboard
-- **Resend:** https://resend.com/domains
+- **Resend:** https://resend.com/emails
 - **PayPal Developer:** https://developer.paypal.com/dashboard
-- **Groq API:** https://console.groq.com/
+- **Groq Console:** https://console.groq.com/
 - **Gemini API:** https://aistudio.google.com/app/apikey
 
-### Documentation
-- **Cloudflare R2 Docs:** https://developers.cloudflare.com/r2/
-- **Railway Docs:** https://docs.railway.app
-- **Vercel Docs:** https://vercel.com/docs
-- **FastAPI Docs:** https://fastapi.tiangolo.com
-- **Next.js Docs:** https://nextjs.org/docs
+### Official Documentation
+- **Cloudflare R2:** https://developers.cloudflare.com/r2/
+- **Railway:** https://docs.railway.app
+- **Vercel:** https://vercel.com/docs
+- **FastAPI:** https://fastapi.tiangolo.com
+- **Next.js:** https://nextjs.org/docs
+- **PayPal REST API:** https://developer.paypal.com/docs/api/overview/
+- **Resend:** https://resend.com/docs
 
 ---
 
-**Questions?** Start with [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) or [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)!
+## 📝 Documentation Guidelines
+
+### When to Update Docs
+
+**After completing a feature:**
+- Update README.md if it's a major feature
+- Create/update technical doc for implementation details
+- Update this index if adding new documentation
+
+**After fixing a bug:**
+- Add to TROUBLESHOOTING.md with solution
+- Update relevant technical docs if architecture changed
+
+**After deployment:**
+- Update DEPLOYMENT.md with any new steps
+- Update ENVIRONMENT_VARIABLES.md with new vars
+- Update README.md status badges
+
+**When changing setup:**
+- Update relevant setup guide (R2, PayPal, etc.)
+- Update DEPLOYMENT.md if process changed
+- Update this index if doc structure changed
+
+### Documentation Standards
+
+- ✅ Mark completed items with checkboxes: `[x]` or `✅`
+- ⚠️ Mark pending items: `[ ]` or `⚠️`
+- ❌ Mark not-started: `❌`
+- 📅 Include "Last Updated" dates
+- 🔗 Link related documents
+- 📊 Use tables for comparisons
+- 💡 Use callouts for important info
+- 📁 Keep code examples up to date
+
+---
+
+## 🆘 Getting Help
+
+### Documentation Not Helping?
+
+1. **Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** for your specific error
+2. **Search GitHub Issues** for similar problems
+3. **Create a new issue** with:
+   - What you were trying to do
+   - What happened instead
+   - Error messages (if any)
+   - Your environment (OS, versions, etc.)
+
+### Contributing to Docs
+
+Found an error or want to improve docs?
+1. Fork the repository
+2. Update the relevant documentation file
+3. Submit a pull request
+
+---
+
+**Questions?** Start with [README.md](./README.md) or [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)!
+
+**Ready to deploy?** Follow [DEPLOYMENT.md](./DEPLOYMENT.md)!
+
+---
+
+**Documentation Status:** ✅ Consolidated and Current (Nov 6, 2025)
