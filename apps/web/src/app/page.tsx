@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Zap, Globe, Shield, Sparkles, ArrowRight } from 'lucide-react';
+import { BookOpen, Zap, Globe, Shield, Sparkles, ArrowRight, Download } from 'lucide-react';
 import FileDrop from '@/components/FileDrop';
 import PriceBox from '@/components/PriceBox';
 import PreviewSection from '@/components/PreviewSection';
@@ -18,30 +18,40 @@ export default function HomePage() {
   const [error, setError] = useState<string>('');
   const [previewLang, setPreviewLang] = useState<string>('es');
   const [previewLangName, setPreviewLangName] = useState<string>('Spanish');
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadMessage, setUploadMessage] = useState<string>('');
 
   const handleFileSelected = async (file: File) => {
     setIsLoading(true);
     setError('');
+    setUploadProgress(0);
+    setUploadMessage('📤 Preparing upload...');
 
     try {
       // Step 1: Get presigned upload URL
       const { key, upload_url } = await api.presignUpload(file.name);
-      
-      // Step 2: Upload file to R2
-      await api.uploadFile(upload_url, file);
-      
+
+      // Step 2: Upload file to R2 with progress tracking
+      await api.uploadFileWithProgress(upload_url, file, (percent, message) => {
+        setUploadProgress(percent);
+        setUploadMessage(message);
+      });
+
       // Step 3: Get price estimate
+      setUploadMessage('🔍 Analyzing your book...');
       const estimateResponse = await api.getEstimate(key, 'es'); // Default to Spanish for estimate
 
       setUploadKey(key);
       setEstimate(estimateResponse);
       setStep('estimate');
-      
+
     } catch (err) {
       console.error('Upload failed:', err);
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
     } finally {
       setIsLoading(false);
+      setUploadProgress(0);
+      setUploadMessage('');
     }
   };
 
@@ -110,9 +120,10 @@ export default function HomePage() {
             </div>
             <a
               href="/retrieve"
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-lg font-medium hover:from-primary-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
-              Retrieve Downloads →
+              <Download className="w-4 h-4" />
+              <span>Get Your Books</span>
             </a>
           </div>
         </div>
@@ -121,6 +132,13 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-20">
+          {/* Price Badge */}
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-lg font-bold mb-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <Sparkles className="w-5 h-5" />
+            <span>Books from $0.99</span>
+            <Sparkles className="w-5 h-5" />
+          </div>
+
           <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Upload. Translate.
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
@@ -184,11 +202,22 @@ export default function HomePage() {
                 maxSizeMB={50}
               />
               {isLoading && (
-                <div className="text-center mt-6">
+                <div className="text-center mt-6 space-y-4">
                   <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-primary-50 to-blue-50 rounded-full border border-primary-200">
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent"></div>
-                    <p className="text-primary-700 font-medium">Uploading and analyzing your file...</p>
+                    <p className="text-primary-700 font-medium">{uploadMessage || 'Uploading and analyzing your file...'}</p>
                   </div>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="max-w-md mx-auto">
+                      <div className="w-full bg-neutral-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-primary-500 to-blue-500 h-full transition-all duration-300 ease-out"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-neutral-500 mt-1">{uploadProgress}% complete</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -243,7 +272,7 @@ export default function HomePage() {
                           <span>Live Translation Preview</span>
                         </h4>
                         <p className="text-primary-50 text-sm mt-1">
-                          First 1000 words • Translated to {previewLangName} • Updates when you change language →
+                          First 250 words • Translated to {previewLangName}
                         </p>
                       </div>
                       <PreviewSection
