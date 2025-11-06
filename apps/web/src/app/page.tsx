@@ -120,7 +120,7 @@ export default function HomePage() {
             </div>
             <a
               href="/retrieve"
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-lg font-medium hover:from-primary-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-primary-600 text-primary-600 rounded-lg font-medium hover:bg-primary-50 transition-all duration-200"
             >
               <Download className="w-4 h-4" />
               <span>Get Your Books</span>
@@ -136,36 +136,37 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-lg font-bold mb-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
             <Sparkles className="w-5 h-5" />
             <span>Books from $0.99</span>
-            <Sparkles className="w-5 h-5" />
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Upload. Translate.
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
           </h2>
-          <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-2xl text-neutral-700 mb-8 max-w-2xl mx-auto leading-relaxed">
             Turn any book into any language in minutes. Then pay only for what you need—no account, no subscription.
           </p>
 
           {/* Primary CTA */}
-          <button
-            onClick={() => {
-              const uploadSection = document.getElementById('upload-section');
-              if (uploadSection) {
-                const yOffset = -100; // Offset for header height
-                const y = uploadSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-              }
-            }}
-            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-full text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 mb-6"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Try It Free Now</span>
-            <span className="text-sm font-normal opacity-90">(250-word preview)</span>
-          </button>
+          <div className="mb-8">
+            <button
+              onClick={() => {
+                const uploadSection = document.getElementById('upload-section');
+                if (uploadSection) {
+                  const yOffset = -100; // Offset for header height
+                  const y = uploadSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+              }}
+              className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-full text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Try It Free Now</span>
+            </button>
+            <p className="text-sm text-neutral-600 mt-2">250-word preview • No payment needed</p>
+          </div>
 
           {/* Social Proof */}
-          <div className="flex items-center justify-center gap-2 text-sm text-neutral-600 mb-8">
+          <div className="flex items-center justify-center gap-2 text-sm text-neutral-600 mb-10">
             <div className="flex -space-x-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">JS</div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MK</div>
