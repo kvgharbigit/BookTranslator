@@ -1,7 +1,8 @@
 // Language options for translation
-// Organized by popularity: Top 8 most dominant languages, then alphabetical
+// Organized by popularity: Top 9 most dominant languages, then alphabetical
 export const LANGUAGES = [
-  // === Top 8 Most Dominant Languages ===
+  // === Top 9 Most Dominant Languages ===
+  { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'es', name: 'Spanish', flag: '🇪🇸' },
   { code: 'fr', name: 'French', flag: '🇫🇷' },
   { code: 'de', name: 'German', flag: '🇩🇪' },
