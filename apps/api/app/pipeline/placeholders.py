@@ -169,29 +169,51 @@ class PlaceholderManager:
         return restored_text, validation_passed
     
     def validate_translation_quality(
-        self, 
-        original_segments: List[str], 
-        translated_segments: List[str]
+        self,
+        original_segments: List[str],
+        translated_segments: List[str],
+        target_lang: str = "en"
     ) -> bool:
-        """Validate translation quality with length ratio checks."""
-        
+        """Validate translation quality with language-specific length ratio checks.
+
+        Args:
+            original_segments: Original text segments
+            translated_segments: Translated text segments
+            target_lang: Target language code for language-specific thresholds
+
+        Returns:
+            True if quality checks pass, False otherwise
+        """
+
         if len(original_segments) != len(translated_segments):
             logger.error(
                 f"Segment count mismatch: {len(original_segments)} -> {len(translated_segments)}"
             )
             return False
-        
+
+        # Language-specific thresholds
+        # CJK and Thai languages naturally compress text (use fewer characters)
+        cjk_languages = {'zh', 'ja', 'ko', 'th'}
+
+        if target_lang.lower() in cjk_languages:
+            min_ratio = 0.2  # Allow 20-250% for compact languages
+            max_ratio = 2.5
+            logger.debug(f"Using CJK thresholds for {target_lang}: {min_ratio}-{max_ratio}")
+        else:
+            min_ratio = 0.6  # Standard 60-180% for other languages
+            max_ratio = 1.8
+
         failed_segments = 0
-        
+
         for i, (original, translated) in enumerate(zip(original_segments, translated_segments)):
             # Skip empty segments
             if not original.strip() or not translated.strip():
                 continue
-            
-            # Check length ratio (0.6 - 1.8 is reasonable for most language pairs)
+
+            # Check length ratio with language-specific thresholds
             length_ratio = len(translated) / len(original)
-            
-            if length_ratio < 0.6 or length_ratio > 1.8:
+
+            if length_ratio < min_ratio or length_ratio > max_ratio:
                 logger.warning(
                     f"Suspicious length ratio for segment {i}: {length_ratio:.2f} "
                     f"(original: {len(original)}, translated: {len(translated)})"

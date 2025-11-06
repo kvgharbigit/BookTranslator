@@ -67,10 +67,10 @@ class TranslationOrchestrator:
                 translated_segments, placeholder_valid = self.placeholder_manager.restore_segments(
                     translated_protected, placeholder_map
                 )
-                
-                # Step 4: Validate translation quality
+
+                # Step 4: Validate translation quality (with language-specific thresholds)
                 quality_valid = self.placeholder_manager.validate_translation_quality(
-                    segments, translated_segments
+                    segments, translated_segments, target_lang
                 )
                 
                 # Check if validation passed

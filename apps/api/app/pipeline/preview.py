@@ -41,7 +41,8 @@ class PreviewService:
         target_lang: str,
         max_words: int = 1000,
         provider: str = "groq",
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        progress_callback: Optional[callable] = None
     ) -> Tuple[str, int, str]:
         """Generate a preview translation of the first N words of an EPUB.
 
@@ -99,14 +100,25 @@ class PreviewService:
             primary_provider = get_provider("groq")
             fallback_provider = get_provider("gemini")
 
-            # Translate segments
+            # Translate segments with fun progress messages
             logger.info(f"Translating {len(segments)} segments with Groq (primary) + Gemini (fallback)")
+
+            # Create fun progress callback with language-specific emojis
+            def batch_progress_callback(current_batch: int, total_batches: int):
+                progress_message = self._get_fun_progress_message(current_batch, total_batches, target_lang)
+                logger.info(progress_message)
+
+                # If we have a progress callback from SSE, send it the message
+                if progress_callback:
+                    progress_callback(progress_message)
+
             orchestrator = TranslationOrchestrator()
             translated_segments, tokens_used, provider_used = await orchestrator.translate_segments(
                 segments=segments,
                 target_lang=target_lang,
                 primary_provider=primary_provider,
-                fallback_provider=fallback_provider
+                fallback_provider=fallback_provider,
+                progress_callback=batch_progress_callback
             )
 
             # Calculate total cost for preview
@@ -126,7 +138,9 @@ class PreviewService:
             )
 
             # Format as single HTML document for preview display with images
-            preview_html = self._format_preview_html(translated_docs, css_content, image_map)
+            preview_html = self._format_preview_html(
+                translated_docs, css_content, image_map, target_lang
+            )
 
             logger.info(f"Preview generated successfully: {actual_words} words using {provider_used}")
             return preview_html, actual_words, provider_used
@@ -293,7 +307,102 @@ class PreviewService:
 
         return image_map
 
-    def _format_preview_html(self, translated_docs: List[dict], css_content: str = "", image_map: Optional[Dict[str, str]] = None) -> str:
+    def _get_fun_progress_message(self, current_batch: int, total_batches: int, target_lang: str) -> str:
+        """Generate fun progress messages with emojis during translation.
+
+        Args:
+            current_batch: Current batch number (1-indexed)
+            total_batches: Total number of batches
+            target_lang: Target language code
+
+        Returns:
+            Fun progress message with emojis
+        """
+        # Language-specific emojis and suffixes
+        language_emojis = {
+            'es': ('🇪🇸', 'Spanish-ifying'),
+            'fr': ('🇫🇷', 'French-ifying'),
+            'de': ('🇩🇪', 'German-ifying'),
+            'it': ('🇮🇹', 'Italian-ifying'),
+            'pt': ('🇵🇹', 'Portuguese-ifying'),
+            'ru': ('🇷🇺', 'Russian-ifying'),
+            'ja': ('🇯🇵', 'Japanese-ifying'),
+            'zh': ('🇨🇳', 'Chinese-ifying'),
+            'ko': ('🇰🇷', 'Korean-ifying'),
+            'ar': ('🇸🇦', 'Arabic-ifying'),
+            'hi': ('🇮🇳', 'Hindi-ifying'),
+            'nl': ('🇳🇱', 'Dutch-ifying'),
+            'pl': ('🇵🇱', 'Polish-ifying'),
+            'tr': ('🇹🇷', 'Turkish-ifying'),
+            'sv': ('🇸🇪', 'Swedish-ifying'),
+            'da': ('🇩🇰', 'Danish-ifying'),
+            'fi': ('🇫🇮', 'Finnish-ifying'),
+            'no': ('🇳🇴', 'Norwegian-ifying'),
+            'cs': ('🇨🇿', 'Czech-ifying'),
+            'el': ('🇬🇷', 'Greek-ifying'),
+            'he': ('🇮🇱', 'Hebrew-ifying'),
+            'th': ('🇹🇭', 'Thai-ifying'),
+            'vi': ('🇻🇳', 'Vietnamese-ifying'),
+            'id': ('🇮🇩', 'Indonesian-ifying'),
+            'uk': ('🇺🇦', 'Ukrainian-ifying'),
+            'ro': ('🇷🇴', 'Romanian-ifying'),
+            'hu': ('🇭🇺', 'Hungarian-ifying'),
+            'bg': ('🇧🇬', 'Bulgarian-ifying'),
+        }
+
+        # Get language-specific emoji and suffix, or use default
+        emoji, lang_suffix = language_emojis.get(target_lang.lower(), ('🌍', f'{target_lang.upper()}-ifying'))
+
+        # Progress percentage
+        progress_pct = int((current_batch / total_batches) * 100)
+
+        # Fun messages based on progress
+        if current_batch == 1:
+            messages = [
+                f"{emoji} ✨ Starting the magic...",
+                f"{emoji} 🎨 Warming up the translation engines...",
+                f"{emoji} 🚀 Beginning the {lang_suffix} journey...",
+                f"{emoji} 📚 Opening the linguistic toolbox...",
+            ]
+        elif current_batch == total_batches:
+            messages = [
+                f"{emoji} 🎉 {lang_suffix} complete! Adding final touches...",
+                f"{emoji} ✅ Making it beautiful... Done!",
+                f"{emoji} 🌟 Polishing the masterpiece...",
+                f"{emoji} 🎊 Finishing touches applied!",
+            ]
+        elif progress_pct < 33:
+            messages = [
+                f"{emoji} 🔄 {lang_suffix} in progress... ({progress_pct}%)",
+                f"{emoji} 💫 Sprinkling linguistic magic... ({progress_pct}%)",
+                f"{emoji} 🎯 Finding the perfect words... ({progress_pct}%)",
+                f"{emoji} 📖 Turning pages... ({progress_pct}%)",
+            ]
+        elif progress_pct < 66:
+            messages = [
+                f"{emoji} 🎨 Making it beautiful... ({progress_pct}%)",
+                f"{emoji} ⚡ Halfway through the {lang_suffix}! ({progress_pct}%)",
+                f"{emoji} 🔥 On a roll now... ({progress_pct}%)",
+                f"{emoji} 🌈 Words flowing beautifully... ({progress_pct}%)",
+            ]
+        else:
+            messages = [
+                f"{emoji} 🏁 Almost there... ({progress_pct}%)",
+                f"{emoji} 💪 Final stretch of {lang_suffix}... ({progress_pct}%)",
+                f"{emoji} ✨ Perfecting the translation... ({progress_pct}%)",
+                f"{emoji} 🎯 Crossing the finish line... ({progress_pct}%)",
+            ]
+
+        # Rotate through messages based on batch number for variety
+        return messages[current_batch % len(messages)]
+
+    def _format_preview_html(
+        self,
+        translated_docs: List[dict],
+        css_content: str = "",
+        image_map: Optional[Dict[str, str]] = None,
+        target_lang: str = "en"
+    ) -> str:
         """Format translated documents into a single HTML preview.
 
         Uses the EXACT same HTML from reconstruct_documents() plus the original EPUB CSS
@@ -302,6 +411,8 @@ class PreviewService:
         Args:
             translated_docs: List of translated spine document dicts (from reconstruct_documents)
             css_content: Original CSS from the EPUB
+            image_map: Optional dictionary mapping image paths to base64 data URIs
+            target_lang: Target language code for RTL detection
 
         Returns:
             Single HTML string suitable for iframe display
@@ -348,9 +459,19 @@ class PreviewService:
                 flags=re.IGNORECASE
             )
 
+        # Determine if RTL language
+        rtl_languages = {'ar', 'he', 'fa', 'ur'}  # Arabic, Hebrew, Farsi, Urdu
+        is_rtl = target_lang.lower() in rtl_languages
+
+        # Set HTML attributes for RTL support
+        dir_attr = ' dir="rtl"' if is_rtl else ''
+        lang_attr = f' lang="{target_lang}"'
+        direction_css = 'rtl' if is_rtl else 'ltr'
+        text_align = 'right' if is_rtl else 'left'
+
         # Wrap with original EPUB CSS plus minimal responsive wrapper
         preview_html = f"""<!DOCTYPE html>
-<html>
+<html{lang_attr}{dir_attr}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -363,6 +484,8 @@ class PreviewService:
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            direction: {direction_css};
+            text-align: {text_align};
         }}
 
         /* Ensure images are responsive */
