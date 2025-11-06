@@ -699,7 +699,7 @@ export default function HomePage() {
             </div>
             <div>
               <div className="font-semibold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</div>
-              <div className="text-sm text-neutral-600">Made by language lovers, for language lovers</div>
+              <div className="text-sm text-neutral-600">Every book, in your language</div>
             </div>
           </div>
           <p className="text-sm text-neutral-600">© 2024 Polytext</p>
