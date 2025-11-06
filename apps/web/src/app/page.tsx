@@ -417,9 +417,9 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+              <div className="flex flex-wrap justify-center gap-4 max-w-6xl mx-auto">
                 {/* Short Book/Novella */}
-                <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border-2 border-blue-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border-2 border-blue-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">🧾</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Short Book</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">0–40K words</div>
@@ -431,7 +431,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Standard Novel */}
-                <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-5 border-2 border-green-300 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 relative">
+                <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] bg-gradient-to-br from-green-50 to-white rounded-xl p-5 border-2 border-green-300 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 relative">
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">MOST POPULAR</div>
                   <div className="text-4xl mb-3 text-center">📘</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Standard Novel</h5>
@@ -444,7 +444,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Long Novel */}
-                <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border-2 border-purple-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border-2 border-purple-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">📕</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Long Novel</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">120K–200K words</div>
@@ -456,7 +456,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Epic Novel */}
-                <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
+                <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">🏛️</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Epic Novel</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">200K–350K words</div>
@@ -468,7 +468,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Grand Epic */}
-                <div className="bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 sm:col-span-2">
+                <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] bg-gradient-to-br from-red-50 to-white rounded-xl p-5 border-2 border-red-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                   <div className="text-4xl mb-3 text-center">📚</div>
                   <h5 className="font-bold text-neutral-900 text-center mb-2">Grand Epic</h5>
                   <div className="text-xs text-center text-neutral-600 mb-3">350K–750K words</div>
