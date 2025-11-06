@@ -39,7 +39,32 @@ class TranslationProvider(ABC):
     
     def get_default_system_hint(self, tgt_lang: str) -> str:
         """Get default system prompt hint."""
-        return (
+
+        # Language-specific quotation mark instructions
+        quotation_marks = {
+            'fr': 'Use proper French quotation marks (« guillemets ») for dialogue, not << >> or angle brackets.',
+            'de': 'Use proper German quotation marks („ and ") for dialogue.',
+            'es': 'Use proper Spanish quotation marks (« » or " ") for dialogue.',
+            'it': 'Use proper Italian quotation marks (« ») for dialogue.',
+            'pt': 'Use proper Portuguese quotation marks (" ") for dialogue.',
+            'ru': 'Use proper Russian quotation marks (« ») for dialogue.',
+            'pl': 'Use proper Polish quotation marks („ ") for dialogue.',
+            'cs': 'Use proper Czech quotation marks („ ") for dialogue.',
+            'nl': 'Use proper Dutch quotation marks (" " or ' ') for dialogue.',
+            'sv': 'Use proper Swedish quotation marks (" " or » «) for dialogue.',
+            'no': 'Use proper Norwegian quotation marks (« ») for dialogue.',
+            'da': 'Use proper Danish quotation marks (» «) for dialogue.',
+            'fi': 'Use proper Finnish quotation marks (" ") for dialogue.',
+        }
+
+        quote_instruction = quotation_marks.get(tgt_lang, '')
+
+        base_instruction = (
             f"Translate to {tgt_lang}. Preserve placeholders {{TAG_n}}/{{NUM_n}}/{{URL_n}} exactly. "
             "Do not add or remove HTML tags."
         )
+
+        if quote_instruction:
+            return f"{base_instruction} {quote_instruction}"
+
+        return base_instruction
