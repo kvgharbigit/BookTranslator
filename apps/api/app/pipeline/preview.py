@@ -365,6 +365,15 @@ class PreviewService:
             height: auto !important;
         }}
 
+        /* Disable hover color changes on all elements */
+        * {{
+            pointer-events: auto !important;
+        }}
+
+        *:hover {{
+            color: inherit !important;
+        }}
+
         /* Preview banner */
         .preview-banner {{
             background: #fef3c7;
