@@ -14,7 +14,7 @@
 Translate any EPUB book into **41 languages** in under 5 minutes:
 
 - **📚 Upload EPUB** → Get instant price estimate ($0.50-$3.00)
-- **🎯 Free Preview** → See first 1000 words translated instantly
+- **🎯 Free Preview** → See first 300 words translated instantly
 - **💳 Pay via PayPal** → Micropayments optimized for small amounts
 - **⚡ AI Translation** → Gemini 2.5 Flash + Groq fallback
 - **📱 Real-time Progress** → Smooth 0-100% progress tracking
@@ -29,10 +29,10 @@ Translate any EPUB book into **41 languages** in under 5 minutes:
 ### Tier 1: Major World Languages (8)
 Spanish, French, German, Italian, Portuguese, Chinese (Simplified), Japanese, Russian
 
-### Tier 2: High-Resource Languages (7)
+### Tier 2: High-Resource Languages (8)
 Korean, Arabic, Hindi, Dutch, Polish, Swedish, Indonesian, Vietnamese
 
-### Tier 3: Medium-Resource Languages (8)
+### Tier 3: Medium-Resource Languages (9)
 Danish, Norwegian, Czech, Romanian, Hungarian, Greek, Malay, Slovak, Catalan
 
 ### Tier 4: Specialized Languages (16)
@@ -41,8 +41,10 @@ Hebrew, Bengali, Tamil, Telugu, Urdu, Persian (Farsi), Bulgarian, Croatian, Serb
 **Note:** Ukrainian temporarily unavailable due to translation quality issues.
 
 **Translation Strategy:**
-- **Previews (250 words):** Llama 3.1 8B for Tiers 1-3, Gemini 2.5 Flash Lite for Tier 4
+- **Previews (300 words):** Llama 3.1 8B Instant for Tiers 1-3, Gemini 2.5 Flash Lite for Tier 4
 - **Full Books:** Gemini 2.5 Flash Lite for all languages (best quality)
+
+**Note:** English is supported as both source and target language for reverse translations.
 
 ---
 
@@ -81,6 +83,7 @@ Visit **http://localhost:3000** → Upload EPUB → Click **"Skip Payment (Test)
 | Standard Novel | 40-120K | $1.49 | $0.08 | $1.29 | 87% |
 | Long Novel | 120-200K | $2.19 | $0.14 | $1.89 | 86% |
 | Epic Novel | 200-350K | $2.99 | $0.24 | $2.55 | 85% |
+| Grand Epic | 350-750K | $3.99 | $0.34 | $3.45 | 86% |
 
 **Why This Works:**
 - **5× cheaper** than competitors (O.Translator charges ~$5 for 100K words)

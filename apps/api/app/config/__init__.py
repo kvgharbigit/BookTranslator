@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     redis_url: str = Field(alias="REDIS_URL")
     rq_queues: str = Field(default="translate", alias="RQ_QUEUES")
     max_concurrent_jobs: int = Field(default=5, alias="MAX_CONCURRENT_JOBS")
-    retention_days: int = Field(default=7, alias="RETENTION_DAYS")
+    retention_days: int = Field(default=5, alias="RETENTION_DAYS")
 
     # Multi-Format Output
     generate_pdf: bool = Field(default=True, alias="GENERATE_PDF")

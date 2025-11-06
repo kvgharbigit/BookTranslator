@@ -142,7 +142,7 @@ export default function PriceBox({
   const optimalProvider = 'PayPal';
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-xl p-6 shadow-md">
+    <div className="w-full bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-xl p-6 shadow-md">
       <div className="text-center mb-8">
         <h3 className="text-xl font-bold text-neutral-900 mb-4">
           Translation Estimate

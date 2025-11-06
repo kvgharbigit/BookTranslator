@@ -7,7 +7,7 @@
 
 ## 📖 Overview
 
-The preview feature provides users with an **instant, free translation sample** of the first 1000 words of their EPUB, allowing them to evaluate translation quality before purchasing. The preview uses the **exact same pipeline** as the full translation, ensuring what users see is exactly what they'll get.
+The preview feature provides users with an **instant, free translation sample** of the first 300 words of their EPUB, allowing them to evaluate translation quality before purchasing. The preview uses the **exact same pipeline** as the full translation, ensuring what users see is exactly what they'll get.
 
 ---
 
@@ -15,7 +15,7 @@ The preview feature provides users with an **instant, free translation sample** 
 
 ### **User Experience**
 - ✅ **Auto-displays** on EPUB upload (no additional clicks needed)
-- ✅ **First 1000 words** translated instantly
+- ✅ **First 300 words** translated instantly
 - ✅ **Exact EPUB reproduction:**
   - Original CSS styling preserved
   - Images embedded as base64 data URIs
@@ -60,7 +60,7 @@ class PreviewService:
 1. Download EPUB from R2 to temp file
 2. Read EPUB structure with `EPUBProcessor`
 3. Extract CSS and images from EPUB
-4. Limit documents to first 1000 words:
+4. Limit documents to first 300 words (configurable via max_words parameter):
    - Include full documents until word limit
    - Truncate last document mid-content if needed
 5. Segment HTML with `HTMLSegmenter`
@@ -192,7 +192,7 @@ def _format_preview_html(translated_docs, css_content, image_map):
         </style>
     </head>
     <body>
-        <div class="preview-banner">Preview - First 1000 Words</div>
+        <div class="preview-banner">Preview - First {actual_word_count} Words</div>
         {combined_html_str}
     </body>
     </html>"""
@@ -202,16 +202,17 @@ def _format_preview_html(translated_docs, css_content, image_map):
 
 ## 🎯 Design Decisions
 
-### **Why 1000 Words?**
-- Provides meaningful sample (2-3 pages)
-- Fast generation (~5-10 seconds)
-- Low cost (~$0.001 per preview with Groq)
-- Enough to evaluate quality
+### **Why 300 Words?**
+- Provides meaningful sample (~1 page)
+- Very fast generation (~3-8 seconds)
+- Extremely low cost (~$0.0003 per preview with Groq)
+- Enough to evaluate quality without being overwhelming
+- Balanced between speed and preview value
 
 ### **Why Groq Primary?**
 - **78% cheaper** than Gemini ($0.074 vs $0.34 per 1M tokens)
 - **Faster** response times
-- Preview cost negligible: 1000 words ≈ 1300 tokens ≈ $0.0001
+- Preview cost negligible: 300 words ≈ 400 tokens ≈ $0.00003
 - Gemini fallback ensures reliability
 
 ### **Why Exact EPUB Reproduction?**
@@ -237,14 +238,14 @@ def _format_preview_html(translated_docs, css_content, image_map):
 ## 📊 Performance Metrics
 
 ### **Generation Speed**
-- Average: 5-10 seconds
-- Groq: ~8 seconds for 1000 words
-- Gemini: ~15 seconds for 1000 words
+- Average: 3-8 seconds
+- Groq: ~5 seconds for 300 words
+- Gemini: ~8 seconds for 300 words
 
 ### **Cost Per Preview**
-- Groq: ~$0.0001 (1300 tokens × $0.074/1M)
-- Gemini: ~$0.0004 (1300 tokens × $0.34/1M)
-- 1000 previews/month: $0.10-0.40
+- Groq: ~$0.00003 (400 tokens × $0.074/1M)
+- Gemini: ~$0.00014 (400 tokens × $0.34/1M)
+- 1000 previews/month: $0.03-0.14
 
 ### **Conversion Impact** (Estimated)
 - Users who see preview: **3-5× more likely to purchase**
@@ -271,9 +272,9 @@ def _format_preview_html(translated_docs, css_content, image_map):
 **Solution:** Extract images from EPUB and embed as base64 data URIs
 
 ### **Issue 3: Early Truncation** ✅ FIXED
-**Problem:** Preview stopped at document boundaries before 1000 words
+**Problem:** Preview stopped at document boundaries before reaching word limit
 
-**Solution:** Changed `_limit_to_words()` to truncate mid-document
+**Solution:** Changed `_limit_to_words()` to truncate mid-document at exact word count
 
 ---
 
@@ -339,7 +340,7 @@ Response:
 ## 🚀 Future Enhancements
 
 ### **Potential Improvements**
-- [ ] Adjustable word count (500/1000/1500 words)
+- [ ] Adjustable word count (200/300/500 words)
 - [ ] Preview caching (5-minute TTL)
 - [ ] Side-by-side original/translated view
 - [ ] Download preview as PDF

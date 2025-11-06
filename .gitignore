@@ -66,6 +66,7 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+dump.rdb
 
 # Node.js
 node_modules/
@@ -86,6 +87,9 @@ outputs/
 # Temporary files
 tmp/
 temp/
+
+# Test results (can be large)
+test_results/
 
 # Debug files (but not organized tests/)
 debug_*.py
