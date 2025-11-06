@@ -218,69 +218,52 @@ class HTMLSegmenter:
         
         # Check if this appears to be a TOC document
         if any(keyword in html_content.lower() for keyword in ['contents', 'table', 'índice']):
-            logger.info("=== DEEP DIVE DEBUG: Applying chapter title translations to TOC document ===")
-            logger.info(f"HTML content length: {len(html_content)}")
-            logger.info(f"HTML content preview (first 500 chars): {html_content[:500]}")
-            
-            # Extract actual titles from HTML to identify exact characters used
+            logger.debug("Applying chapter title translations to TOC document")
+            logger.debug(f"HTML content length: {len(html_content)}")
+
+            # Extract actual titles from HTML to identify exact characters used (DEBUG only)
             import re
             # Find all text that looks like "...something's..."
             smart_quotes_pattern = r'([A-Za-z]+['']s?\s+[A-Za-z]+)'
             matches = re.findall(smart_quotes_pattern, html_content)
-            for match in matches:
-                logger.info(f"Found title with smart quote: '{match}' (len={len(match)})")
-                for i, char in enumerate(match):
-                    if char in "''":  # Check for various apostrophe types
-                        logger.info(f"Character {i}: '{char}' Unicode: U+{ord(char):04X}")
-            
+            logger.debug(f"Found {len(matches)} potential smart quote patterns in TOC")
+
             # Check specifically for the problematic titles
             problematic_titles = ["Mowgli's Brothers", "Her Majesty's Servants"]
             for title in problematic_titles:
                 if title in html_content:
-                    logger.info(f"FOUND '{title}' in HTML content!")
-                    # Find exact position
-                    pos = html_content.find(title)
-                    logger.info(f"Position: {pos}")
-                    logger.info(f"Context around title: '{html_content[max(0, pos-50):pos+len(title)+50]}'")
-                else:
-                    logger.info(f"'{title}' NOT FOUND in HTML content")
-                    # Check for variations
-                    if title.lower() in html_content.lower():
-                        logger.info(f"Found lowercase version of '{title}'")
-                    if title.upper() in html_content:
-                        logger.info(f"Found uppercase version of '{title}'")
+                    logger.debug(f"Found '{title}' in HTML content")
+                elif title.lower() in html_content.lower():
+                    logger.debug(f"Found case variation of '{title}'")
             
             # Apply translations to the HTML content
             for original_title, spanish_title in title_translations.items():
                 import re
-                logger.info(f"Checking for title: '{original_title}'")
-                
+                logger.debug(f"Checking for title: '{original_title}'")
+
                 # Try exact match first, then word boundary pattern for titles with apostrophes
                 if original_title in html_content:
-                    logger.info(f"EXACT MATCH FOUND for '{original_title}'")
-                    
+                    logger.debug(f"EXACT MATCH FOUND for '{original_title}'")
+
                     # For titles with apostrophes, use more flexible pattern
                     if "'" in original_title:
-                        logger.info(f"Replacing apostrophe title: '{original_title}' -> '{spanish_title}'")
+                        logger.debug(f"Replacing apostrophe title: '{original_title}' -> '{spanish_title}'")
                         old_content = html_content
                         html_content = html_content.replace(original_title, spanish_title)
                         if old_content != html_content:
-                            logger.info(f"REPLACEMENT SUCCESSFUL for '{original_title}'")
+                            logger.info(f"TOC translation applied: '{original_title}' -> '{spanish_title}'")
                         else:
-                            logger.info(f"REPLACEMENT FAILED for '{original_title}'")
+                            logger.debug(f"REPLACEMENT FAILED for '{original_title}'")
                     else:
                         # Use word boundaries for regular titles
                         pattern = r'\b' + re.escape(original_title) + r'\b'
                         old_content = html_content
                         html_content = re.sub(pattern, spanish_title, html_content, flags=re.IGNORECASE)
                         if old_content != html_content:
-                            logger.info(f"REGEX REPLACEMENT SUCCESSFUL for '{original_title}'")
+                            logger.info(f"TOC translation applied: '{original_title}' -> '{spanish_title}'")
                         else:
-                            logger.info(f"REGEX REPLACEMENT FAILED for '{original_title}'")
-                    
-                    if old_content != html_content:
-                        logger.info(f"TOC translation applied: '{original_title}' -> '{spanish_title}'")
+                            logger.debug(f"REGEX REPLACEMENT FAILED for '{original_title}'")
                 else:
-                    logger.info(f"No exact match for '{original_title}'")
+                    logger.debug(f"No exact match for '{original_title}'")
         
         return html_content

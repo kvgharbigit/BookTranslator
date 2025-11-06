@@ -175,5 +175,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=settings.port,
         log_level=settings.log_level.lower(),
-        reload=settings.env == "development"
+        reload=settings.env == "development",
+        timeout_keep_alive=30  # Increase keep-alive timeout for long-running requests like preview
     )

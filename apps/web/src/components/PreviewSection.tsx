@@ -37,7 +37,7 @@ export default function PreviewSection({
       setLoading(true);
       setError(null);
 
-      const data = await api.generatePreview(epubKey, targetLang, 500);
+      const data = await api.generatePreview(epubKey, targetLang, 250);
       console.log(`✅ Preview generated using: ${data.provider}/${data.model}`);
       setPreview(data);
     } catch (err) {
@@ -56,7 +56,7 @@ export default function PreviewSection({
           <Loader className="w-12 h-12 text-primary-600 animate-spin mb-4" />
           <p className="text-lg font-semibold text-neutral-900">Generating Preview...</p>
           <p className="text-sm text-neutral-600 mt-2 text-center">
-            Translating first 500 words with AI
+            Translating first 250 words with AI
           </p>
         </div>
       )}

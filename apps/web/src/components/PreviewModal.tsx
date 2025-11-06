@@ -39,7 +39,7 @@ export default function PreviewModal({
       setLoading(true);
       setError(null);
 
-      const data = await api.generatePreview(epubKey, targetLang, 500);
+      const data = await api.generatePreview(epubKey, targetLang, 250);
       console.log(`✅ Preview generated using: ${data.provider}/${data.model}`);
       setPreview(data);
     } catch (err) {
@@ -60,7 +60,7 @@ export default function PreviewModal({
             <div>
               <h3 className="text-xl font-bold text-neutral-900">Translation Preview</h3>
               <p className="text-sm text-neutral-600">
-                First ~500 words translated to {targetLangName}
+                First ~250 words translated to {targetLangName}
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function PreviewModal({
               <Loader className="w-12 h-12 text-primary-600 animate-spin mb-4" />
               <p className="text-lg font-semibold text-neutral-900">Generating Preview...</p>
               <p className="text-sm text-neutral-600 mt-2">
-                Translating first 500 words with AI
+                Translating first 250 words with AI
               </p>
             </div>
           )}

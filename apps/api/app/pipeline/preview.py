@@ -109,7 +109,15 @@ class PreviewService:
                 fallback_provider=fallback_provider
             )
 
+            # Calculate total cost for preview
+            from app.config.models import estimate_cost
+            # Rough split: 45% input, 55% output (based on typical translation patterns)
+            input_tokens = int(tokens_used * 0.45)
+            output_tokens = int(tokens_used * 0.55)
+            total_cost = estimate_cost(provider_used, model, input_tokens, output_tokens)
+
             logger.info(f"✅ Translation completed using {provider_used}")
+            logger.info(f"💰 Preview translation cost: ~${total_cost:.4f} USD ({tokens_used:,} tokens)")
 
             # Reconstruct HTML with translations
             logger.info("Reconstructing HTML with translations")
