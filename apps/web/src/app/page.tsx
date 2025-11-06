@@ -226,6 +226,9 @@ export default function HomePage() {
                 <p className="text-neutral-600 leading-relaxed">
                   Select your EPUB file to get an instant price estimate
                 </p>
+                <p className="text-sm text-primary-600 font-semibold mt-2">
+                  Most books under $2 • Try preview free
+                </p>
               </div>
               <FileDrop 
                 onFileSelected={handleFileSelected} 
