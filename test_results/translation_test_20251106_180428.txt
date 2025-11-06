@@ -1,0 +1,119 @@
+================================================================================
+TRANSLATION QUALITY TEST RESULTS
+Test Date: 2025-11-06 18:04:29
+================================================================================
+
+
+Tier 1 - 8 languages
+--------------------------------------------------------------------------------
+✅ es   Spanish                   Provider: groq   | Time:  18.9s | Words: 250
+     Preview: 📖 Preview - First ~1500 Words This shows exactly how your translated book will look with the same styling and formatting. El libro electrónico de Project Gutenberg de El Libro de la Selva Este libro e...
+
+✅ fr   French                    Provider: groq   | Time:  19.6s | Words: 250
+     Preview: 📖 Preview - First ~1500 Words This shows exactly how your translated book will look with the same styling and formatting. Le livre numérique de Project Gutenberg de Le Livre de la Jungle Ce livre numé...
+
+✅ de   German                    Provider: groq   | Time:  19.1s | Words: 250
+     Preview: 📖 Preview - First ~1500 Words This shows exactly how your translated book will look with the same styling and formatting. Das Project Gutenberg eBook von Der Dschungelbuch Dieses eBook ist für die Ver...
+
+✅ it   Italian                   Provider: groq   | Time:  19.4s | Words: 250
+     Preview: 📖 Preview - First ~1500 Words This shows exactly how your translated book will look with the same styling and formatting. Il progetto Gutenberg eBook di Il libro della giungla Questo ebook è per l'uso...
+
+✅ pt   Portuguese                Provider: groq   | Time:  18.9s | Words: 250
+     Preview: 📖 Preview - First ~1500 Words This shows exactly how your translated book will look with the same styling and formatting. O eBook da Project Gutenberg de O Livro da Selva Este eBook é para o uso de qu...
+
+❌ zh   Chinese (Simplified)      ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ja   Japanese                  ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ru   Russian                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+
+Tier 2 - 10 languages
+--------------------------------------------------------------------------------
+❌ ko   Korean                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ar   Arabic                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ hi   Hindi                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ nl   Dutch                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ pl   Polish                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ tr   Turkish                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ sv   Swedish                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ id   Indonesian                ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ vi   Vietnamese                ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ th   Thai                      ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+
+Tier 3 - 11 languages
+--------------------------------------------------------------------------------
+❌ da   Danish                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ no   Norwegian                 ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ fi   Finnish                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ cs   Czech                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ro   Romanian                  ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ hu   Hungarian                 ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ el   Greek                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ uk   Ukrainian                 ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ms   Malay                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ sk   Slovak                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ca   Catalan                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+
+Tier 4 - 13 languages
+--------------------------------------------------------------------------------
+❌ he   Hebrew                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ bn   Bengali                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ta   Tamil                     ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ te   Telugu                    ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ ur   Urdu                      ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ fa   Persian (Farsi)           ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ bg   Bulgarian                 ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ hr   Croatian                  ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ sr   Serbian                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ lt   Lithuanian                ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ lv   Latvian                   ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ et   Estonian                  ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+❌ sl   Slovenian                 ERROR: HTTP 429: {"error":"Rate limit exceeded: 5 per 1 hour"}
+
+
+================================================================================
+STATISTICS
+================================================================================
+Total Languages Tested: 42
+Successful: 5 (11.9%)
+Failed: 37 (88.1%)
+
+Provider Usage:
+  Llama (Groq): 5
+  Gemini: 0
+
+Average Translation Time: 19.17 seconds

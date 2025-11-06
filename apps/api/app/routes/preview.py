@@ -34,7 +34,7 @@ class PreviewResponse(BaseModel):
 
 
 @router.post("/preview", response_model=PreviewResponse)
-@limiter.limit("5/hour")  # 5 previews per hour per IP
+# No rate limit - previews are free and should be unlimited
 async def generate_preview(
     request: Request,
     data: PreviewRequest
@@ -104,7 +104,7 @@ async def generate_preview(
 
 
 @router.get("/preview/stream")
-@limiter.limit("5/hour")  # 5 previews per hour per IP
+# No rate limit - previews are free and should be unlimited
 async def stream_preview(
     request: Request,
     key: str,
