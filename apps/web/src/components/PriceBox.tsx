@@ -11,13 +11,27 @@ interface PriceBoxProps {
   onSkipPayment?: (email: string, targetLang: string) => Promise<void>;
   onPreview?: (targetLang: string, targetLangName: string) => void;
   disabled?: boolean;
+  targetLang?: string;
+  onLanguageChange?: (langCode: string) => void;
 }
 
-export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayment, onPreview, disabled = false }: PriceBoxProps) {
+export default function PriceBox({
+  tokensEst,
+  priceCents,
+  onPayment,
+  onSkipPayment,
+  onPreview,
+  disabled = false,
+  targetLang: externalTargetLang,
+  onLanguageChange
+}: PriceBoxProps) {
   const [email, setEmail] = useState('');
-  const [targetLang, setTargetLang] = useState('es');
+  const [internalTargetLang, setInternalTargetLang] = useState('es');
   const [hasRights, setHasRights] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Use external targetLang if provided, otherwise use internal state
+  const targetLang = externalTargetLang !== undefined ? externalTargetLang : internalTargetLang;
 
   const handlePayment = async () => {
     if (!hasRights) {
@@ -182,7 +196,14 @@ export default function PriceBox({ tokensEst, priceCents, onPayment, onSkipPayme
           <select
             id="target-lang"
             value={targetLang}
-            onChange={(e) => setTargetLang(e.target.value)}
+            onChange={(e) => {
+              const newLang = e.target.value;
+              if (onLanguageChange) {
+                onLanguageChange(newLang);
+              } else {
+                setInternalTargetLang(newLang);
+              }
+            }}
             disabled={disabled || isProcessing}
             className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
           >
