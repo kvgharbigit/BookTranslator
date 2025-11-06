@@ -330,9 +330,9 @@ export default function HomePage() {
             <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <BookOpen className="w-7 h-7 text-white" />
             </div>
-            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Multiple Formats</h4>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Read Anywhere</h4>
             <p className="text-sm text-neutral-600 leading-relaxed">
-              Get your translated book in EPUB, PDF, and TXT formats
+              Get your translated book in EPUB, PDF, and TXT—works on any device
             </p>
           </div>
 
@@ -340,9 +340,9 @@ export default function HomePage() {
             <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Fast & Simple</h4>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Results in Minutes</h4>
             <p className="text-sm text-neutral-600 leading-relaxed">
-              Upload your file and get professional translation in minutes
+              Upload your file and get professional-quality translation instantly
             </p>
           </div>
 
@@ -350,9 +350,9 @@ export default function HomePage() {
             <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Shield className="w-7 h-7 text-white" />
             </div>
-            <h4 className="text-lg font-semibold text-neutral-900 mb-2">No Strings Attached</h4>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Complete Privacy</h4>
             <p className="text-sm text-neutral-600 leading-relaxed">
-              No account, no subscription, no personal data required
+              No account, no subscription, no tracking—your books stay private
             </p>
           </div>
         </div>
