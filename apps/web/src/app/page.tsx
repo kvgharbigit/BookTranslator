@@ -144,7 +144,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
           </h2>
           <p className="text-xl text-neutral-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            No account needed. No subscription. Just upload your EPUB and get it translated to any language.
+            Turn any book into any language in minutes. Professional AI translation at a fraction of the cost—no account, no subscription.
           </p>
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-semibold mb-8">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
