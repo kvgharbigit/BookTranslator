@@ -165,7 +165,7 @@ export default function HomePage() {
           </button>
 
           {/* Social Proof */}
-          <div className="flex items-center gap-2 text-sm text-neutral-600 mb-8">
+          <div className="flex items-center justify-center gap-2 text-sm text-neutral-600 mb-8">
             <div className="flex -space-x-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">JS</div>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MK</div>
