@@ -133,7 +133,7 @@ export default function HomePage() {
       <main className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-24">
           {/* Price Badge */}
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-lg font-bold mb-8 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full text-lg font-bold mb-8 shadow-md hover:shadow-lg transition-all transform hover:scale-105">
             <Sparkles className="w-5 h-5" />
             <span>Books from $0.99</span>
           </div>
