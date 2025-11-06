@@ -115,7 +115,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</h1>
-                <p className="text-sm text-neutral-600">Made by polyglots, for polyglots</p>
+                <p className="text-sm text-neutral-600">Made by language lovers, for language lovers</p>
               </div>
             </div>
             <a
@@ -579,7 +579,7 @@ export default function HomePage() {
                   <span>Why Our Prices Are Unbeatable</span>
                 </h4>
                 <p className="text-sm text-neutral-700 mb-3">
-                  Built by polyglots who've paid overpriced translation services for years. We know what fair pricing looks like.
+                  Built by language lovers who've paid overpriced translation services for years. We know what fair pricing looks like.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                   <div className="bg-white/70 rounded-lg p-3">
@@ -621,7 +621,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h4 className="text-lg font-semibold text-neutral-900 flex items-center space-x-2">
                   <span>✨</span>
-                  <span>What polyglots get:</span>
+                  <span>What you get:</span>
                 </h4>
                 <ul className="space-y-3 text-neutral-600">
                   <li className="flex items-center space-x-3">
@@ -690,7 +690,7 @@ export default function HomePage() {
             </div>
             <div>
               <div className="font-semibold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Polytext</div>
-              <div className="text-sm text-neutral-600">Made by polyglots, for polyglots</div>
+              <div className="text-sm text-neutral-600">Made by language lovers, for language lovers</div>
             </div>
           </div>
           <p className="text-sm text-neutral-600">© 2024 Polytext</p>
