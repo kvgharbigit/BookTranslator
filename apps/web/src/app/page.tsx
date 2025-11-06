@@ -144,16 +144,16 @@ export default function HomePage() {
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
           </h2>
           <p className="text-xl text-neutral-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            Turn any book into any language in minutes. Professional AI translation at a fraction of the cost—no account, no subscription.
+            Turn any book into any language in minutes. <strong className="text-primary-600">Try it free with a 250-word preview</strong>, then pay only for what you need—no account, no subscription.
           </p>
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-semibold mb-8">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
             Best prices on the market • 100% transparent pricing
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-              <Zap className="w-4 h-4 text-yellow-500" />
-              <span className="text-neutral-700 font-medium">Fast AI translation</span>
+            <div className="flex items-center space-x-2 bg-primary-50 border border-primary-200 px-4 py-2 rounded-full shadow-sm">
+              <Sparkles className="w-4 h-4 text-primary-600" />
+              <span className="text-primary-700 font-semibold">Free 250-word preview</span>
             </div>
             <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
               <Globe className="w-4 h-4 text-blue-500" />
