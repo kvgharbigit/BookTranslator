@@ -143,54 +143,67 @@ export default function PriceBox({
 
   return (
     <div className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-xl p-6 shadow-md">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+      <div className="text-center mb-8">
+        <h3 className="text-xl font-bold text-neutral-900 mb-4">
           Translation Estimate
         </h3>
-        <div className="bg-gradient-to-br from-primary-50 via-blue-50 to-purple-50 rounded-xl p-6 mb-6 border border-primary-100">
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium mb-3 ${
-            bookCategory.color === 'blue' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-            bookCategory.color === 'green' ? 'bg-green-100 text-green-700 border border-green-200' :
-            bookCategory.color === 'purple' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-            bookCategory.color === 'orange' ? 'bg-orange-100 text-orange-700 border border-orange-200' :
-            'bg-red-100 text-red-700 border border-red-200'
-          }`}>
-            <span className="mr-1">📚</span>
+        <div className="bg-gradient-to-br from-neutral-50 to-white rounded-2xl p-8 mb-6 border-2 border-neutral-200">
+          <div className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold mb-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white shadow-sm">
+            <span className="mr-1.5">📚</span>
             <span>{bookCategory.name}</span>
           </div>
-          <p className="text-sm text-neutral-600 mb-2 flex items-center justify-center space-x-2">
-            <Sparkles className="w-4 h-4 text-primary-500" />
+          <p className="text-lg font-bold text-neutral-800 mb-3 flex items-center justify-center space-x-2">
+            <Sparkles className="w-5 h-5 text-primary-600" />
             <span>~{wordsEst.toLocaleString()} words detected</span>
           </p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent mb-1">
+          <p className="text-5xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent mb-2">
             ${priceUSD.toFixed(2)}
           </p>
-          <p className="text-sm text-neutral-600 mb-3">{bookCategory.range}</p>
-          <p className="text-xs text-neutral-500 italic mb-3">Similar to {bookCategory.example}</p>
-          <div className="flex items-center justify-center space-x-4 text-xs text-neutral-600 mb-3">
-            <div className="flex items-center space-x-1">
-              <CheckCircle2 className="w-3 h-3 text-green-500" />
+          <p className="text-base text-neutral-600 mb-2">{bookCategory.range}</p>
+          <p className="text-sm text-neutral-500 italic mb-4">Similar to {bookCategory.example}</p>
+          <div className="flex items-center justify-center space-x-6 text-sm font-medium text-neutral-700 mb-4">
+            <div className="flex items-center space-x-1.5">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span>EPUB</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <CheckCircle2 className="w-3 h-3 text-green-500" />
+            <div className="flex items-center space-x-1.5">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span>PDF</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <CheckCircle2 className="w-3 h-3 text-green-500" />
+            <div className="flex items-center space-x-1.5">
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
               <span>TXT</span>
             </div>
           </div>
-          <div className="inline-flex items-center px-3 py-1 bg-white/70 text-primary-700 text-xs rounded-full border border-primary-200">
-            💳 Secure payment via {optimalProvider} (${(paypalFee / 100).toFixed(2)} processing fee)
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+            <p className="text-sm font-bold text-green-800 mb-1">
+              Save up to 70% vs competitors
+            </p>
+            <p className="text-xs text-green-700">
+              Same quality, fraction of the price
+            </p>
+          </div>
+          <div className="text-sm text-neutral-600 bg-white/80 rounded-lg p-3 border border-neutral-200">
+            <div className="flex justify-between items-center mb-1">
+              <span>Translation:</span>
+              <span className="font-semibold">${priceUSD.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-neutral-500">
+              <span>{optimalProvider} fee:</span>
+              <span>${(paypalFee / 100).toFixed(2)}</span>
+            </div>
+            <div className="border-t border-neutral-200 mt-2 pt-2 flex justify-between items-center font-bold">
+              <span>Total:</span>
+              <span className="text-primary-600">${((priceCents + paypalFee) / 100).toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Target Language Selection */}
         <div>
-          <label htmlFor="target-lang" className="block text-sm font-medium text-neutral-700 mb-1">
+          <label htmlFor="target-lang" className="block text-base font-semibold text-neutral-800 mb-2">
             Translate to:
           </label>
           <select
@@ -205,7 +218,7 @@ export default function PriceBox({
               }
             }}
             disabled={disabled || isProcessing}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+            className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base"
           >
             {LANGUAGES.map((lang) => (
               <option key={lang.code} value={lang.code}>
@@ -217,7 +230,7 @@ export default function PriceBox({
 
         {/* Email Input */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
+          <label htmlFor="email" className="block text-base font-semibold text-neutral-800 mb-2">
             Email for download link:
           </label>
           <input
@@ -227,9 +240,9 @@ export default function PriceBox({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your.email@example.com"
             disabled={disabled || isProcessing}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+            className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base"
           />
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-sm text-neutral-600 mt-1.5">
             Optional but recommended
           </p>
         </div>
@@ -247,18 +260,21 @@ export default function PriceBox({
         )}
 
         {/* Rights Confirmation */}
-        <div className="flex items-start space-x-2">
-          <input
-            id="rights-check"
-            type="checkbox"
-            checked={hasRights}
-            onChange={(e) => setHasRights(e.target.checked)}
-            disabled={disabled || isProcessing}
-            className="mt-1 h-4 w-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500 disabled:opacity-50"
-          />
-          <label htmlFor="rights-check" className="text-sm text-neutral-700">
-            I own the rights to translate this file
-          </label>
+        <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <input
+              id="rights-check"
+              type="checkbox"
+              checked={hasRights}
+              onChange={(e) => setHasRights(e.target.checked)}
+              disabled={disabled || isProcessing}
+              className="mt-0.5 h-5 w-5 text-primary-600 border-2 border-neutral-400 rounded focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+            />
+            <label htmlFor="rights-check" className="text-base font-semibold text-neutral-900 cursor-pointer">
+              I own the rights to translate this file
+              <span className="block text-sm font-normal text-neutral-600 mt-1">Required to proceed</span>
+            </label>
+          </div>
         </div>
 
         {/* Payment Button */}
@@ -277,8 +293,8 @@ export default function PriceBox({
           </span>
         </button>
 
-        {/* Skip Payment Button (for testing) */}
-        {onSkipPayment && (
+        {/* Skip Payment Button (for testing) - Only show in development */}
+        {onSkipPayment && process.env.NODE_ENV === 'development' && (
           <button
             onClick={handleSkipPayment}
             disabled={disabled || isProcessing || !hasRights || !targetLang}
