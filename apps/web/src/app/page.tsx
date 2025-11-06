@@ -151,7 +151,11 @@ export default function HomePage() {
           <button
             onClick={() => {
               const uploadSection = document.getElementById('upload-section');
-              uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              if (uploadSection) {
+                const yOffset = -100; // Offset for header height
+                const y = uploadSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+              }
             }}
             className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-full text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 mb-6"
           >
