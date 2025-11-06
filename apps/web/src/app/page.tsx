@@ -175,10 +175,6 @@ export default function HomePage() {
             <span className="font-medium">Over 200,000 books translated</span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <div className="flex items-center space-x-2 bg-primary-50 border border-primary-200 px-4 py-2 rounded-full shadow-sm">
-              <Sparkles className="w-4 h-4 text-primary-600" />
-              <span className="text-primary-700 font-semibold">Free 250-word preview</span>
-            </div>
             <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
               <Globe className="w-4 h-4 text-blue-500" />
               <span className="text-neutral-700 font-medium">20 languages</span>
