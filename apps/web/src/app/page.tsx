@@ -165,21 +165,14 @@ export default function HomePage() {
           </button>
 
           {/* Social Proof */}
-          <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="flex items-center gap-2 text-sm text-neutral-600">
-              <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">JS</div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MK</div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">AL</div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">+200K</div>
-              </div>
-              <span className="font-medium">Over 200,000 books translated</span>
+          <div className="flex items-center gap-2 text-sm text-neutral-600 mb-8">
+            <div className="flex -space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">JS</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">MK</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">AL</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-white flex items-center justify-center text-white text-xs font-semibold">+200K</div>
             </div>
-
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-semibold">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-              Best prices on the market • 100% transparent pricing
-            </div>
+            <span className="font-medium">Over 200,000 books translated</span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <div className="flex items-center space-x-2 bg-primary-50 border border-primary-200 px-4 py-2 rounded-full shadow-sm">
