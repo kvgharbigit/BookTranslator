@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Callable
 from app.providers.base import TranslationProvider
 from app.config import settings
 from app.logger import get_logger
+from app.utils.cost_tracker import CostTracker
 
 logger = get_logger(__name__)
 
@@ -158,12 +159,28 @@ class GeminiFlashProvider(TranslationProvider):
             
             response.raise_for_status()
             result = response.json()
-            
+
             if "candidates" not in result or not result["candidates"]:
                 raise Exception("No translation candidates returned")
-            
+
             translated_text = result["candidates"][0]["content"]["parts"][0]["text"]
-            
+
+            # Extract token usage from response if available
+            usage_metadata = result.get("usageMetadata", {})
+            input_tokens = usage_metadata.get("promptTokenCount", None)
+            output_tokens = usage_metadata.get("candidatesTokenCount", None)
+
+            # Log API call with cost estimation
+            CostTracker.log_api_call(
+                provider="gemini",
+                model=self.model,
+                input_text=prompt,
+                output_text=translated_text,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                request_id=None
+            )
+
             # Split back into segments
             translated_segments = translated_text.split(separator)
             

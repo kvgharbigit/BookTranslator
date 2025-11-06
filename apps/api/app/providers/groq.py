@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Callable
 from app.providers.base import TranslationProvider
 from app.config import settings
 from app.logger import get_logger
+from app.utils.cost_tracker import CostTracker
 
 logger = get_logger(__name__)
 
@@ -178,12 +179,28 @@ Return exactly {len(batch)} translated segments, each starting with its [number]
             
             response.raise_for_status()
             result = response.json()
-            
+
             if "choices" not in result or not result["choices"]:
                 raise Exception("No translation choices returned")
-            
+
             translated_text = result["choices"][0]["message"]["content"]
-            
+
+            # Extract token usage from response if available
+            usage = result.get("usage", {})
+            input_tokens = usage.get("prompt_tokens", None)
+            output_tokens = usage.get("completion_tokens", None)
+
+            # Log API call with cost estimation
+            CostTracker.log_api_call(
+                provider="groq",
+                model=self.model,
+                input_text=user_prompt,
+                output_text=translated_text,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                request_id=result.get("id", None)
+            )
+
             # Split back into segments and clean up
             translated_segments = translated_text.split(separator)
             
@@ -273,9 +290,25 @@ Return exactly {len(batch)} translated segments, each starting with its [number]
                     
                     response.raise_for_status()
                     result = response.json()
-                    
+
                     if "choices" in result and result["choices"]:
                         translated_text = result["choices"][0]["message"]["content"].strip()
+
+                        # Extract token usage and log cost
+                        usage = result.get("usage", {})
+                        input_tokens = usage.get("prompt_tokens", None)
+                        output_tokens = usage.get("completion_tokens", None)
+
+                        CostTracker.log_api_call(
+                            provider="groq",
+                            model=self.model,
+                            input_text=f"Translate to {tgt_lang}: {segment}",
+                            output_text=translated_text,
+                            input_tokens=input_tokens,
+                            output_tokens=output_tokens,
+                            request_id=result.get("id", None)
+                        )
+
                         translated.append(translated_text)
                     else:
                         logger.warning(f"No translation for segment {i+1}, using original")
