@@ -157,7 +157,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
               <Globe className="w-4 h-4 text-blue-500" />
-              <span className="text-neutral-700 font-medium">50+ languages</span>
+              <span className="text-neutral-700 font-medium">20 languages</span>
             </div>
             <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
               <Shield className="w-4 h-4 text-green-500" />
@@ -632,10 +632,10 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h4 className="text-lg font-semibold text-neutral-900 flex items-center space-x-2">
                   <span>🌍</span>
-                  <span>50+ languages supported:</span>
+                  <span>20 languages supported:</span>
                 </h4>
                 <p className="text-neutral-600 leading-relaxed">
-                  Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, Korean, Arabic, Hindi, Dutch, Swedish, and 40+ more languages with native-level accuracy.
+                  Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, Korean, Arabic, Hindi, Dutch, Swedish, and 7 more languages with native-level accuracy.
                 </p>
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mt-4">
                   <div className="text-sm font-semibold text-neutral-900 mb-2">🗣️ Built by Language Lovers</div>
