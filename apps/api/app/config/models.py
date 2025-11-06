@@ -64,51 +64,23 @@ DEFAULT_GROQ_MODEL = "llama-3.1-8b-instant"
 # =============================================================================
 # GEMINI MODELS
 # =============================================================================
+# NOTE: We only use gemini-2.5-flash-lite for all translation tasks.
+# Other models are kept for reference but should not be used.
 
 GEMINI_MODELS = {
-    "gemini-2.0-flash-exp": ModelConfig(
-        name="gemini-2.0-flash-exp",
-        display_name="Gemini 2.0 Flash (Experimental)",
-        pricing=ModelPricing(
-            input_cost_per_1m=0.00,   # FREE during preview
-            output_cost_per_1m=0.00,  # FREE during preview
-        ),
-        max_tokens=8192,
-        context_window=1000000,  # 1M context
-    ),
     "gemini-2.5-flash-lite": ModelConfig(
         name="gemini-2.5-flash-lite",
         display_name="Gemini 2.5 Flash Lite",
         pricing=ModelPricing(
-            input_cost_per_1m=0.00,   # FREE tier available
-            output_cost_per_1m=0.00,  # FREE tier available
+            input_cost_per_1m=0.10,   # $0.10 per 1M input tokens (text/image/video)
+            output_cost_per_1m=0.40,  # $0.40 per 1M output tokens
         ),
         max_tokens=8192,
         context_window=1000000,  # 1M context
-    ),
-    "gemini-1.5-flash": ModelConfig(
-        name="gemini-1.5-flash",
-        display_name="Gemini 1.5 Flash",
-        pricing=ModelPricing(
-            input_cost_per_1m=0.075,  # $0.075 per 1M input tokens
-            output_cost_per_1m=0.30,  # $0.30 per 1M output tokens
-        ),
-        max_tokens=8192,
-        context_window=1000000,  # 1M context
-    ),
-    "gemini-1.5-pro": ModelConfig(
-        name="gemini-1.5-pro",
-        display_name="Gemini 1.5 Pro",
-        pricing=ModelPricing(
-            input_cost_per_1m=1.25,   # $1.25 per 1M input tokens
-            output_cost_per_1m=5.00,  # $5.00 per 1M output tokens
-        ),
-        max_tokens=8192,
-        context_window=2000000,  # 2M context
     ),
 }
 
-# Default Gemini model for production use
+# Default Gemini model for production use (ONLY model we use)
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
 
 
