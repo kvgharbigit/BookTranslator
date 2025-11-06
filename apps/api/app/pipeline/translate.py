@@ -44,6 +44,12 @@ class TranslationOrchestrator:
             'lv',  # Latvian - Low resource
             'et',  # Estonian - Low resource
             'sl',  # Slovenian - Low resource
+
+            # Failed on Llama - moved to Gemini after testing (Nov 2025)
+            'th',  # Thai - Complete translation failure on Llama
+            'tr',  # Turkish - Very poor quality on Llama
+            'fi',  # Finnish - Title translation failure on Llama
+            # Note: Ukrainian (uk) was removed from supported languages - fails on both Llama and Gemini
         }
     
     async def translate_segments(

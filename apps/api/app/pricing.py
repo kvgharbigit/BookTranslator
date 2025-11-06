@@ -87,7 +87,7 @@ def calculate_price_cents(tokens_est: int, provider: str = "gemini") -> int:
         logger.warning(f"File rejected: {tokens_est:,} tokens exceeds {settings.max_file_tokens:,} token limit")
         words_est = tokens_est * 0.75  # ~0.75 words per token
         max_words = settings.max_file_tokens * 0.75
-        raise ValueError(f"Content limit exceeded: ~{words_est:,.0f} words > {max_words:,.0f} word maximum. Please use a shorter book or split into multiple files.")
+        raise ValueError(f"📚 Book too large: Your file has approximately {words_est:,.0f} words, but our maximum is {max_words:,.0f} words (~750 pages). Please try a shorter book or split this into multiple files.")
 
     # 5-tier pricing structure aligned with word ranges
     # Word ranges: 0-40K, 40-120K, 120-200K, 200-350K, 350-750K

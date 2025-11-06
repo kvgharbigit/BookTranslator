@@ -11,7 +11,7 @@
 
 ## ✨ What This Does
 
-Translate any EPUB book into 50+ languages in under 5 minutes:
+Translate any EPUB book into **41 languages** in under 5 minutes:
 
 - **📚 Upload EPUB** → Get instant price estimate ($0.50-$3.00)
 - **🎯 Free Preview** → See first 1000 words translated instantly
@@ -21,6 +21,28 @@ Translate any EPUB book into 50+ languages in under 5 minutes:
 - **📦 Multi-format Output** → Download EPUB + PDF + TXT
 - **☁️ Cloudflare R2** → Zero egress fees, 5-day retention
 - **📧 Email Delivery** → Automated notifications with download links
+
+---
+
+## 🌍 Supported Languages (41 Total)
+
+### Tier 1: Major World Languages (8)
+Spanish, French, German, Italian, Portuguese, Chinese (Simplified), Japanese, Russian
+
+### Tier 2: High-Resource Languages (7)
+Korean, Arabic, Hindi, Dutch, Polish, Swedish, Indonesian, Vietnamese
+
+### Tier 3: Medium-Resource Languages (8)
+Danish, Norwegian, Czech, Romanian, Hungarian, Greek, Malay, Slovak, Catalan
+
+### Tier 4: Specialized Languages (16)
+Hebrew, Bengali, Tamil, Telugu, Urdu, Persian (Farsi), Bulgarian, Croatian, Serbian, Lithuanian, Latvian, Estonian, Slovenian, **Thai, Turkish, Finnish**
+
+**Note:** Ukrainian temporarily unavailable due to translation quality issues.
+
+**Translation Strategy:**
+- **Previews (250 words):** Llama 3.1 8B for Tiers 1-3, Gemini 2.5 Flash Lite for Tier 4
+- **Full Books:** Gemini 2.5 Flash Lite for all languages (best quality)
 
 ---
 

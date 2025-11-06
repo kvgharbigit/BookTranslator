@@ -1,5 +1,6 @@
 // Language options for translation
 // Organized by popularity: Top 9 most dominant languages, then alphabetical
+// Total: 41 languages (Ukrainian removed due to translation issues)
 export const LANGUAGES = [
   // === Top 9 Most Dominant Languages ===
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -44,7 +45,6 @@ export const LANGUAGES = [
   { code: 'te', name: 'Telugu', flag: '🇮🇳' },
   { code: 'th', name: 'Thai', flag: '🇹🇭' },
   { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
-  { code: 'uk', name: 'Ukrainian', flag: '🇺🇦' },
   { code: 'ur', name: 'Urdu', flag: '🇵🇰' },
   { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
 ];

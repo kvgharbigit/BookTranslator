@@ -103,16 +103,16 @@ class GeminiFlashProvider(TranslationProvider):
             try:
                 return await self._translate_batch(batch, src_lang, tgt_lang, system_hint)
             except Exception as e:
-                error_msg = str(e)
-                
+                error_msg = str(e).strip() if (e and str(e).strip()) else "Unknown error"
+
                 # Handle rate limits with longer delays for Gemini
                 if "rate limit" in error_msg.lower() or "429" in error_msg or "quota" in error_msg.lower():
                     wait_time = (2 ** attempt) * 5  # 5s, 10s, 20s for rate limits
                 else:
                     wait_time = 2 ** attempt  # 1s, 2s, 4s for other errors
-                
+
                 logger.warning(
-                    f"Gemini translation attempt {attempt + 1} failed: {e}. "
+                    f"Gemini translation attempt {attempt + 1} failed: {error_msg}. "
                     f"Retrying in {wait_time}s..."
                 )
                 

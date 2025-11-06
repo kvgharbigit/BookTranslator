@@ -7,6 +7,7 @@ import PriceBox from '@/components/PriceBox';
 import PreviewSection from '@/components/PreviewSection';
 import { api } from '@/lib/api';
 import { LANGUAGES } from '@/lib/languages';
+import { getLanguageUploadMessages } from '@/lib/uploadMessages';
 
 type Step = 'upload' | 'estimate' | 'processing';
 
@@ -25,21 +26,38 @@ export default function HomePage() {
     setIsLoading(true);
     setError('');
     setUploadProgress(0);
-    setUploadMessage('📤 Preparing upload...');
+
+    // Language-specific upload messages
+    const langMessages = getLanguageUploadMessages(previewLang, previewLangName);
+    const randomStartMsg = langMessages.start[Math.floor(Math.random() * langMessages.start.length)];
+    setUploadMessage(randomStartMsg);
 
     try {
       // Step 1: Get presigned upload URL
       const { key, upload_url } = await api.presignUpload(file.name);
 
       // Step 2: Upload file to R2 with progress tracking
+      let lastMessagePercent = 0;
+      let progressMsgIndex = 0;
       await api.uploadFileWithProgress(upload_url, file, (percent, message) => {
         setUploadProgress(percent);
-        setUploadMessage(message);
+        // Add fun language-specific messages based on progress
+        if (percent < 30 && lastMessagePercent < 30) {
+          setUploadMessage(langMessages.progress[0]);
+          lastMessagePercent = 30;
+        } else if (percent >= 30 && percent < 60 && lastMessagePercent < 60) {
+          setUploadMessage(langMessages.progress[1] || langMessages.progress[0]);
+          lastMessagePercent = 60;
+        } else if (percent >= 60 && percent < 100 && lastMessagePercent < 100) {
+          setUploadMessage(langMessages.progress[2] || langMessages.progress[1] || langMessages.progress[0]);
+          lastMessagePercent = 100;
+        }
       });
 
-      // Step 3: Get price estimate
-      setUploadMessage('🔍 Analyzing your book...');
-      const estimateResponse = await api.getEstimate(key, 'es'); // Default to Spanish for estimate
+      // Step 3: Get price estimate with language-specific message
+      const randomAnalyzeMsg = langMessages.analyzing[Math.floor(Math.random() * langMessages.analyzing.length)];
+      setUploadMessage(randomAnalyzeMsg);
+      const estimateResponse = await api.getEstimate(key, previewLang);
 
       setUploadKey(key);
       setEstimate(estimateResponse);
@@ -214,17 +232,46 @@ export default function HomePage() {
                   <span>Step 1</span>
                 </div>
                 <h3 className="text-3xl font-bold text-neutral-900 mb-4">
-                  Upload Your EPUB
+                  Choose Language & Upload
                 </h3>
                 <p className="text-lg text-neutral-600 leading-relaxed mb-3">
-                  Select your EPUB file to get an instant price estimate
+                  Select your target language, then upload your EPUB for an instant price estimate
                 </p>
                 <p className="text-base text-primary-600 font-bold">
                   Most books under $2 • Try preview free
                 </p>
               </div>
-              <FileDrop 
-                onFileSelected={handleFileSelected} 
+
+              {/* Target Language Selection */}
+              <div className="mb-8 max-w-md mx-auto">
+                <label htmlFor="upload-target-lang" className="block text-lg font-semibold text-neutral-800 mb-3 text-center">
+                  Translate to:
+                </label>
+                <select
+                  id="upload-target-lang"
+                  value={previewLang}
+                  onChange={(e) => {
+                    const newLang = e.target.value;
+                    setPreviewLang(newLang);
+                    const langName = LANGUAGES.find(lang => lang.code === newLang)?.name || newLang;
+                    setPreviewLangName(langName);
+                  }}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 border-2 border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base font-medium bg-white shadow-sm"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-sm text-neutral-500 mt-2 text-center">
+                  Select your target language before uploading
+                </p>
+              </div>
+
+              <FileDrop
+                onFileSelected={handleFileSelected}
                 disabled={isLoading}
                 maxSizeMB={50}
               />
@@ -257,10 +304,10 @@ export default function HomePage() {
                   <span>Step 2</span>
                 </div>
                 <h3 className="text-3xl font-bold text-neutral-900 mb-4">
-                  Choose Language & Translate
+                  Preview & Pay
                 </h3>
                 <p className="text-lg text-neutral-600 leading-relaxed">
-                  Select your language and <strong className="text-primary-600">try it free with a 300-word preview</strong>—see the quality before you pay
+                  Check out your <strong className="text-primary-600">free 300-word preview</strong> below—see the quality before you pay
                 </p>
               </div>
 

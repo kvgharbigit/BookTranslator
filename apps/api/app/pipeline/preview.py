@@ -73,10 +73,14 @@ class PreviewService:
         try:
             # Download from R2
             logger.info(f"Downloading EPUB from R2: {r2_key}")
+            if progress_callback:
+                progress_callback("📚 Opening your book...")
             await asyncio.to_thread(self.storage.download_file, r2_key, epub_path)
 
             # Read EPUB structure
             logger.info("Reading EPUB structure")
+            if progress_callback:
+                progress_callback("📖 Reading chapters...")
             book, spine_docs = self.epub_processor.read_epub(epub_path)
 
             # Extract original CSS and images from EPUB
@@ -87,8 +91,14 @@ class PreviewService:
             logger.info(f"Extracted {len(set(image_map.values()))} unique images from EPUB")
 
             # Limit documents to first N words
+            logger.info(f"📊 Before limiting: {len(spine_docs)} spine documents, target: {max_words} words")
             limited_docs, actual_words = self._limit_to_words(spine_docs, max_words)
-            logger.info(f"Limited to {len(limited_docs)} documents, {actual_words} words")
+            logger.info(f"📊 After limiting: {len(limited_docs)} documents, {actual_words} words (target was {max_words})")
+
+            # Verify the limit is actually enforced
+            if actual_words > max_words * 1.1:  # Allow 10% margin
+                logger.error(f"❌ Word limit not enforced! Got {actual_words} words but max was {max_words}")
+                raise ValueError(f"Word limit failed: {actual_words} > {max_words}")
 
             # Segment HTML (extracts translatable text while preserving structure)
             logger.info("Segmenting HTML content")
@@ -104,6 +114,11 @@ class PreviewService:
 
             # Translate segments with fun progress messages
             logger.info(f"Translating preview with Groq (Llama) primary + Gemini fallback (auto for Tier 4 langs)")
+
+            # Send initial language-specific "start" message
+            if progress_callback:
+                start_msg = self._get_fun_progress_message(1, 999, target_lang)  # current=1 triggers start
+                progress_callback(start_msg)
 
             # Create fun progress callback with language-specific emojis
             def batch_progress_callback(current_batch: int, total_batches: int):
@@ -141,8 +156,13 @@ class PreviewService:
 
             # Format as single HTML document for preview display with images
             preview_html = self._format_preview_html(
-                translated_docs, css_content, image_map, target_lang
+                translated_docs, css_content, image_map, target_lang, actual_words
             )
+
+            # Send language-specific completion message
+            if progress_callback:
+                finish_msg = self._get_fun_progress_message(999, 999, target_lang)  # Special values for finish
+                progress_callback(finish_msg)
 
             logger.info(f"Preview generated successfully: {actual_words} words using {provider_used}")
             return preview_html, actual_words, provider_used
@@ -175,27 +195,36 @@ class PreviewService:
         limited_docs = []
         total_words = 0
 
-        for doc in spine_docs:
+        for i, doc in enumerate(spine_docs):
             # Extract text from HTML to count words
             soup = BeautifulSoup(doc['content'], 'html.parser')
             text = soup.get_text()
             word_count = len(text.split())
 
+            logger.info(f"  Doc {i}: {word_count} words, href={doc.get('href', 'unknown')}")
+
             if total_words + word_count > max_words:
                 # This document would exceed limit - truncate it
                 words_remaining = max_words - total_words
+                logger.info(f"  Doc {i} would exceed limit. Truncating to {words_remaining} words remaining.")
                 if words_remaining > 0:
                     truncated_doc = self._truncate_document_to_words(doc, words_remaining)
+                    # Verify truncation worked
+                    truncated_text = BeautifulSoup(truncated_doc['content'], 'html.parser').get_text()
+                    actual_words = len(truncated_text.split())
+                    logger.info(f"  Doc {i} after truncation: {actual_words} words")
                     limited_docs.append(truncated_doc)
                     total_words += words_remaining
                 break
 
             # Include full document
+            logger.info(f"  Doc {i}: Including full document ({word_count} words)")
             limited_docs.append(doc)
             total_words += word_count
 
             # Stop if we've hit the target exactly
             if total_words >= max_words:
+                logger.info(f"  Stopping: reached {total_words} words (target: {max_words})")
                 break
 
         return limited_docs, total_words
@@ -212,31 +241,45 @@ class PreviewService:
         """
         soup = BeautifulSoup(doc['content'], 'html.parser')
 
-        # Find all text nodes and truncate at word boundary
+        # Find all text nodes and truncate at word boundary while preserving HTML structure
         words_collected = 0
+        truncation_point_found = False
+        elements_to_remove = []
 
-        for element in soup.find_all(string=True):
-            if isinstance(element, NavigableString):
+        # Get all string elements (text nodes) in document order
+        for element in soup.descendants:
+            if truncation_point_found:
+                # Mark all remaining elements for removal
+                if hasattr(element, 'extract'):
+                    elements_to_remove.append(element)
+                continue
+
+            if isinstance(element, NavigableString) and element.strip():
                 text = str(element)
                 words = text.split()
 
                 if words_collected + len(words) > max_words:
-                    # Truncate this text node
+                    # Truncate this text node and mark everything after for removal
                     words_to_take = max_words - words_collected
-                    truncated_text = ' '.join(words[:words_to_take]) + '...'
-                    element.replace_with(truncated_text)
-                    words_collected = max_words
+                    if words_to_take > 0:
+                        truncated_text = ' '.join(words[:words_to_take]) + '...'
+                        element.replace_with(NavigableString(truncated_text))
+                    else:
+                        # No words to take, remove this element
+                        if hasattr(element, 'extract'):
+                            elements_to_remove.append(element)
 
-                    # Remove all subsequent siblings and their content
-                    parent = element.parent
-                    if parent:
-                        # Remove all following siblings
-                        for sibling in list(element.next_siblings):
-                            if hasattr(sibling, 'extract'):
-                                sibling.extract()
-                    break
+                    truncation_point_found = True
+                    words_collected = max_words
                 else:
                     words_collected += len(words)
+
+        # Remove all elements that come after truncation point
+        for elem in elements_to_remove:
+            try:
+                elem.extract()
+            except:
+                pass  # Element may have been removed as child of another removed element
 
         return {
             'id': doc['id'],
@@ -460,12 +503,7 @@ class PreviewService:
                 'progress': ['Making it krásný (beautiful)...', '🎨 Czech artistry flowing...', 'Adding that pohoda vibes...'],
                 'finish': ['Výborně! Czech perfection done!', '🎉 Skvělé! Wonderful!', '✨ Hotovo! Complete!']
             },
-            'uk': {
-                'emoji': '🇺🇦',
-                'start': ['Привіт! Starting Ukrainian soul...', '🌻 Beginning українська magic...', '🎨 Ukrainian beauty blooming...'],
-                'progress': ['Making it гарний (beautiful)...', '💛💙 Ukrainian spirit flowing...', 'Adding that душа (soul)...'],
-                'finish': ['Чудово! Ukrainian perfection!', '🎉 Прекрасно! Wonderful!', '✨ Готово! Complete!']
-            },
+            # Ukrainian (uk) removed - translation quality issues on both Llama and Gemini
             'ro': {
                 'emoji': '🇷🇴',
                 'start': ['Salut! Starting Romanian charm...', '🎻 Beginning Română melody...', '🏔️ Carpathian magic awakening...'],
@@ -603,7 +641,8 @@ class PreviewService:
         translated_docs: List[dict],
         css_content: str = "",
         image_map: Optional[Dict[str, str]] = None,
-        target_lang: str = "en"
+        target_lang: str = "en",
+        actual_word_count: int = 0
     ) -> str:
         """Format translated documents into a single HTML preview.
 
@@ -718,7 +757,7 @@ class PreviewService:
 </head>
 <body>
     <div class="preview-banner">
-        <strong>📖 Preview - First ~1500 Words</strong>
+        <strong>📖 Preview - First {actual_word_count} Words</strong>
         <p style="margin: 0.5em 0 0 0; font-size: 0.9em; color: #92400e;">
             This shows exactly how your translated book will look with the same styling and formatting.
         </p>
