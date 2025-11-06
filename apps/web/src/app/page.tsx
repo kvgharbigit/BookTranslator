@@ -230,7 +230,7 @@ export default function HomePage() {
                   Step 2: Choose Language & Translate
                 </h3>
                 <p className="text-neutral-600 leading-relaxed">
-                  Select your language and see a live preview of the translation quality
+                  Select your language and <strong className="text-primary-600">try it free with a 250-word preview</strong>—see the quality before you pay
                 </p>
               </div>
 
@@ -269,10 +269,10 @@ export default function HomePage() {
                       <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-6 py-4">
                         <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
                           <Sparkles className="w-5 h-5" />
-                          <span>Live Translation Preview</span>
+                          <span>Free 250-Word Preview</span>
                         </h4>
                         <p className="text-primary-50 text-sm mt-1">
-                          First 250 words • Translated to {previewLangName}
+                          Try before you buy • Translated to {previewLangName}
                         </p>
                       </div>
                       <PreviewSection
