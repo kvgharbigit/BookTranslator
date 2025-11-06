@@ -143,9 +143,23 @@ export default function HomePage() {
             Upload. Translate.
             <span className="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent block">Download.</span>
           </h2>
-          <p className="text-xl text-neutral-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            Turn any book into any language in minutes. <strong className="text-primary-600">Try it free with a 250-word preview</strong>, then pay only for what you need—no account, no subscription.
+          <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Turn any book into any language in minutes. Then pay only for what you need—no account, no subscription.
           </p>
+
+          {/* Primary CTA */}
+          <button
+            onClick={() => {
+              const uploadSection = document.getElementById('upload-section');
+              uploadSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-full text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 mb-6"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>Try It Free Now</span>
+            <span className="text-sm font-normal opacity-90">(250-word preview)</span>
+          </button>
+
           <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-sm font-semibold mb-8">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
             Best prices on the market • 100% transparent pricing
@@ -185,7 +199,7 @@ export default function HomePage() {
         )}
 
         {/* Step Content */}
-        <div className="flex flex-col items-center space-y-8">
+        <div id="upload-section" className="flex flex-col items-center space-y-8">
           {step === 'upload' && (
             <div className="w-full max-w-lg">
               <div className="text-center mb-8">
