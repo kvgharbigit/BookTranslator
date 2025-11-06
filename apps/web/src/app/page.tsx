@@ -365,7 +365,7 @@ export default function HomePage() {
                 🏆 Best Value on the Market
               </div>
               <h3 className="text-2xl font-bold text-neutral-900 mb-4">
-                Fair, Transparent Pricing
+                The Honest Pricing You've Been Looking For
               </h3>
               <p className="text-neutral-600 mb-4 leading-relaxed">
                 Created by language lovers who understand the real cost of quality translation.
