@@ -112,26 +112,30 @@ class EPUBProcessor:
             return content
     
     def write_epub(
-        self, 
-        original_book: epub.EpubBook, 
-        translated_docs: List[Dict], 
+        self,
+        original_book: epub.EpubBook,
+        translated_docs: List[Dict],
         output_path: str
     ) -> bool:
         """Write translated EPUB preserving structure and assets."""
-        
+
         try:
             # Create new book with same metadata
             new_book = epub.EpubBook()
-            
+
             # Copy metadata
             new_book.set_identifier(original_book.get_metadata('DC', 'identifier')[0][0])
             new_book.set_title(original_book.get_metadata('DC', 'title')[0][0])
             new_book.set_language(original_book.get_metadata('DC', 'language')[0][0])
-            
+
             # Copy authors
             for author in original_book.get_metadata('DC', 'creator'):
                 new_book.add_author(author[0])
-            
+
+            # Extract and combine all CSS for embedding (like preview does)
+            css_content = self._extract_all_css_from_book(original_book)
+            logger.info(f"Extracted {len(css_content)} chars of CSS for embedding")
+
             # Copy all non-document items (CSS, images, fonts, etc.)
             for item in original_book.get_items():
                 if item.get_type() != ebooklib.ITEM_DOCUMENT:
@@ -142,32 +146,35 @@ class EPUBProcessor:
             href_mapping = {}
             
             for doc in translated_docs:
-                # Create new EPUB item
-                chapter = epub.EpubHtml(
-                    title=doc['title'] or f"Chapter {len(spine)+1}",
+                # Use EpubItem instead of EpubHtml to preserve embedded CSS
+                # EpubHtml has built-in sanitization that strips <style> tags
+                chapter = epub.EpubItem(
+                    uid=doc['id'],
                     file_name=doc['href'],
-                    lang='es'  # Set to target language
+                    media_type='application/xhtml+xml',
+                    content=b''  # Will be set below
                 )
-                
-                # Set the correct media type for XHTML documents
-                chapter.media_type = 'application/xhtml+xml'
+                # Set title as property
+                chapter.title = doc['title'] or f"Chapter {len(spine)+1}"
                 
                 # Build proper href mapping BEFORE updating content
                 href_mapping[doc['href']] = chapter.get_name()
                 logger.debug(f"Href mapping: '{doc['href']}' -> '{chapter.get_name()}'")
-                
+
                 # Update internal links in content with correct mapping
                 updated_content = self._update_internal_links(doc['content'], href_mapping)
-                
-                # Ensure content is properly encoded as bytes
+
+                # Embed CSS in the HTML document (like preview does)
+                updated_content = self._embed_css_in_html(updated_content, css_content)
+
+                # Set content as bytes (EpubItem preserves raw content without sanitization)
                 if isinstance(updated_content, str):
-                    chapter.content = updated_content.encode('utf-8')
+                    chapter.set_content(updated_content.encode('utf-8'))
                 elif isinstance(updated_content, bytes):
-                    chapter.content = updated_content
+                    chapter.set_content(updated_content)
                 else:
-                    # Convert any other type to string first, then encode
-                    chapter.content = str(updated_content).encode('utf-8')
-                
+                    chapter.set_content(str(updated_content).encode('utf-8'))
+
                 new_book.add_item(chapter)
                 spine.append(chapter)
             
@@ -456,36 +463,116 @@ class EPUBProcessor:
             logger.warning(f"Failed to update navigation document: {e}")
             return nav_item
     
+    def _extract_all_css_from_book(self, book: epub.EpubBook) -> str:
+        """Extract and combine all CSS stylesheets from EPUB.
+
+        Args:
+            book: EbookLib Book object
+
+        Returns:
+            Combined CSS content from all stylesheets
+        """
+        css_content = []
+        for item in book.get_items():
+            if item.get_type() == ebooklib.ITEM_STYLE:
+                try:
+                    css = item.get_content().decode('utf-8')
+                    css_content.append(css)
+                except Exception as e:
+                    logger.warning(f"Failed to extract CSS from {item.get_name()}: {e}")
+
+        return '\n\n'.join(css_content)
+
+    def _embed_css_in_html(self, html_content: str, css_content: str) -> str:
+        """Embed CSS directly in HTML document's <head> section.
+
+        Uses EXACT same CSS approach as preview for consistency.
+
+        Args:
+            html_content: HTML document content
+            css_content: CSS to embed
+
+        Returns:
+            HTML with embedded CSS
+        """
+        try:
+            if not css_content:
+                return html_content
+
+            soup = BeautifulSoup(html_content, 'xml')
+
+            # Find or create head element
+            head = soup.find('head')
+            if not head:
+                # Create head if it doesn't exist
+                html_tag = soup.find('html')
+                if html_tag:
+                    head = soup.new_tag('head')
+                    html_tag.insert(0, head)
+                else:
+                    logger.warning("No <html> or <head> tag found, cannot embed CSS")
+                    return html_content
+
+            # Create style tag with EXACT same CSS as preview
+            style_tag = soup.new_tag('style', type='text/css')
+
+            # Use EXACT same CSS structure as preview.py _format_preview_html
+            enhanced_css = f"""{css_content}
+
+/* Minimal responsive wrapper - don't override EPUB styles */
+body {{
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}}
+
+/* Ensure images are responsive */
+img {{
+    max-width: 100% !important;
+    height: auto !important;
+}}
+"""
+            style_tag.string = enhanced_css
+
+            # Insert at beginning of head
+            head.insert(0, style_tag)
+
+            return str(soup)
+
+        except Exception as e:
+            logger.error(f"Failed to embed CSS in HTML: {e}", exc_info=True)
+            return html_content
+
     def _update_internal_links(self, content: str, href_mapping: Dict[str, str]) -> str:
         """Update internal hyperlinks within document content."""
         try:
             if not content or not isinstance(content, str):
                 return content
-            
-            soup = BeautifulSoup(content, 'html.parser')
-            
+
+            soup = BeautifulSoup(content, 'xml')
+
             # Update all anchor links
             for link in soup.find_all('a', href=True):
                 href = link['href']
-                
+
                 # Skip external links (http/https)
                 if href.startswith(('http://', 'https://', 'mailto:', 'ftp://')):
                     continue
-                
+
                 # Handle relative links to other chapters
                 if '/' not in href or href.startswith('./'):
                     # Clean up the href
                     base_href = href.replace('./', '')
                     base_file = base_href.split('#')[0]
                     anchor = '#' + base_href.split('#')[1] if '#' in base_href else ''
-                    
+
                     # Update if we have a mapping for this file
                     if base_file in href_mapping:
                         link['href'] = href_mapping[base_file] + anchor
                         logger.debug(f"Updated internal link: {href} -> {link['href']}")
-            
+
             return str(soup)
-            
+
         except Exception as e:
             logger.warning(f"Failed to update internal links: {e}")
             return content
