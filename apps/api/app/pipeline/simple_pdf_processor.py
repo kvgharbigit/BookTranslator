@@ -48,16 +48,23 @@ class SimplePDFProcessor:
         metadata = self._extract_metadata(pdf_doc)
         logger.info(f"Extracted metadata: {metadata}")
 
-        # Extract raw text
+        # Extract raw text with page markers (for chapter detection)
         raw_text = self._extract_text(pdf_doc)
         logger.info(f"Extracted {len(raw_text)} characters of text")
+
+        # Detect chapters (before cleaning, to use page break markers)
+        chapters = self._detect_chapters(raw_text)
+        if chapters:
+            logger.info(f"Detected {len(chapters)} chapters")
+        else:
+            logger.info("No chapters detected, using single document")
 
         # Clean artifacts
         clean_text = self._clean_artifacts(raw_text)
         logger.info(f"After cleaning: {len(clean_text)} characters")
 
-        # Convert to HTML spine documents
-        spine_docs = self._to_simple_html(clean_text, metadata['title'])
+        # Convert to HTML spine documents (with or without chapters)
+        spine_docs = self._to_simple_html(clean_text, metadata['title'], chapters)
         logger.info(f"Created {len(spine_docs)} HTML documents")
 
         pdf_doc.close()
@@ -187,16 +194,95 @@ class SimplePDFProcessor:
 
         return text.strip()
 
-    def _to_simple_html(self, text: str, title: str) -> List[Dict]:
+    def _detect_chapters(self, text: str) -> Optional[List[Dict]]:
+        """
+        Detect chapter breaks in text.
+
+        Uses multiple heuristics:
+        1. Page breaks followed by chapter markers
+        2. "Chapter N" patterns
+        3. Roman numerals (I., II., III., etc.)
+        4. All-caps titles at page start
+        5. Numbered patterns (1., 2., etc.)
+
+        Returns:
+            List of chapter dicts with 'title' and 'start_pos', or None if no chapters
+        """
+        chapters = []
+
+        # Split text into pages using page break markers
+        page_pattern = r'___PAGE_BREAK_(\d+)___'
+        pages = re.split(page_pattern, text)
+
+        # pages will be: [text_before_page0, page_num, text_of_page, page_num, text_of_page, ...]
+        current_pos = 0
+
+        for i in range(0, len(pages), 2):
+            page_text = pages[i]
+            page_num = int(pages[i-1]) if i > 0 else 0
+
+            # Get first few lines of page (potential chapter title)
+            lines = page_text.strip().split('\n')[:5]
+            first_line = lines[0].strip() if lines else ""
+
+            if not first_line:
+                current_pos += len(page_text)
+                continue
+
+            # Check for chapter patterns
+            chapter_title = None
+
+            # Pattern 1: "Chapter" followed by number or word
+            # Examples: "Chapter 1", "Chapter One", "CHAPTER ONE"
+            chapter_match = re.match(r'^(?:CHAPTER|Chapter)\s+([IVXLCDM\d]+|[A-Za-z]+)(?:\s*[:\-]?\s*(.*))?$', first_line)
+            if chapter_match:
+                chapter_title = first_line
+
+            # Pattern 2: Roman numerals at start
+            # Examples: "I.", "II.", "III. CORALINE"
+            elif re.match(r'^[IVXLCDM]+\.?\s+[A-Z]', first_line):
+                chapter_title = first_line
+
+            # Pattern 3: Numbered patterns
+            # Examples: "1.", "2. The Story Begins"
+            elif re.match(r'^\d+\.?\s+[A-Z]', first_line):
+                chapter_title = first_line
+
+            # Pattern 4: All-caps title (at least 3 words or 10+ chars)
+            # Examples: "LITTLE RED RIDING HOOD", "THE BEGINNING"
+            elif first_line.isupper() and (len(first_line.split()) >= 2 or len(first_line) >= 10):
+                # Make sure it's not just metadata or headers
+                if not any(skip in first_line for skip in ['PAGE', 'ISBN', 'COPYRIGHT', 'PUBLISHER']):
+                    chapter_title = first_line
+
+            # Pattern 5: Title Case with sufficient length
+            # Examples: "Little Red Riding Hood", "Snow White and the Seven Dwarfs"
+            elif first_line.istitle() and len(first_line) >= 10 and not first_line.endswith('.'):
+                chapter_title = first_line
+
+            if chapter_title:
+                chapters.append({
+                    'title': chapter_title,
+                    'start_pos': current_pos,
+                    'page_num': page_num
+                })
+
+            current_pos += len(page_text)
+
+        # Only return chapters if we found at least 2
+        # (1 chapter = just continuous text, not worth splitting)
+        if len(chapters) >= 2:
+            return chapters
+
+        return None
+
+    def _to_simple_html(self, text: str, title: str, chapters: Optional[List[Dict]] = None) -> List[Dict]:
         """
         Convert cleaned text to simple HTML spine documents.
 
         Creates:
         1. Title page (if title exists)
-        2. Content document(s) with paragraphs
-
-        Future: Will split into chapters based on page breaks and patterns.
-        For now: Single content document.
+        2. Content document(s) - either single or split by chapters
         """
         spine_docs = []
 
@@ -220,24 +306,106 @@ class SimplePDFProcessor:
                 'title': 'Title Page'
             })
 
-        # 2. Create content document
-        # Remove page break markers (replace with paragraph breaks)
+        # 2. Remove page break markers (replace with paragraph breaks)
         text = re.sub(r'___PAGE_BREAK_\d+___', '', text)
 
-        # Split into paragraphs (double newline = paragraph break)
-        paragraphs = self._split_paragraphs(text)
+        # 3. Create content documents (with or without chapters)
+        if chapters:
+            # Split into chapters
+            for i, chapter in enumerate(chapters):
+                # Get text for this chapter
+                start_pos = chapter['start_pos']
+                end_pos = chapters[i + 1]['start_pos'] if i + 1 < len(chapters) else len(text)
 
-        # Build HTML content
-        content_html = self._paragraphs_to_html(paragraphs, title)
+                # Adjust positions after page marker removal
+                # (page markers were removed, so we need to search for chapter title)
+                chapter_text = self._extract_chapter_text(text, chapter['title'],
+                                                          chapters[i + 1]['title'] if i + 1 < len(chapters) else None)
 
-        spine_docs.append({
-            'id': 'content',
-            'href': 'content.xhtml',
-            'content': content_html,
-            'title': 'Content'
-        })
+                if not chapter_text:
+                    continue
+
+                # Split into paragraphs
+                paragraphs = self._split_paragraphs(chapter_text)
+
+                if not paragraphs:
+                    continue
+
+                # Build HTML with chapter heading
+                chapter_html = self._chapter_to_html(chapter['title'], paragraphs, title)
+
+                chapter_id = f"chapter_{i + 1}"
+                spine_docs.append({
+                    'id': chapter_id,
+                    'href': f'{chapter_id}.xhtml',
+                    'content': chapter_html,
+                    'title': chapter['title']
+                })
+
+        else:
+            # Single content document (no chapters detected)
+            paragraphs = self._split_paragraphs(text)
+            content_html = self._paragraphs_to_html(paragraphs, title)
+
+            spine_docs.append({
+                'id': 'content',
+                'href': 'content.xhtml',
+                'content': content_html,
+                'title': 'Content'
+            })
 
         return spine_docs
+
+    def _extract_chapter_text(self, text: str, chapter_title: str, next_chapter_title: Optional[str]) -> str:
+        """
+        Extract text for a specific chapter.
+
+        Finds the chapter title in text and extracts everything until the next chapter.
+        """
+        # Find chapter start
+        chapter_start = text.find(chapter_title)
+        if chapter_start == -1:
+            logger.warning(f"Could not find chapter title in text: {chapter_title}")
+            return ""
+
+        # Find chapter end (next chapter or end of text)
+        if next_chapter_title:
+            chapter_end = text.find(next_chapter_title, chapter_start + len(chapter_title))
+            if chapter_end == -1:
+                chapter_end = len(text)
+        else:
+            chapter_end = len(text)
+
+        return text[chapter_start:chapter_end]
+
+    def _chapter_to_html(self, chapter_title: str, paragraphs: List[str], book_title: str) -> str:
+        """Convert chapter title and paragraphs to HTML document."""
+        html_parts = [
+            '<!DOCTYPE html>',
+            '<html xmlns="http://www.w3.org/1999/xhtml">',
+            '<head>',
+            f'    <title>{self._escape_html(chapter_title)}</title>',
+            '    <meta charset="utf-8"/>',
+            '</head>',
+            '<body>',
+            f'    <h2>{self._escape_html(chapter_title)}</h2>',
+        ]
+
+        # Add each paragraph (skip first if it's the chapter title)
+        for para in paragraphs:
+            # Skip if paragraph is just the chapter title
+            if para.strip() == chapter_title.strip():
+                continue
+
+            escaped_para = self._escape_html(para)
+            html_parts.append(f'    <p>{escaped_para}</p>')
+
+        html_parts.extend([
+            '</body>',
+            '</html>'
+        ])
+
+        return '\n'.join(html_parts)
 
     def _split_paragraphs(self, text: str) -> List[str]:
         """
