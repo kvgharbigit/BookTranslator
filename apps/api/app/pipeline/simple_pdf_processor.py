@@ -667,13 +667,17 @@ class SimplePDFProcessor:
         try:
             pdf_doc = fitz.open(pdf_path)
 
-            # Check first few pages for text
-            pages_to_check = min(3, len(pdf_doc))
+            # Check first several pages for text (some PDFs have blank cover pages)
+            pages_to_check = min(10, len(pdf_doc))
             total_text = ""
 
             for i in range(pages_to_check):
                 page_text = pdf_doc[i].get_text().strip()
                 total_text += page_text
+
+                # Early exit if we found enough text
+                if len(total_text) > 500:
+                    break
 
             pdf_doc.close()
 
