@@ -48,23 +48,26 @@ class SimplePDFProcessor:
         metadata = self._extract_metadata(pdf_doc)
         logger.info(f"Extracted metadata: {metadata}")
 
-        # Extract raw text with page markers (for chapter detection)
-        raw_text = self._extract_text(pdf_doc)
-        logger.info(f"Extracted {len(raw_text)} characters of text")
+        # Try TOC-based chapter detection first (most reliable)
+        chapters = self._detect_chapters_from_toc(pdf_doc)
 
-        # Detect chapters (before cleaning, to use page break markers)
-        chapters = self._detect_chapters(raw_text)
+        if not chapters:
+            # Fallback: pattern-based detection with cleaned text
+            raw_text = self._extract_text(pdf_doc)
+            logger.info(f"Extracted {len(raw_text)} characters of text")
+            chapters = self._detect_chapters(raw_text)
+
         if chapters:
             logger.info(f"Detected {len(chapters)} chapters")
         else:
             logger.info("No chapters detected, using single document")
 
-        # Clean artifacts
-        clean_text = self._clean_artifacts(raw_text)
-        logger.info(f"After cleaning: {len(clean_text)} characters")
+        # Extract and clean text
+        clean_text, page_offsets = self._extract_clean_text_with_offsets(pdf_doc)
+        logger.info(f"Extracted {len(clean_text)} characters (clean)")
 
         # Convert to HTML spine documents (with or without chapters)
-        spine_docs = self._to_simple_html(clean_text, metadata['title'], chapters)
+        spine_docs = self._to_simple_html(clean_text, metadata['title'], chapters, page_offsets)
         logger.info(f"Created {len(spine_docs)} HTML documents")
 
         pdf_doc.close()
@@ -194,21 +197,183 @@ class SimplePDFProcessor:
 
         return text.strip()
 
+    def _detect_chapters_from_toc(self, pdf_doc) -> Optional[List[Dict]]:
+        """
+        Detect chapters using PDF's built-in Table of Contents.
+        This is the most reliable method when available.
+
+        Returns:
+            List of chapter dicts with 'title', 'start_pos', 'page_num', or None
+        """
+        try:
+            # Get TOC (outline/bookmarks)
+            toc = pdf_doc.get_toc(simple=False)
+
+            if not toc or len(toc) < 2:
+                logger.info("No TOC found or too few entries")
+                return None
+
+            # Filter to level 1 chapters only (top-level headings)
+            chapters = []
+            for level, title, page_num in toc:
+                if level == 1:  # Top-level chapters only
+                    # PyMuPDF page numbers are 1-indexed in TOC
+                    page_idx = max(0, page_num - 1)
+                    chapters.append({
+                        'title': title.strip(),
+                        'page_num': page_idx,
+                        'start_pos': None  # Will be calculated with offsets
+                    })
+
+            if len(chapters) >= 2:
+                logger.info(f"Found {len(chapters)} chapters from TOC")
+                return chapters
+
+            logger.info("TOC has < 2 chapters, not using")
+            return None
+
+        except Exception as e:
+            logger.warning(f"Failed to extract TOC: {e}")
+            return None
+
+    def _extract_clean_text_with_offsets(self, pdf_doc) -> tuple[str, Dict[int, int]]:
+        """
+        Extract text from PDF with:
+        1. Header/footer removal (frequency analysis)
+        2. Page-to-offset mapping for reliable chapter splitting
+        3. Improved paragraph shaping
+
+        Returns:
+            (clean_text, page_offsets) where page_offsets maps page_num -> char position
+        """
+        # Step 1: Extract all pages
+        pages_text = []
+        for page_num in range(len(pdf_doc)):
+            page = pdf_doc[page_num]
+            text = page.get_text()
+            pages_text.append(text)
+
+        # Step 2: Detect and remove repeated headers/footers
+        headers, footers = self._detect_headers_footers(pages_text)
+
+        # Step 3: Build clean text with offset map
+        page_offsets = {}
+        clean_pages = []
+        current_offset = 0
+
+        for page_num, text in enumerate(pages_text):
+            # Store offset for this page
+            page_offsets[page_num] = current_offset
+
+            # Remove headers/footers
+            lines = text.split('\n')
+            clean_lines = []
+
+            for line in lines:
+                line_stripped = line.strip()
+                # Skip headers, footers, and page numbers
+                if line_stripped in headers or line_stripped in footers:
+                    continue
+                if re.match(r'^\s*\d+\s*$', line_stripped):  # Lone page numbers
+                    continue
+                clean_lines.append(line)
+
+            page_text = '\n'.join(clean_lines)
+
+            # Improve paragraph shaping
+            page_text = self._shape_paragraphs(page_text)
+
+            clean_pages.append(page_text)
+            current_offset += len(page_text) + 2  # +2 for \n\n between pages
+
+        # Join all pages
+        clean_text = '\n\n'.join(clean_pages)
+
+        return clean_text, page_offsets
+
+    def _detect_headers_footers(self, pages_text: List[str]) -> tuple[set, set]:
+        """
+        Detect repeated headers and footers using frequency analysis.
+
+        Returns:
+            (headers_set, footers_set) - sets of repeated text to remove
+        """
+        if len(pages_text) < 3:
+            return set(), set()
+
+        # Count frequency of first/last lines
+        first_lines = {}
+        last_lines = {}
+
+        for text in pages_text:
+            lines = [l.strip() for l in text.split('\n') if l.strip()]
+            if not lines:
+                continue
+
+            # First 1-2 lines
+            for line in lines[:2]:
+                first_lines[line] = first_lines.get(line, 0) + 1
+
+            # Last 1-2 lines
+            for line in lines[-2:]:
+                last_lines[line] = last_lines.get(line, 0) + 1
+
+        # Find lines that appear on >= 50% of pages
+        threshold = len(pages_text) * 0.5
+
+        headers = {line for line, count in first_lines.items() if count >= threshold}
+        footers = {line for line, count in last_lines.items() if count >= threshold}
+
+        if headers:
+            logger.info(f"Detected {len(headers)} repeated headers")
+        if footers:
+            logger.info(f"Detected {len(footers)} repeated footers")
+
+        return headers, footers
+
+    def _shape_paragraphs(self, text: str) -> str:
+        """
+        Improve paragraph formatting:
+        - Fix end-of-line hyphenation
+        - Normalize line endings
+        - Collapse multiple blank lines
+        """
+        # De-hyphenate end-of-line breaks
+        # "near-\nest" → "nearest"
+        text = re.sub(r'(\w)-\s*\n\s*(\w)', r'\1\2', text)
+
+        # Normalize line endings
+        text = text.replace('\r\n', '\n').replace('\r', '\n')
+
+        # Collapse 3+ blank lines to 2 (paragraph break)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+
+        return text
+
     def _detect_chapters(self, text: str) -> Optional[List[Dict]]:
         """
         Detect chapter breaks in text.
 
         Uses multiple heuristics:
-        1. Page breaks followed by chapter markers
-        2. "Chapter N" patterns
-        3. Roman numerals (I., II., III., etc.)
-        4. All-caps titles at page start
-        5. Numbered patterns (1., 2., etc.)
+        1. "Part One", "Part Two" patterns
+        2. "Prologue", "Epilogue", "Foreword" patterns
+        3. "Chapter N" patterns
+        4. Roman numerals (I., II., III., etc.)
+        5. All-caps titles at page start
+        6. Numbered patterns (1., 2., etc.)
 
         Returns:
             List of chapter dicts with 'title' and 'start_pos', or None if no chapters
         """
         chapters = []
+
+        # Skip patterns - pages to ignore for chapter detection
+        SKIP_KEYWORDS = [
+            'CONTENTS', 'TABLE OF CONTENTS', 'INDEX',
+            'COPYRIGHT', 'PUBLISHER', 'ISBN', 'PAGE',
+            'ACKNOWLEDGMENTS', 'DEDICATION',
+            'ALSO BY', 'ABOUT THE AUTHOR', 'BACK ADS'
+        ]
 
         # Split text into pages using page break markers
         page_pattern = r'___PAGE_BREAK_(\d+)___'
@@ -222,40 +387,54 @@ class SimplePDFProcessor:
             page_num = int(pages[i-1]) if i > 0 else 0
 
             # Get first few lines of page (potential chapter title)
-            lines = page_text.strip().split('\n')[:5]
-            first_line = lines[0].strip() if lines else ""
+            lines = [l.strip() for l in page_text.strip().split('\n')[:10] if l.strip()]
+            if not lines:
+                current_pos += len(page_text)
+                continue
 
-            if not first_line:
+            first_line = lines[0]
+
+            # Skip metadata/TOC pages
+            if any(skip in first_line.upper() for skip in SKIP_KEYWORDS):
                 current_pos += len(page_text)
                 continue
 
             # Check for chapter patterns
             chapter_title = None
 
-            # Pattern 1: "Chapter" followed by number or word
+            # Pattern 1: "Part One", "Part Two", etc.
+            # Examples: "Part One", "Part Two", "PART ONE"
+            if re.match(r'^(?:PART|Part)\s+(?:One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|I+|V|1|2|3|4|5|6|7|8|9|10)$', first_line, re.IGNORECASE):
+                chapter_title = first_line
+
+            # Pattern 2: "Prologue", "Epilogue", "Foreword", "Preface", "Introduction"
+            elif re.match(r'^(?:Prologue|Epilogue|Foreword|Preface|Introduction|Afterword)$', first_line, re.IGNORECASE):
+                chapter_title = first_line
+
+            # Pattern 3: "Chapter" followed by number or word
             # Examples: "Chapter 1", "Chapter One", "CHAPTER ONE"
-            chapter_match = re.match(r'^(?:CHAPTER|Chapter)\s+([IVXLCDM\d]+|[A-Za-z]+)(?:\s*[:\-]?\s*(.*))?$', first_line)
-            if chapter_match:
+            elif re.match(r'^(?:CHAPTER|Chapter)\s+([IVXLCDM\d]+|[A-Za-z]+)(?:\s*[:\-]?\s*(.*))?$', first_line):
                 chapter_title = first_line
 
-            # Pattern 2: Roman numerals at start
-            # Examples: "I.", "II.", "III. CORALINE"
-            elif re.match(r'^[IVXLCDM]+\.?\s+[A-Z]', first_line):
+            # Pattern 4: Roman numerals at start (but NOT if it's just I, II, III alone - likely TOC)
+            # Examples: "I. CORALINE", "II. THE BEGINNING"
+            elif re.match(r'^[IVXLCDM]+\.?\s+[A-Z]{2,}', first_line):
                 chapter_title = first_line
 
-            # Pattern 3: Numbered patterns
-            # Examples: "1.", "2. The Story Begins"
+            # Pattern 5: Numbered patterns
+            # Examples: "1. The Story Begins", "2 The Adventure"
             elif re.match(r'^\d+\.?\s+[A-Z]', first_line):
                 chapter_title = first_line
 
-            # Pattern 4: All-caps title (at least 3 words or 10+ chars)
+            # Pattern 6: All-caps title (at least 2 words or 10+ chars)
             # Examples: "LITTLE RED RIDING HOOD", "THE BEGINNING"
+            # But skip if it looks like metadata
             elif first_line.isupper() and (len(first_line.split()) >= 2 or len(first_line) >= 10):
-                # Make sure it's not just metadata or headers
-                if not any(skip in first_line for skip in ['PAGE', 'ISBN', 'COPYRIGHT', 'PUBLISHER']):
+                if not any(skip in first_line.upper() for skip in SKIP_KEYWORDS):
+                    # Additional check: make sure it's not a repeated header across multiple pages
                     chapter_title = first_line
 
-            # Pattern 5: Title Case with sufficient length
+            # Pattern 7: Title Case with sufficient length
             # Examples: "Little Red Riding Hood", "Snow White and the Seven Dwarfs"
             elif first_line.istitle() and len(first_line) >= 10 and not first_line.endswith('.'):
                 chapter_title = first_line
@@ -276,7 +455,7 @@ class SimplePDFProcessor:
 
         return None
 
-    def _to_simple_html(self, text: str, title: str, chapters: Optional[List[Dict]] = None) -> List[Dict]:
+    def _to_simple_html(self, text: str, title: str, chapters: Optional[List[Dict]] = None, page_offsets: Optional[Dict[int, int]] = None) -> List[Dict]:
         """
         Convert cleaned text to simple HTML spine documents.
 
@@ -306,23 +485,25 @@ class SimplePDFProcessor:
                 'title': 'Title Page'
             })
 
-        # 2. Remove page break markers (replace with paragraph breaks)
-        text = re.sub(r'___PAGE_BREAK_\d+___', '', text)
+        # 2. Create content documents (with or without chapters)
+        if chapters and page_offsets:
+            # Calculate start_pos from page_num using offsets
+            for chapter in chapters:
+                if chapter.get('start_pos') is None and 'page_num' in chapter:
+                    chapter['start_pos'] = page_offsets.get(chapter['page_num'], 0)
 
-        # 3. Create content documents (with or without chapters)
-        if chapters:
-            # Split into chapters
+            # Sort chapters by start_pos
+            chapters.sort(key=lambda c: c.get('start_pos', 0))
+
+            # Split into chapters using reliable offsets
             for i, chapter in enumerate(chapters):
-                # Get text for this chapter
-                start_pos = chapter['start_pos']
-                end_pos = chapters[i + 1]['start_pos'] if i + 1 < len(chapters) else len(text)
+                start_pos = chapter.get('start_pos', 0)
+                end_pos = chapters[i + 1].get('start_pos', len(text)) if i + 1 < len(chapters) else len(text)
 
-                # Adjust positions after page marker removal
-                # (page markers were removed, so we need to search for chapter title)
-                chapter_text = self._extract_chapter_text(text, chapter['title'],
-                                                          chapters[i + 1]['title'] if i + 1 < len(chapters) else None)
+                # Extract chapter text by slicing
+                chapter_text = text[start_pos:end_pos]
 
-                if not chapter_text:
+                if not chapter_text or len(chapter_text) < 10:
                     continue
 
                 # Split into paragraphs
