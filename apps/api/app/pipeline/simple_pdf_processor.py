@@ -433,9 +433,13 @@ class SimplePDFProcessor:
             elif re.match(r'^(?:CHAPTER|Chapter)\s+([IVXLCDM\d]+|[A-Za-z]+)(?:\s*[:\-]?\s*(.*))?$', first_line):
                 chapter_title = first_line
 
-            # Pattern 4: Roman numerals at start (but NOT if it's just I, II, III alone - likely TOC)
-            # Examples: "I. CORALINE", "II. THE BEGINNING"
+            # Pattern 4: Roman numerals (standalone or with text)
+            # Examples: "I.", "II.", "III. CORALINE", "IV. THE BEGINNING"
+            elif re.match(r'^[IVXLCDM]+\.$', first_line):
+                # Standalone Roman numeral (common chapter marker)
+                chapter_title = first_line
             elif re.match(r'^[IVXLCDM]+\.?\s+[A-Z]{2,}', first_line):
+                # Roman numeral with following text
                 chapter_title = first_line
 
             # Pattern 5: Numbered patterns
