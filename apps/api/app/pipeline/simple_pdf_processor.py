@@ -207,16 +207,33 @@ class SimplePDFProcessor:
         """
         try:
             # Get TOC (outline/bookmarks)
+            # simple=False returns: [level, title, page, metadata_dict]
             toc = pdf_doc.get_toc(simple=False)
 
             if not toc or len(toc) < 2:
                 logger.info("No TOC found or too few entries")
                 return None
 
+            # Skip keywords - entries to ignore
+            SKIP_TOC_ENTRIES = [
+                'CONTENTS', 'TABLE OF CONTENTS', 'INDEX',
+                'ABOUT THE AUTHOR', 'ALSO BY', 'BACK ADS',
+                'COPYRIGHT', 'ABOUT THE PUBLISHER',
+                'ACKNOWLEDGMENTS', 'DEDICATION'
+            ]
+
             # Filter to level 1 chapters only (top-level headings)
             chapters = []
-            for level, title, page_num in toc:
+            for entry in toc:
+                level = entry[0]
+                title = entry[1]
+                page_num = entry[2]
+
                 if level == 1:  # Top-level chapters only
+                    # Skip metadata/back matter entries
+                    if any(skip.lower() in title.lower() for skip in SKIP_TOC_ENTRIES):
+                        continue
+
                     # PyMuPDF page numbers are 1-indexed in TOC
                     page_idx = max(0, page_num - 1)
                     chapters.append({
@@ -226,10 +243,10 @@ class SimplePDFProcessor:
                     })
 
             if len(chapters) >= 2:
-                logger.info(f"Found {len(chapters)} chapters from TOC")
+                logger.info(f"Found {len(chapters)} chapters from TOC: {[c['title'] for c in chapters]}")
                 return chapters
 
-            logger.info("TOC has < 2 chapters, not using")
+            logger.info("TOC has < 2 chapters after filtering, not using")
             return None
 
         except Exception as e:
