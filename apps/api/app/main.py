@@ -9,6 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.logger import setup_logging, get_logger, set_request_id
 from app.db import create_tables
+from app.migrations import run_migrations
 from app.routes import health, presign, estimate, checkout, webhook, jobs, paypal, skip_payment, preview
 
 # Setup logging
@@ -129,6 +130,9 @@ async def startup_event():
     # Create database tables
     create_tables()
     logger.info("Database tables created/verified")
+
+    # Run database migrations
+    run_migrations()
 
     # Log configuration
     logger.info(f"Environment: {settings.env}")
