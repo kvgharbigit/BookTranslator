@@ -149,6 +149,7 @@ class HTMLSegmenter:
         try:
             soup = BeautifulSoup(original_html, 'lxml-xml', from_encoding='utf-8')
             segment_idx = 0
+            inline_elements = {'em', 'strong', 'b', 'i', 'a', 'span', 'code', 'sup', 'sub'}
 
             # Replace text content with translations
             for element in soup.find_all(string=True):
@@ -164,8 +165,30 @@ class HTMLSegmenter:
                         not text.isdigit() and
                         text.lower() not in ['html', 'head', 'body', 'div', 'span'] and
                         segment_idx < len(translated_segments)):
-                        # Replace with translated text
-                        element.replace_with(translated_segments[segment_idx])
+
+                        translated_text = translated_segments[segment_idx]
+
+                        # For inline elements (except links), check if next sibling starts with punctuation
+                        # If so, append that punctuation to the translated text
+                        # Skip this for <a> tags since URLs should keep punctuation outside
+                        if parent.name in inline_elements and parent.name != 'a':
+                            next_sibling = parent.next_sibling
+                            if next_sibling and isinstance(next_sibling, NavigableString):
+                                sibling_text = str(next_sibling)
+                                # Check if starts with punctuation (colon, period, comma, etc.)
+                                # But only if it's followed by whitespace or end of string (not part of a number like "3.14")
+                                if sibling_text and len(sibling_text) > 0 and sibling_text[0] in ':,;!?…':
+                                    # Append punctuation to translated text
+                                    translated_text = translated_text + sibling_text[0]
+                                    # Remove punctuation from next sibling
+                                    next_sibling.replace_with(sibling_text[1:])
+                                elif sibling_text and len(sibling_text) > 1 and sibling_text[0] == '.' and (sibling_text[1].isspace() or sibling_text[1] in '\n\r\t'):
+                                    # Period followed by whitespace - move it inside
+                                    translated_text = translated_text + '.'
+                                    next_sibling.replace_with(sibling_text[1:])
+
+                        # Replace with translated text (possibly with punctuation appended)
+                        element.replace_with(translated_text)
                         segment_idx += 1
 
             # Convert to string with proper UTF-8 encoding

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Spacing Test V2 - No BR Tags</title>
+    <style>
+        /* Bilingual Subtitle Styles - Minimal and Unobtrusive */
+
+        .bilingual-subtitle {
+            display: block;
+            font-size: 0.65em;
+            font-style: italic;
+            color: #bbb;
+            margin: 0.3em 0 0 0;
+            padding: 0;
+            line-height: 1.4;
+            text-decoration: none;
+            white-space: normal;
+        }
+
+        /* Ensure subtitles don't inherit bold from parent */
+        h1 .bilingual-subtitle,
+        h2 .bilingual-subtitle,
+        h3 .bilingual-subtitle,
+        h4 .bilingual-subtitle,
+        h5 .bilingual-subtitle,
+        h6 .bilingual-subtitle,
+        strong .bilingual-subtitle,
+        b .bilingual-subtitle {
+            font-weight: normal !important;
+        }
+
+        /* Ensure block elements maintain block display and spacing */
+        p, h1, h2, h3, h4, h5, h6, div, blockquote, li {
+            display: block !important;
+        }
+
+        /* Ensure proper spacing between block elements - even more aggressive */
+        p {
+            margin-top: 1em !important;
+            margin-bottom: 1em !important;
+            display: block !important;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 1.2em !important;
+            margin-bottom: 0.6em !important;
+            display: block !important;
+        }
+
+        /* Ensure line breaks between paragraphs are not collapsed */
+        * + p {
+            margin-top: 1em !important;
+        }
+
+        * + h1, * + h2, * + h3, * + h4, * + h5, * + h6 {
+            margin-top: 1.2em !important;
+        }
+
+        /* Bilingual pair container - ensure block display with proper spacing */
+        .bi-pair {
+            display: block;
+            margin-bottom: 1em;
+        }
+
+        .bi-col {
+            display: block;
+            margin: 0;
+        }
+
+        /* Basic body styling */
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Georgia, serif;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bilingual Spacing Test V2 (No BR Tags)</h1>
+
+    <h2>Capítulo Uno<span class="bilingual-subtitle" lang="en">Chapter One</span></h2>
+
+    <p>Este es el primer párrafo del capítulo.<span class="bilingual-subtitle" lang="en">This is the first paragraph of the chapter.</span></p>
+
+    <p>Este es el segundo párrafo con más texto.<span class="bilingual-subtitle" lang="en">This is the second paragraph with more text.</span></p>
+
+    <p>Y aquí está un tercer párrafo para probar el espaciado.<span class="bilingual-subtitle" lang="en">And here is a third paragraph to test spacing.</span></p>
+
+    <p>Este es un cuarto párrafo muy largo para ver cómo se maneja el espaciado cuando hay mucho texto en un solo párrafo. Queremos asegurarnos de que el subtítulo aparezca correctamente después del texto traducido y que no interfiera con el espaciado normal entre párrafos.<span class="bilingual-subtitle" lang="en">This is a very long fourth paragraph to see how spacing is handled when there is a lot of text in a single paragraph. We want to make sure that the subtitle appears correctly after the translated text and does not interfere with normal spacing between paragraphs.</span></p>
+
+    <div style="margin-top: 3em; padding: 1em; background: #f0f0f0; border-left: 4px solid #666;">
+        <strong>Expected behavior (V2 - No BR tags):</strong>
+        <ul>
+            <li>Each paragraph should have clear spacing before and after (1em margin)</li>
+            <li>The subtitle span is display:block, so it appears on a new line automatically</li>
+            <li>The subtitle should be small (0.65em), italic, and gray (#bbb)</li>
+            <li>There should be visible separation between where one paragraph ends and the next begins</li>
+            <li>The subtitle has margin-top: 0.3em to create a small gap between translation and original</li>
+        </ul>
+    </div>
+</body>
+</html>

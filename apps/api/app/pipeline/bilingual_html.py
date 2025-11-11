@@ -90,19 +90,18 @@ class BilingualHTMLGenerator:
         """Return CSS for bilingual subtitle styling.
 
         Subtitles appear inline in very small, subtle gray text.
-        No extra spacing - just inherits parent element's natural spacing.
+        The subtitle appears after a line break within the parent element.
         """
         return '''/* Bilingual Subtitle Styles - Minimal and Unobtrusive */
 
 .bilingual-subtitle {
-    display: inline;
+    display: block;
     font-size: 0.65em;
     font-style: italic;
     color: #bbb;
-    margin: 0;
+    margin: 0.3em 0 0 0;
     padding: 0;
     line-height: 1.4;
-    vertical-align: baseline;
     text-decoration: none;
     white-space: normal;
 }
@@ -124,21 +123,26 @@ p, h1, h2, h3, h4, h5, h6, div, blockquote, li {
     display: block !important;
 }
 
-/* Ensure proper spacing between block elements */
+/* Ensure proper spacing between block elements - even more aggressive */
 p {
-    margin: 1em 0 !important;
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+    display: block !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    margin: 1em 0 0.5em 0 !important;
+    margin-top: 1.2em !important;
+    margin-bottom: 0.6em !important;
     display: block !important;
 }
 
-/* Line breaks should be visible */
-br {
-    display: block !important;
-    content: "" !important;
-    margin: 0.5em 0 !important;
+/* Ensure line breaks between paragraphs are not collapsed */
+* + p {
+    margin-top: 1em !important;
+}
+
+* + h1, * + h2, * + h3, * + h4, * + h5, * + h6 {
+    margin-top: 1.2em !important;
 }
 
 /* Bilingual pair container - ensure block display with proper spacing */
@@ -310,15 +314,40 @@ def _reconstruct_bilingual_html(
                 segment_idx += 1
 
     # Second pass: Insert subtitle spans inside parent elements
-    # Block-level elements that should have <br> before subtitle
-    block_elements = {'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'blockquote', 'li', 'td', 'th', 'dd', 'dt'}
+    # Subtitle is now display:block so it automatically appears on new line
+    inline_elements = {'em', 'strong', 'b', 'i', 'a', 'span', 'code', 'sup', 'sub'}
 
     for item in elements_to_subtitle:
         try:
             parent = item['parent']
             original_text = item['original']
 
-            # Create subtitle span
+            # For inline elements (except links), check if next sibling starts with punctuation
+            # If so, move that punctuation inside the parent before adding subtitle
+            # Skip this for <a> tags since URLs should keep punctuation outside
+            if parent.name in inline_elements and parent.name != 'a':
+                next_sibling = parent.next_sibling
+                if next_sibling and isinstance(next_sibling, NavigableString):
+                    sibling_text = str(next_sibling)
+                    # Check if starts with punctuation (colon, period, comma, etc.)
+                    # But only if it's followed by whitespace or end of string (not part of a number like "3.14")
+                    punct_to_move = None
+                    if sibling_text and len(sibling_text) > 0 and sibling_text[0] in ':,;!?…':
+                        punct_to_move = sibling_text[0]
+                    elif sibling_text and len(sibling_text) > 1 and sibling_text[0] == '.' and (sibling_text[1].isspace() or sibling_text[1] in '\n\r\t'):
+                        punct_to_move = '.'
+
+                    if punct_to_move:
+                        # Add punctuation to the end of parent's content
+                        if parent.string:
+                            parent.string = parent.string + punct_to_move
+                        else:
+                            # Parent has child elements, append to last child or parent
+                            parent.append(punct_to_move)
+                        # Remove punctuation from next sibling
+                        next_sibling.replace_with(sibling_text[1:])
+
+            # Create subtitle span (display: block in CSS, so no <br> needed)
             subtitle = soup.new_tag('span', attrs={
                 'class': 'bilingual-subtitle',
                 'lang': source_lang,
@@ -326,16 +355,8 @@ def _reconstruct_bilingual_html(
             })
             subtitle.string = original_text
 
-            # Only add <br> if parent is a block-level element
-            # For inline parents (like <em>, <strong>, <a>), just append subtitle
-            if parent.name in block_elements:
-                br = soup.new_tag('br')
-                parent.append(br)
-                parent.append(subtitle)
-            else:
-                # For inline elements, add a space before subtitle
-                parent.append(' ')
-                parent.append(subtitle)
+            # Simply append the subtitle - CSS will handle the line break
+            parent.append(subtitle)
         except Exception as e:
             logger.warning(f"Failed to add subtitle to element '{parent.name if hasattr(parent, 'name') else 'unknown'}': {e}")
             continue  # Skip this subtitle but continue with others
