@@ -4,7 +4,7 @@ from slowapi.util import get_remote_address
 
 from app.config import settings
 from app.deps import get_storage
-from app.pricing import estimate_price_from_size, estimate_price_from_file
+from app.pricing import estimate_price_from_size, estimate_price_from_file, estimate_tokens_from_epub, estimate_tokens_from_size, calculate_price_with_format
 from app.schemas import EstimateRequest, EstimateResponse
 from app.logger import get_logger
 
@@ -43,23 +43,23 @@ async def estimate_price(
                 detail=f"File size limit exceeded: {size_mb:.1f}MB > {settings.max_file_mb}MB maximum. Please use a smaller file."
             )
         
-        # For EPUB files, download and analyze text content
+        # Estimate tokens first
         if data.key.lower().endswith('.epub'):
             # Download file temporarily for text extraction
             import tempfile
             import os
-            
+
             with tempfile.NamedTemporaryFile(suffix='.epub', delete=False) as temp_file:
                 temp_file_path = temp_file.name
-            
+
             try:
                 success = storage.download_file(data.key, temp_file_path)
                 if success:
-                    tokens_est, price_cents = estimate_price_from_file(temp_file_path)
-                    logger.info(f"EPUB analysis successful: {tokens_est:,} tokens → ${price_cents/100:.2f}")
+                    tokens_est = estimate_tokens_from_epub(temp_file_path)
+                    logger.info(f"EPUB analysis successful: {tokens_est:,} tokens")
                 else:
                     logger.warning("Failed to download EPUB file, using size fallback")
-                    tokens_est, price_cents = estimate_price_from_size(size_bytes)
+                    tokens_est = estimate_tokens_from_size(size_bytes)
             except ValueError as e:
                 # Content limit exceeded - return user-friendly 400 error
                 raise HTTPException(
@@ -68,7 +68,7 @@ async def estimate_price(
                 )
             except Exception as e:
                 logger.warning(f"Failed to extract EPUB text, using size fallback: {e}")
-                tokens_est, price_cents = estimate_price_from_size(size_bytes)
+                tokens_est = estimate_tokens_from_size(size_bytes)
             finally:
                 # Clean up temp file
                 if os.path.exists(temp_file_path):
@@ -76,13 +76,27 @@ async def estimate_price(
         else:
             # For non-EPUB files, use size-based estimation
             try:
-                tokens_est, price_cents = estimate_price_from_size(size_bytes)
+                tokens_est = estimate_tokens_from_size(size_bytes)
             except ValueError as e:
                 # Content limit exceeded - return user-friendly 400 error
                 raise HTTPException(
                     status_code=400,
                     detail=str(e)
                 )
+
+        # Calculate price including format surcharge
+        try:
+            price_cents = calculate_price_with_format(
+                tokens_est,
+                output_format=data.output_format or "translation",
+                provider="gemini"
+            )
+        except ValueError as e:
+            # Content limit exceeded - return user-friendly 400 error
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
 
         logger.info(
             f"Price estimate for {data.key}: {size_bytes} bytes -> "

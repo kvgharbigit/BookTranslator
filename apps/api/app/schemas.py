@@ -18,6 +18,7 @@ class PresignUploadResponse(BaseModel):
 class EstimateRequest(BaseModel):
     key: str = Field(..., description="R2 object key")
     target_lang: str = Field(..., description="Target language code")
+    output_format: Optional[str] = Field("translation", description="Output format: 'translation', 'bilingual', or 'both'")
 
 
 class EstimateResponse(BaseModel):
@@ -32,6 +33,7 @@ class CreateCheckoutRequest(BaseModel):
     email: Optional[str] = Field(None, description="Email for delivery")
     price_cents: int = Field(..., description="Expected price in cents")
     provider: Optional[str] = Field(None, description="Preferred provider")
+    output_format: Optional[str] = Field("translation", description="Output format: 'translation', 'bilingual', or 'both'")
 
 
 class CreateCheckoutResponse(BaseModel):
