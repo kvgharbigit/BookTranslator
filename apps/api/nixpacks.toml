@@ -1,0 +1,17 @@
+# Nixpacks configuration for Railway deployment
+# Specifies system dependencies required for the BookTranslator API worker
+
+[phases.setup]
+# System packages required for WeasyPrint (HTML-to-PDF with CSS support)
+# These libraries enable proper rendering of bilingual PDFs with preserved formatting
+aptPkgs = [
+    "libpango-1.0-0",      # Text layout and rendering
+    "libpangocairo-1.0-0", # Cairo backend for Pango
+    "libcairo2",           # 2D graphics library
+    "libgdk-pixbuf2.0-0",  # Image loading library
+    "shared-mime-info"      # MIME type database
+]
+
+[start]
+# Start the RQ worker with scheduler for background job processing
+cmd = "poetry run rq worker --with-scheduler bookTranslator-jobs"

@@ -96,9 +96,9 @@ class BilingualHTMLGenerator:
 
 .bilingual-subtitle {
     display: block;
-    font-size: 0.65em;
+    font-size: 0.85em;
     font-style: italic;
-    color: #bbb;
+    color: #666;
     margin: 0.3em 0 0 0;
     padding: 0;
     line-height: 1.4;

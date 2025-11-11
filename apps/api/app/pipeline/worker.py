@@ -463,20 +463,51 @@ def _generate_both_outputs(
             output_keys["bilingual_epub"] = epub_key
             logger.info(f"Uploaded bilingual EPUB: {epub_key}")
 
-        # Generate bilingual PDF from the EPUB we just created
+        # Generate bilingual PDF - Use HTML-to-PDF to preserve CSS styling
+        # (EPUB-to-PDF via Calibre loses the bilingual subtitle formatting)
         try:
-            if ENHANCED_PDF_AVAILABLE:
-                bilingual_pdf_path = convert_epub_to_pdf(bilingual_epub_path, temp_dir)
-            else:
-                raise Exception("Enhanced PDF converter not available")
+            from app.html_to_pdf import convert_bilingual_html_to_pdf
 
-            if bilingual_pdf_path and os.path.exists(bilingual_pdf_path):
+            bilingual_pdf_path = os.path.join(temp_dir, f"{job_id}_bilingual.pdf")
+            logger.info("📄 Converting bilingual HTML to PDF (preserves CSS styling)...")
+
+            # Get combined CSS (original + bilingual)
+            original_css = epub_processor.extract_all_css_from_book(original_book)
+            from app.pipeline.bilingual_html import BilingualHTMLGenerator
+            gen = BilingualHTMLGenerator()
+            combined_css = f"{original_css}\n\n/* Bilingual Layout */\n{gen.css}"
+
+            # Convert HTML → PDF with preserved styling
+            success = convert_bilingual_html_to_pdf(
+                bilingual_docs=bilingual_docs,
+                css_content=combined_css,
+                output_path=bilingual_pdf_path,
+                source_lang=source_lang,
+                target_lang=target_lang,
+                original_book=original_book
+            )
+
+            if success and os.path.exists(bilingual_pdf_path):
                 pdf_key = f"outputs/{job_id}_bilingual.pdf"
                 if storage.upload_file(bilingual_pdf_path, pdf_key, "application/pdf"):
                     output_keys["bilingual_pdf"] = pdf_key
-                    logger.info(f"Uploaded bilingual PDF: {pdf_key}")
+                    logger.info(f"Uploaded bilingual PDF with preserved CSS: {pdf_key}")
+            else:
+                logger.error("Bilingual PDF generation failed")
         except Exception as e:
-            logger.error(f"Failed to generate bilingual PDF: {e}")
+            logger.error(f"Failed to generate bilingual PDF: {e}", exc_info=True)
+            # Fallback to EPUB-based PDF if HTML-to-PDF fails
+            try:
+                logger.info("Falling back to EPUB-to-PDF conversion...")
+                if ENHANCED_PDF_AVAILABLE:
+                    bilingual_pdf_path = convert_epub_to_pdf(bilingual_epub_path, temp_dir)
+                    if bilingual_pdf_path and os.path.exists(bilingual_pdf_path):
+                        pdf_key = f"outputs/{job_id}_bilingual.pdf"
+                        if storage.upload_file(bilingual_pdf_path, pdf_key, "application/pdf"):
+                            output_keys["bilingual_pdf"] = pdf_key
+                            logger.warning("Used fallback PDF (CSS styling may be lost)")
+            except Exception as fallback_error:
+                logger.error(f"Fallback PDF generation also failed: {fallback_error}")
 
         # Generate bilingual TXT from documents
         try:
