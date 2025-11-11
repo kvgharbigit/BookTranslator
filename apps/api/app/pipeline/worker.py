@@ -146,23 +146,49 @@ def translate_epub(job_id: str):
             job.progress_step = "assembling"
             job.progress_percent = 60
             db.commit()
-            
-            translated_docs = segmenter.reconstruct_documents(
-                translated_segments, reconstruction_maps, spine_docs
-            )
-            
-            # Apply RTL layout if needed
-            if orchestrator.should_use_rtl_layout(target_lang):
-                translated_docs = _apply_rtl_layout(translated_docs)
-            
-            # Step 5: Generate multi-format outputs
-            job.progress_step = "uploading"
-            job.progress_percent = 80
-            db.commit()
-            
-            output_keys = _generate_outputs(
-                job_id, temp_dir, original_book, translated_docs, translated_segments
-            )
+
+            # Check output format
+            output_format = getattr(job, 'output_format', 'translation')
+
+            if output_format == "bilingual":
+                # Create bilingual documents with side-by-side layout
+                from app.pipeline.bilingual_html import create_bilingual_documents
+
+                bilingual_docs = create_bilingual_documents(
+                    original_segments=segments,
+                    translated_segments=translated_segments,
+                    reconstruction_maps=reconstruction_maps,
+                    source_lang=job.source_lang or "en",
+                    target_lang=target_lang
+                )
+
+                # Step 5: Generate bilingual outputs
+                job.progress_step = "uploading"
+                job.progress_percent = 80
+                db.commit()
+
+                output_keys = _generate_bilingual_outputs(
+                    job_id, temp_dir, original_book, bilingual_docs,
+                    job.source_lang or "en", target_lang
+                )
+            else:
+                # Standard translation-only flow
+                translated_docs = segmenter.reconstruct_documents(
+                    translated_segments, reconstruction_maps, spine_docs
+                )
+
+                # Apply RTL layout if needed
+                if orchestrator.should_use_rtl_layout(target_lang):
+                    translated_docs = _apply_rtl_layout(translated_docs)
+
+                # Step 5: Generate multi-format outputs
+                job.progress_step = "uploading"
+                job.progress_percent = 80
+                db.commit()
+
+                output_keys = _generate_outputs(
+                    job_id, temp_dir, original_book, translated_docs, translated_segments
+                )
             
             # Update job with output keys
             job.output_epub_key = output_keys.get("epub")
@@ -269,6 +295,49 @@ def _generate_outputs(
         logger.error(f"Failed to generate outputs using shared module: {e}")
         # Re-raise exception instead of using legacy fallback
         # This ensures consistent output quality and reveals issues early
+        raise
+
+    return output_keys
+
+
+def _generate_bilingual_outputs(
+    job_id: str,
+    temp_dir: str,
+    original_book,
+    bilingual_docs: list,
+    source_lang: str,
+    target_lang: str
+) -> dict:
+    """Generate bilingual EPUB output."""
+
+    storage = get_storage()
+    output_keys = {}
+
+    try:
+        epub_processor = EPUBProcessor()
+
+        # Generate bilingual EPUB
+        epub_path = os.path.join(temp_dir, f"{job_id}_bilingual.epub")
+
+        success = epub_processor.write_bilingual_epub(
+            original_book=original_book,
+            bilingual_docs=bilingual_docs,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            output_path=epub_path
+        )
+
+        if success and os.path.exists(epub_path):
+            # Upload to storage
+            epub_key = f"outputs/{job_id}.epub"
+            if storage.upload_file(epub_path, epub_key, "application/epub+zip"):
+                output_keys["epub"] = epub_key
+                logger.info(f"Uploaded bilingual EPUB: {epub_key}")
+
+        logger.info(f"Generated bilingual outputs: {list(output_keys.keys())}")
+
+    except Exception as e:
+        logger.error(f"Failed to generate bilingual outputs: {e}")
         raise
 
     return output_keys

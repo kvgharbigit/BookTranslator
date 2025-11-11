@@ -193,7 +193,105 @@ class EPUBProcessor:
         except Exception as e:
             logger.error(f"Failed to write EPUB: {e}")
             return False
-    
+
+    def write_bilingual_epub(
+        self,
+        original_book: epub.EpubBook,
+        bilingual_docs: List[Dict],
+        source_lang: str,
+        target_lang: str,
+        output_path: str
+    ) -> bool:
+        """Write bilingual EPUB with side-by-side original and translation."""
+
+        try:
+            # Create new book with bilingual metadata
+            new_book = epub.EpubBook()
+
+            # Copy metadata
+            new_book.set_identifier(original_book.get_metadata('DC', 'identifier')[0][0])
+
+            # Update title to indicate bilingual edition
+            original_title = original_book.get_metadata('DC', 'title')[0][0]
+            new_book.set_title(f"{original_title} (Bilingual Edition)")
+
+            # Add TWO separate language declarations (critical for compatibility)
+            new_book.add_metadata('DC', 'language', source_lang)
+            new_book.add_metadata('DC', 'language', target_lang)
+
+            # Add description
+            from ..pipeline.bilingual_html import BilingualHTMLGenerator
+            gen = BilingualHTMLGenerator()
+            source_name = gen._get_language_name(source_lang)
+            target_name = gen._get_language_name(target_lang)
+            new_book.add_metadata('DC', 'description',
+                f'Bilingual edition: {source_name} and {target_name}')
+
+            # Copy authors
+            for author in original_book.get_metadata('DC', 'creator'):
+                new_book.add_author(author[0])
+
+            # Extract original CSS
+            original_css = self._extract_all_css_from_book(original_book)
+
+            # Get bilingual CSS from generator
+            bilingual_css = gen._get_css()
+
+            # Combine CSS: original + bilingual
+            combined_css = f"{original_css}\n\n/* Bilingual Layout */\n{bilingual_css}"
+            logger.info(f"Combined CSS: {len(combined_css)} chars")
+
+            # Copy all non-document items (images, fonts, etc.)
+            for item in original_book.get_items():
+                if item.get_type() != ebooklib.ITEM_DOCUMENT:
+                    new_book.add_item(item)
+
+            # Add bilingual documents
+            spine = []
+            href_mapping = {}
+
+            for doc in bilingual_docs:
+                chapter = epub.EpubItem(
+                    uid=doc['id'],
+                    file_name=doc['href'],
+                    media_type='application/xhtml+xml',
+                    content=b''
+                )
+                chapter.title = doc['title'] or f"Chapter {len(spine)+1}"
+
+                href_mapping[doc['href']] = chapter.get_name()
+
+                # Update links and embed combined CSS
+                updated_content = self._update_internal_links(doc['content'], href_mapping)
+                updated_content = self._embed_css_in_html(updated_content, combined_css)
+
+                # Set content
+                if isinstance(updated_content, str):
+                    chapter.set_content(updated_content.encode('utf-8'))
+                elif isinstance(updated_content, bytes):
+                    chapter.set_content(updated_content)
+                else:
+                    chapter.set_content(str(updated_content).encode('utf-8'))
+
+                new_book.add_item(chapter)
+                spine.append(chapter)
+
+            # Set spine
+            new_book.spine = [item for item in spine]
+
+            # Update navigation
+            self._update_navigation(original_book, new_book, spine, bilingual_docs, href_mapping)
+
+            # Write EPUB
+            epub.write_epub(output_path, new_book)
+
+            logger.info(f"Successfully wrote bilingual EPUB to {output_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to write bilingual EPUB: {e}")
+            return False
+
     def _update_navigation(self, original_book: epub.EpubBook, new_book: epub.EpubBook, spine: List, translated_docs: List[Dict], href_mapping: Dict[str, str]):
         """Update navigation elements including TOC and NCX files."""
         try:
