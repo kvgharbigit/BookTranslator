@@ -204,10 +204,11 @@ class PreviewService:
         spine_docs: List[dict],
         max_words: int
     ) -> Tuple[List[dict], int]:
-        """Limit spine documents to approximately max_words.
+        """Limit spine documents to approximately max_words from the MIDDLE of the book.
 
-        Reads documents sequentially until word count reaches max_words.
-        Truncates the last document mid-content if needed to hit the word limit.
+        Calculates the total word count, finds the middle position, and extracts
+        max_words centered around that middle point. This gives a better preview
+        of actual narrative content rather than front matter.
 
         Args:
             spine_docs: List of spine document dicts with 'content' key
@@ -216,14 +217,57 @@ class PreviewService:
         Returns:
             Tuple of (limited_docs, actual_word_count)
         """
-        limited_docs = []
-        total_words = 0
+        # First pass: count total words in all documents
+        doc_word_counts = []
+        total_book_words = 0
 
         for i, doc in enumerate(spine_docs):
-            # Extract text from HTML to count words
             soup = BeautifulSoup(doc['content'], 'html.parser')
             text = soup.get_text()
             word_count = len(text.split())
+            doc_word_counts.append(word_count)
+            total_book_words += word_count
+
+        logger.info(f"Total book: {len(spine_docs)} documents, {total_book_words} words")
+
+        # Calculate starting position (middle of book minus half preview length)
+        # This centers the preview in the middle of the book
+        middle_word_position = total_book_words // 2
+        preview_start_position = max(0, middle_word_position - (max_words // 2))
+
+        logger.info(f"Preview: {max_words} words from middle (position {preview_start_position}-{preview_start_position + max_words})")
+
+        # Find which document contains our start position
+        cumulative_words = 0
+        start_doc_idx = 0
+        start_doc_offset = 0
+
+        for i, word_count in enumerate(doc_word_counts):
+            if cumulative_words + word_count > preview_start_position:
+                start_doc_idx = i
+                start_doc_offset = preview_start_position - cumulative_words
+                break
+            cumulative_words += word_count
+
+        logger.info(f"Starting from document {start_doc_idx}, offset {start_doc_offset} words")
+
+        # Extract documents starting from the calculated position
+        limited_docs = []
+        total_words = 0
+
+        for i in range(start_doc_idx, len(spine_docs)):
+            doc = spine_docs[i]
+            soup = BeautifulSoup(doc['content'], 'html.parser')
+            text = soup.get_text()
+            word_count = len(text.split())
+
+            # For the first document, we might need to skip some words
+            if i == start_doc_idx and start_doc_offset > 0:
+                # Truncate from the beginning, then continue normally
+                doc = self._skip_initial_words(doc, start_doc_offset)
+                soup = BeautifulSoup(doc['content'], 'html.parser')
+                text = soup.get_text()
+                word_count = len(text.split())
 
             logger.info(f"  Doc {i}: {word_count} words, href={doc.get('href', 'unknown')}")
 
@@ -252,6 +296,59 @@ class PreviewService:
                 break
 
         return limited_docs, total_words
+
+    def _skip_initial_words(self, doc: dict, words_to_skip: int) -> dict:
+        """Skip the first N words of a document while preserving HTML structure.
+
+        Args:
+            doc: Document dict with 'content' key
+            words_to_skip: Number of words to skip from the beginning
+
+        Returns:
+            New document dict with initial words removed
+        """
+        soup = BeautifulSoup(doc['content'], 'html.parser')
+
+        words_skipped = 0
+        skip_complete = False
+        elements_to_remove = []
+
+        # Get all string elements (text nodes) in document order
+        for element in soup.descendants:
+            if skip_complete:
+                # We've skipped enough, keep the rest
+                break
+
+            if isinstance(element, NavigableString) and element.strip():
+                text = str(element)
+                words = text.split()
+
+                if words_skipped + len(words) <= words_to_skip:
+                    # Remove this entire text node
+                    words_skipped += len(words)
+                    if hasattr(element, 'extract'):
+                        elements_to_remove.append(element)
+                else:
+                    # Partially keep this text node
+                    words_from_start = words_to_skip - words_skipped
+                    remaining_text = ' '.join(words[words_from_start:])
+                    element.replace_with(NavigableString(remaining_text))
+                    words_skipped = words_to_skip
+                    skip_complete = True
+
+        # Remove marked elements
+        for elem in elements_to_remove:
+            try:
+                elem.extract()
+            except:
+                pass
+
+        return {
+            'id': doc['id'],
+            'href': doc['href'],
+            'title': doc['title'],
+            'content': str(soup)
+        }
 
     def _truncate_document_to_words(self, doc: dict, max_words: int) -> dict:
         """Truncate a document's content to approximately max_words.
