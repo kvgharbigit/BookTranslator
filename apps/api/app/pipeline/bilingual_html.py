@@ -1,9 +1,11 @@
 """
-Bilingual HTML generation - Production ready version.
-Maximum compatibility, minimal complexity.
+Bilingual HTML generation with inline subtitle format.
 
-Generates side-by-side bilingual content for EPUB readers with
-battle-tested CSS that works across all major readers.
+Generates bilingual content where the translated text appears first,
+followed by the original text as a subtle subtitle below it.
+
+This format provides the best reading experience across all formats
+(EPUB, PDF, TXT) while maintaining professional typography.
 """
 from typing import List, Dict
 
@@ -13,78 +15,10 @@ logger = get_logger(__name__)
 
 
 class BilingualHTMLGenerator:
-    """Generates bilingual HTML with table-based responsive layout."""
+    """Generates bilingual HTML with inline subtitle format."""
 
     def __init__(self):
         self.css = self._get_css()
-
-    def merge_segments(
-        self,
-        original_segments: List[str],
-        translated_segments: List[str],
-        source_lang: str = "en",
-        target_lang: str = "es"
-    ) -> str:
-        """
-        Merge aligned segments into bilingual HTML.
-
-        Args:
-            original_segments: Original text segments
-            translated_segments: Translated segments (1:1 aligned)
-            source_lang: Source language code (e.g., 'en')
-            target_lang: Target language code (e.g., 'es')
-
-        Returns:
-            Complete HTML with all bilingual pairs
-
-        Raises:
-            ValueError: If segment counts don't match
-        """
-        if len(original_segments) != len(translated_segments):
-            raise ValueError(
-                f"Segment mismatch: {len(original_segments)} original "
-                f"vs {len(translated_segments)} translated"
-            )
-
-        # Get language display names
-        source_name = self._get_language_name(source_lang)
-        target_name = self._get_language_name(target_lang)
-
-        # Build HTML
-        html_parts = []
-
-        for orig, trans in zip(original_segments, translated_segments):
-            html_parts.append(self._create_pair(
-                orig, trans,
-                source_lang, target_lang,
-                source_name, target_name
-            ))
-
-        return '\n'.join(html_parts)
-
-    def _create_pair(
-        self,
-        original: str,
-        translation: str,
-        source_lang: str,
-        target_lang: str,
-        source_name: str,
-        target_name: str
-    ) -> str:
-        """Create HTML for one bilingual paragraph pair.
-
-        Layout: TARGET (left/first) | SOURCE (right/second)
-        Users read primarily in target language, reference source when needed.
-        """
-
-        return f'''<div class="bi-pair" epub:type="z3998:translation">
-    <div class="bi-col bi-target" lang="{target_lang}" xml:lang="{target_lang}">
-        {translation}
-    </div>
-    <div class="bi-col bi-source" lang="{source_lang}" xml:lang="{source_lang}">
-        {original}
-    </div>
-</div>'''
 
     def _get_css(self) -> str:
         """Return CSS for bilingual subtitle styling.
@@ -143,17 +77,6 @@ h1, h2, h3, h4, h5, h6 {
 
 * + h1, * + h2, * + h3, * + h4, * + h5, * + h6 {
     margin-top: 1.2em !important;
-}
-
-/* Bilingual pair container - ensure block display with proper spacing */
-.bi-pair {
-    display: block;
-    margin-bottom: 1em;
-}
-
-.bi-col {
-    display: block;
-    margin: 0;
 }'''
 
     def _get_language_name(self, lang_code: str) -> str:
