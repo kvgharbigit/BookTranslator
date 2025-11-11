@@ -175,6 +175,57 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
               <Download className="w-5 h-5 text-green-600 group-hover:translate-y-0.5 transition-transform" />
             </a>
           )}
+
+          {/* Bilingual EPUB Download */}
+          {job.download_urls.bilingual_epub && (
+            <a
+              href={job.download_urls.bilingual_epub}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors group"
+            >
+              <BookOpen className="w-6 h-6 text-indigo-600" />
+              <div className="flex-1">
+                <p className="font-medium text-indigo-900">EPUB (Bilingual)</p>
+                <p className="text-sm text-indigo-700">Side-by-side translation for e-readers</p>
+              </div>
+              <Download className="w-5 h-5 text-indigo-600 group-hover:translate-y-0.5 transition-transform" />
+            </a>
+          )}
+
+          {/* Bilingual PDF Download */}
+          {job.download_urls.bilingual_pdf && (
+            <a
+              href={job.download_urls.bilingual_pdf}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-3 p-3 bg-pink-50 border border-pink-200 rounded-lg hover:bg-pink-100 transition-colors group"
+            >
+              <Image className="w-6 h-6 text-pink-600" />
+              <div className="flex-1">
+                <p className="font-medium text-pink-900">PDF (Bilingual)</p>
+                <p className="text-sm text-pink-700">Side-by-side translation for printing</p>
+              </div>
+              <Download className="w-5 h-5 text-pink-600 group-hover:translate-y-0.5 transition-transform" />
+            </a>
+          )}
+
+          {/* Bilingual TXT Download */}
+          {job.download_urls.bilingual_txt && (
+            <a
+              href={job.download_urls.bilingual_txt}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-3 p-3 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors group"
+            >
+              <FileText className="w-6 h-6 text-teal-600" />
+              <div className="flex-1">
+                <p className="font-medium text-teal-900">TXT (Bilingual)</p>
+                <p className="text-sm text-teal-700">Side-by-side translation as plain text</p>
+              </div>
+              <Download className="w-5 h-5 text-teal-600 group-hover:translate-y-0.5 transition-transform" />
+            </a>
+          )}
         </div>
 
         <p className="text-xs text-gray-500 mt-4 text-center">

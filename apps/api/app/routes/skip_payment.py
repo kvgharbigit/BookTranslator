@@ -93,6 +93,7 @@ async def skip_payment(
 
         # Step 2: Calculate price including format surcharge
         output_format = data.output_format or "translation"
+        logger.info(f"🔍 API RECEIVED: output_format={repr(output_format)}, type={type(output_format).__name__}")
         try:
             price_cents = calculate_price_with_format(
                 tokens_est,
@@ -127,6 +128,7 @@ async def skip_payment(
         )
         db.add(job)
         db.commit()
+        logger.info(f"✅ SAVED TO DB: job_id={job_id}, output_format={repr(job.output_format)}")
 
         # Start translation job immediately
         from app.pipeline.worker import translate_epub

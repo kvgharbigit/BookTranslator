@@ -118,6 +118,10 @@ async def stream_preview(
 ):
     """Stream preview generation with real-time progress updates via SSE.
 
+    Note: This endpoint always generates BOTH translation and bilingual previews
+    regardless of the output_format parameter. This allows instant tab switching
+    in the UI without regenerating previews.
+
     This endpoint:
     1. Streams progress messages as Server-Sent Events
     2. Shows fun, emoji-filled progress updates during translation

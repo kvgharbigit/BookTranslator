@@ -20,7 +20,7 @@ class Job(Base):
     output_txt_key = Column(String, nullable=True)  # R2 TXT output key
     target_lang = Column(String, nullable=False)
     source_lang = Column(String, nullable=True)  # Auto-detected
-    output_format = Column(String, default="translation")  # 'translation' | 'bilingual'
+    output_format = Column(String, default="translation")  # 'translation' | 'bilingual' | 'both'
     provider = Column(String, nullable=False)  # 'gemini' | 'groq'
     status = Column(String, default="queued")  # queued|processing|done|failed
     error = Column(Text, nullable=True)
