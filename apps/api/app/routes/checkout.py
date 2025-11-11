@@ -164,7 +164,7 @@ async def create_checkout(
                 logger.error(f"Failed to queue translation: {e}")
             
             return CreateCheckoutResponse(
-                checkout_url=f"http://localhost:3000/processing?job_id={job_id}",
+                checkout_url=f"{settings.frontend_url}/processing?job_id={job_id}",
                 job_id=job_id
             )
         
