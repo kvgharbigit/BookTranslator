@@ -309,16 +309,26 @@ def _generate_bilingual_outputs(
     source_lang: str,
     target_lang: str
 ) -> dict:
-    """Generate bilingual EPUB output."""
+    """Generate bilingual EPUB, PDF, and TXT outputs."""
 
     storage = get_storage()
     output_keys = {}
 
     try:
-        epub_processor = EPUBProcessor()
+        # Import shared modules
+        import sys
+        import asyncio
+        from pathlib import Path
 
-        # Generate bilingual EPUB
-        epub_path = os.path.join(temp_dir, f"{job_id}_bilingual.epub")
+        # Add common modules to path
+        common_path = Path(__file__).parent.parent.parent.parent.parent / "common"
+        sys.path.insert(0, str(common_path))
+
+        from common.outputs import generate_outputs_with_metadata, OutputGenerator
+
+        # First, generate the bilingual EPUB
+        epub_processor = EPUBProcessor()
+        epub_path = os.path.join(temp_dir, f"{job_id}.epub")
 
         success = epub_processor.write_bilingual_epub(
             original_book=original_book,
@@ -328,12 +338,53 @@ def _generate_bilingual_outputs(
             output_path=epub_path
         )
 
-        if success and os.path.exists(epub_path):
-            # Upload to storage
+        if not success or not os.path.exists(epub_path):
+            raise Exception("Failed to generate bilingual EPUB")
+
+        # Extract translated text for TXT generation
+        # For bilingual, we'll extract just the translated text (target language)
+        translated_segments = []
+        for doc in bilingual_docs:
+            # Parse the bilingual HTML and extract only translated text
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(doc['content'], 'lxml-xml')
+            # Find all text content (will include both languages, but that's ok for TXT)
+            text = soup.get_text(separator=' ', strip=True)
+            translated_segments.append(text)
+
+        # Generate all three outputs using shared module
+        results = asyncio.run(generate_outputs_with_metadata(
+            output_dir=temp_dir,
+            job_id=job_id,
+            original_book=original_book,
+            translated_docs=bilingual_docs,
+            translated_segments=translated_segments
+        ))
+
+        # Upload successful outputs to storage
+        output_generator = OutputGenerator()
+        file_paths = output_generator.get_output_files(temp_dir, job_id)
+
+        # Upload EPUB
+        if results.get("epub") and file_paths.get("epub"):
             epub_key = f"outputs/{job_id}.epub"
-            if storage.upload_file(epub_path, epub_key, "application/epub+zip"):
+            if storage.upload_file(file_paths["epub"], epub_key, "application/epub+zip"):
                 output_keys["epub"] = epub_key
                 logger.info(f"Uploaded bilingual EPUB: {epub_key}")
+
+        # Upload PDF
+        if results.get("pdf") and file_paths.get("pdf"):
+            pdf_key = f"outputs/{job_id}.pdf"
+            if storage.upload_file(file_paths["pdf"], pdf_key, "application/pdf"):
+                output_keys["pdf"] = pdf_key
+                logger.info(f"Uploaded bilingual PDF: {pdf_key}")
+
+        # Upload TXT
+        if results.get("txt") and file_paths.get("txt"):
+            txt_key = f"outputs/{job_id}.txt"
+            if storage.upload_file(file_paths["txt"], txt_key, "text/plain; charset=utf-8"):
+                output_keys["txt"] = txt_key
+                logger.info(f"Uploaded bilingual TXT: {txt_key}")
 
         logger.info(f"Generated bilingual outputs: {list(output_keys.keys())}")
 

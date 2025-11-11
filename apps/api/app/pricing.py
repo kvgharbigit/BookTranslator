@@ -263,11 +263,11 @@ def get_optimal_payment_provider(amount_cents: int) -> str:
 
 def calculate_payment_fees(amount_cents: int, provider: str) -> int:
     """Calculate payment processing fees for given provider.
-    
+
     Args:
         amount_cents: Payment amount in cents
         provider: "paypal" or "stripe"
-        
+
     Returns:
         int: Fee amount in cents
     """
@@ -280,3 +280,47 @@ def calculate_payment_fees(amount_cents: int, provider: str) -> int:
     else:
         logger.warning(f"Unknown payment provider: {provider}")
         return 0
+
+
+def calculate_price_with_format(
+    tokens_est: int,
+    output_format: str = "translation",
+    provider: str = "gemini"
+) -> int:
+    """Calculate price including bilingual format surcharge.
+
+    Output format pricing:
+    - "translation": Base price only (standard translation)
+    - "bilingual": Base price + $1.00 (bilingual reader only)
+    - "both": Base price + $1.50 (both standard + bilingual)
+
+    Args:
+        tokens_est: Estimated token count
+        output_format: One of "translation", "bilingual", "both"
+        provider: AI provider name
+
+    Returns:
+        int: Total price in cents
+    """
+    # Calculate base translation price
+    base_price_cents = calculate_price_cents(tokens_est, provider)
+
+    # Add format surcharge
+    if output_format == "bilingual":
+        surcharge_cents = 100  # $1.00 for bilingual only
+        logger.info(f"Applied bilingual surcharge: +$1.00")
+    elif output_format == "both":
+        surcharge_cents = 150  # $1.50 for both formats
+        logger.info(f"Applied both formats surcharge: +$1.50")
+    else:  # "translation" or unspecified
+        surcharge_cents = 0
+
+    total_price_cents = base_price_cents + surcharge_cents
+
+    logger.info(
+        f"Format pricing: base ${base_price_cents/100:.2f} + "
+        f"format surcharge ${surcharge_cents/100:.2f} = "
+        f"total ${total_price_cents/100:.2f}"
+    )
+
+    return total_price_cents
