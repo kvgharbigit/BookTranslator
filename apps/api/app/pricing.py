@@ -156,50 +156,59 @@ def estimate_price_from_file(file_path: str, provider: str = "gemini") -> tuple[
 
 
 def validate_price_match(
-    size_bytes: int, 
-    expected_price_cents: int, 
+    size_bytes: int,
+    expected_price_cents: int,
     provider: str = "gemini",
-    tolerance_cents: int = 10
+    tolerance_cents: int = 10,
+    output_format: str = "translation"
 ) -> bool:
     """Validate that expected price matches server-side calculation.
-    
+
     Used to prevent client-side price tampering.
     """
-    _, calculated_price = estimate_price_from_size(size_bytes, provider)
-    
+    tokens_est = estimate_tokens_from_size(size_bytes)
+    calculated_price = calculate_price_with_format(tokens_est, output_format, provider)
+
     price_diff = abs(calculated_price - expected_price_cents)
     is_valid = price_diff <= tolerance_cents
-    
+
     if not is_valid:
         logger.warning(
             f"Price validation failed: expected {expected_price_cents}, "
             f"calculated {calculated_price}, diff {price_diff}"
         )
-    
+
     return is_valid
 
 
 def validate_price_match_from_file(
     file_path: str,
-    expected_price_cents: int, 
+    expected_price_cents: int,
     provider: str = "gemini",
-    tolerance_cents: int = 10
+    tolerance_cents: int = 10,
+    output_format: str = "translation"
 ) -> bool:
     """Validate that expected price matches server-side calculation using file analysis.
-    
+
     Used to prevent client-side price tampering for EPUB files.
     """
-    _, calculated_price = estimate_price_from_file(file_path, provider)
-    
+    if file_path.lower().endswith('.epub'):
+        tokens_est = estimate_tokens_from_epub(file_path)
+    else:
+        file_size = Path(file_path).stat().st_size
+        tokens_est = estimate_tokens_from_size(file_size)
+
+    calculated_price = calculate_price_with_format(tokens_est, output_format, provider)
+
     price_diff = abs(calculated_price - expected_price_cents)
     is_valid = price_diff <= tolerance_cents
-    
+
     if not is_valid:
         logger.warning(
             f"Price validation failed (file-based): expected {expected_price_cents}, "
             f"calculated {calculated_price}, diff {price_diff}"
         )
-    
+
     return is_valid
 
 

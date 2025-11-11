@@ -50,28 +50,39 @@ async def get_job_status(
     if job.status == "done":
         download_urls = {}
         expires_at = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
-        
+
         try:
             # Generate presigned URLs for each available format
             if job.output_epub_key:
                 download_urls["epub"] = storage.generate_presigned_download_url(
                     job.output_epub_key
                 )
-            
+
             if job.output_pdf_key:
                 download_urls["pdf"] = storage.generate_presigned_download_url(
                     job.output_pdf_key
                 )
-            
+
             if job.output_txt_key:
                 download_urls["txt"] = storage.generate_presigned_download_url(
                     job.output_txt_key
                 )
-            
+
+            # For "both" format, also include bilingual outputs
+            output_format = getattr(job, 'output_format', 'translation')
+            if output_format == "both":
+                bilingual_epub_key = f"outputs/{job.id}_bilingual.epub"
+                bilingual_pdf_key = f"outputs/{job.id}_bilingual.pdf"
+                bilingual_txt_key = f"outputs/{job.id}_bilingual.txt"
+
+                download_urls["bilingual_epub"] = storage.generate_presigned_download_url(bilingual_epub_key)
+                download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(bilingual_pdf_key)
+                download_urls["bilingual_txt"] = storage.generate_presigned_download_url(bilingual_txt_key)
+
             if download_urls:
                 response_data["download_urls"] = download_urls
                 response_data["expires_at"] = expires_at
-            
+
         except Exception as e:
             logger.error(f"Failed to generate download URLs for job {job_id}: {e}")
             # Don't fail the request, just log the error
@@ -149,6 +160,17 @@ async def get_jobs_by_email(
                     download_urls["txt"] = storage.generate_presigned_download_url(
                         job.output_txt_key
                     )
+
+                # For "both" format, also include bilingual outputs
+                output_format = getattr(job, 'output_format', 'translation')
+                if output_format == "both":
+                    bilingual_epub_key = f"outputs/{job.id}_bilingual.epub"
+                    bilingual_pdf_key = f"outputs/{job.id}_bilingual.pdf"
+                    bilingual_txt_key = f"outputs/{job.id}_bilingual.txt"
+
+                    download_urls["bilingual_epub"] = storage.generate_presigned_download_url(bilingual_epub_key)
+                    download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(bilingual_pdf_key)
+                    download_urls["bilingual_txt"] = storage.generate_presigned_download_url(bilingual_txt_key)
 
                 if download_urls:
                     response_data["download_urls"] = download_urls

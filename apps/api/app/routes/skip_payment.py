@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import get_db
 from app.deps import get_storage
-from app.pricing import estimate_price_from_file, estimate_price_from_size
+from app.pricing import estimate_tokens_from_size, estimate_tokens_from_epub, calculate_price_with_format
 from app.models import Job
 from app.logger import get_logger
 from pydantic import BaseModel
@@ -19,6 +19,7 @@ class SkipPaymentRequest(BaseModel):
     key: str
     target_lang: str
     email: str | None = None
+    output_format: str | None = "translation"
 
 
 class SkipPaymentResponse(BaseModel):
@@ -50,8 +51,10 @@ async def skip_payment(
                 detail="File not found. Please upload file first."
             )
 
-        # Estimate price (for record keeping)
+        # Estimate tokens and price (for record keeping)
         temp_file_path = None
+
+        # Step 1: Estimate tokens
         if data.key.lower().endswith('.epub'):
             import tempfile
             import os
@@ -62,18 +65,46 @@ async def skip_payment(
             try:
                 success = storage.download_file(data.key, temp_file_path)
                 if success:
-                    tokens_est, price_cents = estimate_price_from_file(temp_file_path, provider)
+                    tokens_est = estimate_tokens_from_epub(temp_file_path)
                 else:
                     logger.warning("Failed to download EPUB file, using size fallback")
-                    tokens_est, price_cents = estimate_price_from_size(size_bytes, provider)
+                    tokens_est = estimate_tokens_from_size(size_bytes)
+            except ValueError as e:
+                # Content limit exceeded - return user-friendly error
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(e)
+                )
             except Exception as e:
                 logger.warning(f"Failed to extract EPUB text, using size fallback: {e}")
-                tokens_est, price_cents = estimate_price_from_size(size_bytes, provider)
+                tokens_est = estimate_tokens_from_size(size_bytes)
             finally:
                 if temp_file_path and os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
         else:
-            tokens_est, price_cents = estimate_price_from_size(size_bytes, provider)
+            try:
+                tokens_est = estimate_tokens_from_size(size_bytes)
+            except ValueError as e:
+                # Content limit exceeded - return user-friendly error
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(e)
+                )
+
+        # Step 2: Calculate price including format surcharge
+        output_format = data.output_format or "translation"
+        try:
+            price_cents = calculate_price_with_format(
+                tokens_est,
+                output_format=output_format,
+                provider=provider
+            )
+        except ValueError as e:
+            # Content limit exceeded - return user-friendly error
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
 
         # Generate job ID
         job_id = str(uuid.uuid4())
@@ -91,6 +122,7 @@ async def skip_payment(
             tokens_est=tokens_est,
             size_bytes=size_bytes,
             email=data.email,
+            output_format=output_format,
             stripe_payment_id=f"skip_payment_{job_id}"
         )
         db.add(job)

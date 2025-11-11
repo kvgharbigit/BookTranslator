@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db import get_db
 from app.deps import get_storage
-from app.pricing import estimate_price_from_size, estimate_price_from_file, validate_price_match, validate_price_match_from_file, get_optimal_payment_provider
+from app.pricing import estimate_price_from_size, estimate_price_from_file, estimate_tokens_from_size, estimate_tokens_from_epub, calculate_price_with_format, validate_price_match, validate_price_match_from_file, get_optimal_payment_provider
 from app.paypal import get_paypal_provider
 from app.schemas import CreateCheckoutRequest, CreateCheckoutResponse
 from app.models import Job
@@ -48,34 +48,67 @@ async def create_checkout(
         # For EPUB files, download and analyze text content for accurate token estimation
         temp_file_path = None
         epub_download_success = False
-        
+
+        # Step 1: Estimate tokens
         if data.key.lower().endswith('.epub'):
             import tempfile
             import os
-            
+
             with tempfile.NamedTemporaryFile(suffix='.epub', delete=False) as temp_file:
                 temp_file_path = temp_file.name
-            
+
             try:
                 success = storage.download_file(data.key, temp_file_path)
                 if success:
-                    tokens_est, server_price_cents = estimate_price_from_file(temp_file_path, provider)
+                    tokens_est = estimate_tokens_from_epub(temp_file_path)
                     epub_download_success = True
                 else:
                     logger.warning("Failed to download EPUB file for checkout, using size fallback")
-                    tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+                    tokens_est = estimate_tokens_from_size(size_bytes)
+            except ValueError as e:
+                # Content limit exceeded - return user-friendly 400 error
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(e)
+                )
             except Exception as e:
                 logger.warning(f"Failed to extract EPUB text for checkout, using size fallback: {e}")
-                tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+                tokens_est = estimate_tokens_from_size(size_bytes)
         else:
-            tokens_est, server_price_cents = estimate_price_from_size(size_bytes, provider)
+            try:
+                tokens_est = estimate_tokens_from_size(size_bytes)
+            except ValueError as e:
+                # Content limit exceeded - return user-friendly 400 error
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(e)
+                )
+
+        # Step 2: Calculate price including format surcharge
+        try:
+            server_price_cents = calculate_price_with_format(
+                tokens_est,
+                output_format=data.output_format or "translation",
+                provider=provider
+            )
+        except ValueError as e:
+            # Content limit exceeded - return user-friendly 400 error
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
         
         # Validate client price matches server calculation
         # Use file-based validation for EPUB files if we downloaded it successfully
+        output_format = data.output_format or "translation"
         if epub_download_success and temp_file_path and os.path.exists(temp_file_path):
-            price_validation_passed = validate_price_match_from_file(temp_file_path, data.price_cents, provider)
+            price_validation_passed = validate_price_match_from_file(
+                temp_file_path, data.price_cents, provider, output_format=output_format
+            )
         else:
-            price_validation_passed = validate_price_match(size_bytes, data.price_cents, provider)
+            price_validation_passed = validate_price_match(
+                size_bytes, data.price_cents, provider, output_format=output_format
+            )
             
         # Clean up temp file after validation
         if temp_file_path and os.path.exists(temp_file_path):
@@ -111,6 +144,7 @@ async def create_checkout(
                 tokens_est=tokens_est,
                 size_bytes=size_bytes,
                 email=data.email,
+                output_format=output_format,
                 stripe_payment_id=f"fake_paypal_payment_{job_id}"
             )
             db.add(job)
@@ -169,6 +203,7 @@ async def create_checkout(
             size_bytes=size_bytes,
             tokens_est=tokens_est,
             price_charged_cents=server_price_cents,
+            output_format=output_format,
             stripe_payment_id=payment_id,  # Store payment ID for both providers
         )
         
