@@ -190,6 +190,7 @@ def translate_epub(job_id: str):
                 job_id, temp_dir, original_book,
                 translated_docs, translated_segments,
                 bilingual_docs,
+                segments,  # Pass original segments for bilingual TXT
                 job.source_lang or "en", target_lang
             )
 
@@ -418,6 +419,7 @@ def _generate_both_outputs(
     translated_docs: list,
     translated_segments: list,
     bilingual_docs: list,
+    original_segments: list,
     source_lang: str,
     target_lang: str
 ) -> dict:
@@ -534,35 +536,33 @@ def _generate_both_outputs(
             except Exception as fallback_error:
                 logger.error(f"Fallback PDF generation also failed: {fallback_error}")
 
-        # Generate bilingual TXT from documents with proper formatting
+        # Generate bilingual TXT from raw segments (clean format)
         try:
             bilingual_text_parts = []
 
-            for doc in bilingual_docs:
-                soup = BeautifulSoup(doc['content'], 'lxml-xml')
+            # Validate segment counts match
+            if len(original_segments) != len(translated_segments):
+                logger.warning(
+                    f"Segment count mismatch for bilingual TXT: "
+                    f"original={len(original_segments)}, translated={len(translated_segments)}. "
+                    f"Using minimum length."
+                )
+                min_len = min(len(original_segments), len(translated_segments))
+                original_segments_safe = original_segments[:min_len]
+                translated_segments_safe = translated_segments[:min_len]
+            else:
+                original_segments_safe = original_segments
+                translated_segments_safe = translated_segments
 
-                # Find all bilingual subtitle pairs
-                for element in soup.find_all(class_='bilingual-subtitle'):
-                    parent = element.parent
+            # Format: Clean separation between translation and original
+            for orig, trans in zip(original_segments_safe, translated_segments_safe):
+                orig_text = orig.strip()
+                trans_text = trans.strip()
 
-                    # Get the translated text (everything except the subtitle)
-                    translated_text = ""
-                    for content in parent.contents:
-                        if hasattr(content, 'get') and content.get('class') == ['bilingual-subtitle']:
-                            continue  # Skip subtitle
-                        if isinstance(content, str):
-                            translated_text += content
-                        else:
-                            translated_text += content.get_text()
-
-                    # Get the original text from subtitle
-                    original_text = element.get_text(strip=True)
-
-                    # Format: Translation first, then original in parentheses on new line
-                    if translated_text.strip() and original_text.strip():
-                        bilingual_text_parts.append(
-                            f"{translated_text.strip()}\n    ({original_text.strip()})\n"
-                        )
+                if orig_text and trans_text:
+                    bilingual_text_parts.append(
+                        f"{trans_text}\n    ({orig_text})\n"
+                    )
 
             bilingual_txt_path = os.path.join(temp_dir, f"{job_id}_bilingual.txt")
             with open(bilingual_txt_path, "w", encoding="utf-8") as f:
