@@ -38,7 +38,10 @@ export default function RetrievePage() {
     setSearched(false);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiBase) {
+        throw new Error('API configuration missing');
+      }
       const response = await fetch(`${apiBase}/jobs-by-email/${encodeURIComponent(email)}`);
 
       if (!response.ok) {

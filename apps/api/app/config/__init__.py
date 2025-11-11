@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     env: str = Field(default="development", alias="ENV")
     log_level: str = Field(default="info", alias="LOG_LEVEL")
     database_url: str = Field(alias="DATABASE_URL")  # Required - always use Railway PostgreSQL
-    frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")  # Frontend URL for redirects
+    frontend_url: str = Field(alias="FRONTEND_URL")  # Frontend URL for redirects (REQUIRED in production)
 
     # Cloudflare R2 Storage (Required - No Local Fallback)
     r2_account_id: str = Field(alias="R2_ACCOUNT_ID")

@@ -1,4 +1,9 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+// No localhost fallback - NEXT_PUBLIC_API_BASE must be set in production
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+if (!API_BASE) {
+  throw new Error('NEXT_PUBLIC_API_BASE environment variable is not set');
+}
 
 export interface PresignUploadResponse {
   key: string;
