@@ -187,7 +187,7 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
               <BookOpen className="w-6 h-6 text-indigo-600" />
               <div className="flex-1">
                 <p className="font-medium text-indigo-900">EPUB (Bilingual)</p>
-                <p className="text-sm text-indigo-700">Side-by-side translation for e-readers</p>
+                <p className="text-sm text-indigo-700">Translation with original text as subtitles</p>
               </div>
               <Download className="w-5 h-5 text-indigo-600 group-hover:translate-y-0.5 transition-transform" />
             </a>
@@ -204,7 +204,7 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
               <Image className="w-6 h-6 text-pink-600" />
               <div className="flex-1">
                 <p className="font-medium text-pink-900">PDF (Bilingual)</p>
-                <p className="text-sm text-pink-700">Side-by-side translation for printing</p>
+                <p className="text-sm text-pink-700">Translation with original text as subtitles</p>
               </div>
               <Download className="w-5 h-5 text-pink-600 group-hover:translate-y-0.5 transition-transform" />
             </a>
@@ -221,7 +221,7 @@ export default function ProgressPoller({ jobId }: ProgressPollerProps) {
               <FileText className="w-6 h-6 text-teal-600" />
               <div className="flex-1">
                 <p className="font-medium text-teal-900">TXT (Bilingual)</p>
-                <p className="text-sm text-teal-700">Side-by-side translation as plain text</p>
+                <p className="text-sm text-teal-700">Translation with original text as subtitles</p>
               </div>
               <Download className="w-5 h-5 text-teal-600 group-hover:translate-y-0.5 transition-transform" />
             </a>

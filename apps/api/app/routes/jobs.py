@@ -68,16 +68,21 @@ async def get_job_status(
                     job.output_txt_key
                 )
 
-            # For "both" format, also include bilingual outputs
-            output_format = getattr(job, 'output_format', 'translation')
-            if output_format == "both":
-                bilingual_epub_key = f"outputs/{job.id}_bilingual.epub"
-                bilingual_pdf_key = f"outputs/{job.id}_bilingual.pdf"
-                bilingual_txt_key = f"outputs/{job.id}_bilingual.txt"
+            # Include bilingual outputs if they exist (for "bilingual" or "both" formats)
+            if job.bilingual_epub_key:
+                download_urls["bilingual_epub"] = storage.generate_presigned_download_url(
+                    job.bilingual_epub_key
+                )
 
-                download_urls["bilingual_epub"] = storage.generate_presigned_download_url(bilingual_epub_key)
-                download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(bilingual_pdf_key)
-                download_urls["bilingual_txt"] = storage.generate_presigned_download_url(bilingual_txt_key)
+            if job.bilingual_pdf_key:
+                download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(
+                    job.bilingual_pdf_key
+                )
+
+            if job.bilingual_txt_key:
+                download_urls["bilingual_txt"] = storage.generate_presigned_download_url(
+                    job.bilingual_txt_key
+                )
 
             if download_urls:
                 response_data["download_urls"] = download_urls
@@ -161,16 +166,21 @@ async def get_jobs_by_email(
                         job.output_txt_key
                     )
 
-                # For "both" format, also include bilingual outputs
-                output_format = getattr(job, 'output_format', 'translation')
-                if output_format == "both":
-                    bilingual_epub_key = f"outputs/{job.id}_bilingual.epub"
-                    bilingual_pdf_key = f"outputs/{job.id}_bilingual.pdf"
-                    bilingual_txt_key = f"outputs/{job.id}_bilingual.txt"
+                # Include bilingual outputs if they exist (for "bilingual" or "both" formats)
+                if job.bilingual_epub_key:
+                    download_urls["bilingual_epub"] = storage.generate_presigned_download_url(
+                        job.bilingual_epub_key
+                    )
 
-                    download_urls["bilingual_epub"] = storage.generate_presigned_download_url(bilingual_epub_key)
-                    download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(bilingual_pdf_key)
-                    download_urls["bilingual_txt"] = storage.generate_presigned_download_url(bilingual_txt_key)
+                if job.bilingual_pdf_key:
+                    download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(
+                        job.bilingual_pdf_key
+                    )
+
+                if job.bilingual_txt_key:
+                    download_urls["bilingual_txt"] = storage.generate_presigned_download_url(
+                        job.bilingual_txt_key
+                    )
 
                 if download_urls:
                     response_data["download_urls"] = download_urls

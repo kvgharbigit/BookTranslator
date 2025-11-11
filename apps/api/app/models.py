@@ -16,8 +16,11 @@ class Job(Base):
     email = Column(String, nullable=True)
     source_key = Column(String, nullable=False)  # R2 upload key
     output_epub_key = Column(String, nullable=True)  # R2 EPUB output key
-    output_pdf_key = Column(String, nullable=True)  # R2 PDF output key  
+    output_pdf_key = Column(String, nullable=True)  # R2 PDF output key
     output_txt_key = Column(String, nullable=True)  # R2 TXT output key
+    bilingual_epub_key = Column(String, nullable=True)  # R2 bilingual EPUB key
+    bilingual_pdf_key = Column(String, nullable=True)  # R2 bilingual PDF key
+    bilingual_txt_key = Column(String, nullable=True)  # R2 bilingual TXT key
     target_lang = Column(String, nullable=False)
     source_lang = Column(String, nullable=True)  # Auto-detected
     output_format = Column(String, default="translation")  # 'translation' | 'bilingual' | 'both'

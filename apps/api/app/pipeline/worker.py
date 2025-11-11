@@ -194,11 +194,14 @@ def translate_epub(job_id: str):
             )
 
             # Update job with output keys
-            # For "both" format, we generate 6 files but only store the primary 3 in database
-            # The additional bilingual files are accessible via status endpoint
             job.output_epub_key = output_keys.get("epub")
             job.output_pdf_key = output_keys.get("pdf")
             job.output_txt_key = output_keys.get("txt")
+
+            # Store bilingual keys if they exist (for "bilingual" or "both" formats)
+            job.bilingual_epub_key = output_keys.get("bilingual_epub")
+            job.bilingual_pdf_key = output_keys.get("bilingual_pdf")
+            job.bilingual_txt_key = output_keys.get("bilingual_txt")
             
             # Step 6: Complete job
             job.status = "done"
