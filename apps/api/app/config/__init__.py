@@ -1,78 +1,131 @@
-"""Application configuration using Pydantic settings."""
+"""Application configuration using Pydantic settings.
 
-from pydantic import Field
+Only secrets (API keys, passwords, tokens) are loaded from environment variables.
+Non-secret configuration constants are in app.config.constants.
+"""
+
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
+
+from .constants import (
+    DEFAULT_PORT,
+    DEFAULT_LOG_LEVEL,
+    R2_BUCKET,
+    R2_REGION,
+    SIGNED_GET_TTL_SECONDS,
+    MIN_PRICE_CENTS,
+    TARGET_PROFIT_CENTS,
+    PRICE_CENTS_PER_MILLION_TOKENS,
+    MICROPAYMENTS_THRESHOLD_CENTS,
+    DEFAULT_PROVIDER,
+    DEFAULT_GEMINI_MODEL,
+    DEFAULT_GROQ_MODEL,
+    MAX_BATCH_TOKENS,
+    MAX_JOB_TOKENS,
+    MAX_FILE_TOKENS,
+    RETRY_LIMIT,
+    DEFAULT_RQ_QUEUES,
+    MAX_CONCURRENT_JOBS,
+    RETENTION_DAYS,
+    GENERATE_PDF,
+    GENERATE_TXT,
+    DEFAULT_EMAIL_PROVIDER,
+    EMAIL_FROM,
+    RATE_LIMIT_BURST,
+    RATE_LIMIT_PER_HOUR,
+    MAX_FILE_MB,
+    MAX_ZIP_ENTRIES,
+    MAX_COMPRESSION_RATIO,
+    get_frontend_url,
+)
 
 
 class Settings(BaseSettings):
-    """Application settings using environment variables."""
+    """Application settings - only secrets from environment variables."""
 
-    # Server
-    port: int = Field(default=8000, alias="PORT")
+    # Server Configuration
+    port: int = Field(default=DEFAULT_PORT, alias="PORT")
     env: str = Field(default="development", alias="ENV")
-    log_level: str = Field(default="info", alias="LOG_LEVEL")
-    database_url: str = Field(alias="DATABASE_URL")  # Required - always use Railway PostgreSQL
-    frontend_url: str = Field(alias="FRONTEND_URL")  # Frontend URL for redirects (REQUIRED in production)
+    log_level: str = Field(default=DEFAULT_LOG_LEVEL, alias="LOG_LEVEL")
 
-    # Cloudflare R2 Storage (Required - No Local Fallback)
+    # SECRETS - Must be in environment
+    database_url: str = Field(alias="DATABASE_URL")
+    redis_url: str = Field(alias="REDIS_URL")
+
+    # Frontend URL (auto-determined from env, but can override)
+    frontend_url: str | None = Field(default=None, alias="FRONTEND_URL")
+
+    # R2 Storage SECRETS
     r2_account_id: str = Field(alias="R2_ACCOUNT_ID")
     r2_access_key_id: str = Field(alias="R2_ACCESS_KEY_ID")
     r2_secret_access_key: str = Field(alias="R2_SECRET_ACCESS_KEY")
-    r2_bucket: str = Field(default="epub-translator-production", alias="R2_BUCKET")
-    r2_region: str = Field(default="auto", alias="R2_REGION")
-    signed_get_ttl_seconds: int = Field(default=432000, alias="SIGNED_GET_TTL_SECONDS")  # 5 days (5 * 24 * 60 * 60)
 
-    # Payment Processing (PayPal only)
-    min_price_cents: int = Field(default=50, alias="MIN_PRICE_CENTS")
-    target_profit_cents: int = Field(default=40, alias="TARGET_PROFIT_CENTS")
-    price_cents_per_million_tokens: int = Field(default=300, alias="PRICE_CENTS_PER_MILLION_TOKENS")
+    # R2 non-secrets (constants)
+    r2_bucket: str = R2_BUCKET
+    r2_region: str = R2_REGION
+    signed_get_ttl_seconds: int = SIGNED_GET_TTL_SECONDS
 
-    # PayPal Micropayments
+    # PayPal SECRETS
     paypal_client_id: str = Field(alias="PAYPAL_CLIENT_ID")
     paypal_client_secret: str = Field(alias="PAYPAL_CLIENT_SECRET")
-    paypal_environment: str = Field(default="sandbox", alias="PAYPAL_ENVIRONMENT")  # "sandbox" or "live"
     paypal_webhook_id: str = Field(alias="PAYPAL_WEBHOOK_ID")
-    micropayments_threshold_cents: int = Field(default=800, alias="MICROPAYMENTS_THRESHOLD_CENTS")
+    paypal_environment: str = Field(default="sandbox", alias="PAYPAL_ENVIRONMENT")
 
-    # Translation Providers
-    # NOTE: Default models are defined in app.config.models (single source of truth)
-    # These defaults should match DEFAULT_GEMINI_MODEL and DEFAULT_GROQ_MODEL
-    provider: str = Field(default="gemini", alias="PROVIDER")
+    # Pricing (constants)
+    min_price_cents: int = MIN_PRICE_CENTS
+    target_profit_cents: int = TARGET_PROFIT_CENTS
+    price_cents_per_million_tokens: int = PRICE_CENTS_PER_MILLION_TOKENS
+    micropayments_threshold_cents: int = MICROPAYMENTS_THRESHOLD_CENTS
+
+    # Translation Provider SECRETS
     gemini_api_key: str = Field(alias="GEMINI_API_KEY")
-    gemini_model: str = Field(default="gemini-2.5-flash-lite", alias="GEMINI_MODEL")  # Should match app.config.models.DEFAULT_GEMINI_MODEL
     groq_api_key: str = Field(alias="GROQ_API_KEY")
-    groq_model: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")  # Should match app.config.models.DEFAULT_GROQ_MODEL
-    max_batch_tokens: int = Field(default=6000, alias="MAX_BATCH_TOKENS")
-    max_job_tokens: int = Field(default=1000000, alias="MAX_JOB_TOKENS")
-    max_file_tokens: int = Field(default=1000000, alias="MAX_FILE_TOKENS")  # 1M token limit for pricing tiers
-    retry_limit: int = Field(default=3, alias="RETRY_LIMIT")
 
-    # Queue & Processing
-    redis_url: str = Field(alias="REDIS_URL")
-    rq_queues: str = Field(default="translate", alias="RQ_QUEUES")
-    max_concurrent_jobs: int = Field(default=5, alias="MAX_CONCURRENT_JOBS")
-    retention_days: int = Field(default=5, alias="RETENTION_DAYS")
+    # Translation non-secrets (constants)
+    provider: str = DEFAULT_PROVIDER
+    gemini_model: str = DEFAULT_GEMINI_MODEL
+    groq_model: str = DEFAULT_GROQ_MODEL
+    max_batch_tokens: int = MAX_BATCH_TOKENS
+    max_job_tokens: int = MAX_JOB_TOKENS
+    max_file_tokens: int = MAX_FILE_TOKENS
+    retry_limit: int = RETRY_LIMIT
 
-    # Multi-Format Output
-    generate_pdf: bool = Field(default=True, alias="GENERATE_PDF")
-    generate_txt: bool = Field(default=True, alias="GENERATE_TXT")
+    # Queue (constants)
+    rq_queues: str = DEFAULT_RQ_QUEUES
+    max_concurrent_jobs: int = MAX_CONCURRENT_JOBS
+    retention_days: int = RETENTION_DAYS
 
-    # Email
-    email_provider: str = Field(default="resend", alias="EMAIL_PROVIDER")
+    # Output (constants)
+    generate_pdf: bool = GENERATE_PDF
+    generate_txt: bool = GENERATE_TXT
+
+    # Email SECRETS
     resend_api_key: str = Field(alias="RESEND_API_KEY")
-    email_from: str = Field(alias="EMAIL_FROM")
 
-    # Security & Rate Limiting
-    rate_limit_burst: int = Field(default=10, alias="RATE_LIMIT_BURST")
-    rate_limit_per_hour: int = Field(default=60, alias="RATE_LIMIT_PER_HOUR")
-    max_file_mb: int = Field(default=200, alias="MAX_FILE_MB")
-    max_zip_entries: int = Field(default=5000, alias="MAX_ZIP_ENTRIES")
-    max_compression_ratio: int = Field(default=10, alias="MAX_COMPRESSION_RATIO")
+    # Email non-secrets (constants)
+    email_provider: str = DEFAULT_EMAIL_PROVIDER
+    email_from: str = EMAIL_FROM
+
+    # Security (constants)
+    rate_limit_burst: int = RATE_LIMIT_BURST
+    rate_limit_per_hour: int = RATE_LIMIT_PER_HOUR
+    max_file_mb: int = MAX_FILE_MB
+    max_zip_entries: int = MAX_ZIP_ENTRIES
+    max_compression_ratio: int = MAX_COMPRESSION_RATIO
+
+    @field_validator("frontend_url", mode="before")
+    @classmethod
+    def set_frontend_url(cls, v, info):
+        """Auto-set frontend URL based on environment if not provided."""
+        if v is not None:
+            return v
+        env = info.data.get("env", "development")
+        return get_frontend_url(env)
 
     class Config:
         env_file = ".env"
         case_sensitive = False
-        extra = "ignore"  # Ignore extra environment variables
+        extra = "ignore"
 
 
 # Global settings instance
