@@ -158,6 +158,7 @@ def translate_epub(job_id: str):
                     original_segments=segments,
                     translated_segments=translated_segments,
                     reconstruction_maps=reconstruction_maps,
+                    spine_docs=spine_docs,
                     source_lang=job.source_lang or "en",
                     target_lang=target_lang
                 )

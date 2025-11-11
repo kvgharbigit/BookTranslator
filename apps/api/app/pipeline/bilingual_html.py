@@ -188,6 +188,7 @@ def create_bilingual_documents(
     original_segments: List[str],
     translated_segments: List[str],
     reconstruction_maps: List[Dict],
+    spine_docs: List[Dict],
     source_lang: str,
     target_lang: str
 ) -> List[Dict]:
@@ -198,12 +199,15 @@ def create_bilingual_documents(
         original_segments: All original text segments
         translated_segments: All translated segments (1:1 aligned)
         reconstruction_maps: Document reconstruction metadata
+        spine_docs: Original spine documents (for HTML structure)
         source_lang: Source language code (e.g., 'en')
         target_lang: Target language code (e.g., 'es')
 
     Returns:
         List of bilingual documents, one per original document
     """
+    from bs4 import BeautifulSoup
+
     bilingual_gen = BilingualHTMLGenerator()
     bilingual_docs = []
 
@@ -224,11 +228,41 @@ def create_bilingual_documents(
             target_lang
         )
 
+        # Get original document structure
+        doc_idx = doc_map['doc_idx']
+        original_doc = spine_docs[doc_idx]
+        original_content = original_doc['content']
+
+        # Parse original document and replace body content with bilingual HTML
+        soup = BeautifulSoup(original_content, 'lxml-xml', from_encoding='utf-8')
+
+        # Find body or create one if it doesn't exist
+        body = soup.find('body')
+        if body:
+            # Clear existing content and insert bilingual HTML
+            body.clear()
+            body.append(BeautifulSoup(bilingual_html, 'html.parser'))
+        else:
+            # If no body, try to find the root and replace all content
+            logger.warning(f"No body tag found in document {doc_idx}, using full replacement")
+            # Wrap bilingual HTML in proper XHTML structure
+            full_html = f'''<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>{doc_map['doc_title']}</title>
+</head>
+<body>
+{bilingual_html}
+</body>
+</html>'''
+            soup = BeautifulSoup(full_html, 'lxml-xml', from_encoding='utf-8')
+
         bilingual_docs.append({
             'id': doc_map['doc_id'],
             'href': doc_map['doc_href'],
             'title': doc_map['doc_title'],
-            'content': bilingual_html
+            'content': str(soup)
         })
 
         logger.info(
