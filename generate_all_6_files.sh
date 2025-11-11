@@ -120,6 +120,57 @@ try:
 
     if files_generated == 6:
         print("\n🎉 SUCCESS! All 6 files generated correctly!")
+
+        # Download files locally to test_outputs
+        print("")
+        print("="*60)
+        print("📥 Downloading files to test_outputs/...")
+        print("="*60)
+
+        output_dir = Path("../../test_outputs")
+        output_dir.mkdir(exist_ok=True)
+
+        downloaded = 0
+
+        # Download regular files
+        if job.output_epub_key:
+            local_path = output_dir / f"{job_id}.epub"
+            if storage.download_file(job.output_epub_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        if job.output_pdf_key:
+            local_path = output_dir / f"{job_id}.pdf"
+            if storage.download_file(job.output_pdf_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        if job.output_txt_key:
+            local_path = output_dir / f"{job_id}.txt"
+            if storage.download_file(job.output_txt_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        # Download bilingual files
+        if job.bilingual_epub_key:
+            local_path = output_dir / f"{job_id}_bilingual.epub"
+            if storage.download_file(job.bilingual_epub_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        if job.bilingual_pdf_key:
+            local_path = output_dir / f"{job_id}_bilingual.pdf"
+            if storage.download_file(job.bilingual_pdf_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        if job.bilingual_txt_key:
+            local_path = output_dir / f"{job_id}_bilingual.txt"
+            if storage.download_file(job.bilingual_txt_key, str(local_path)):
+                print(f"✅ Downloaded: {local_path}")
+                downloaded += 1
+
+        print(f"\n📦 Downloaded {downloaded}/6 files to test_outputs/")
     else:
         print(f"\n❌ FAILURE! Only {files_generated}/6 files generated")
 
