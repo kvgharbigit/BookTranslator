@@ -15,6 +15,7 @@ interface PriceBoxProps {
   onLanguageChange?: (langCode: string) => void;
   outputFormat?: string;
   onFormatChange?: (format: string) => void;
+  basePriceCents?: number;
 }
 
 export default function PriceBox({
@@ -27,7 +28,8 @@ export default function PriceBox({
   targetLang: externalTargetLang,
   onLanguageChange,
   outputFormat: externalOutputFormat,
-  onFormatChange
+  onFormatChange,
+  basePriceCents
 }: PriceBoxProps) {
   const [email, setEmail] = useState('');
   const [internalTargetLang, setInternalTargetLang] = useState('es');
@@ -99,6 +101,14 @@ export default function PriceBox({
 
   const priceUSD = priceCents / 100;
   const wordsEst = Math.round(tokensEst * 0.75); // More accurate word estimation
+
+  // Calculate base price (translation only) for dropdown options
+  // Use provided basePriceCents if available, otherwise reverse-calculate from current price
+  const basePriceUSD = basePriceCents !== undefined
+    ? basePriceCents / 100
+    : (outputFormat === 'bilingual' ? priceUSD - 1.00 :
+       outputFormat === 'both' ? priceUSD - 1.50 :
+       priceUSD);
   
   // Determine book category based on token count (matching backend pricing logic)
   // Using 1 token = 0.75 words conversion
@@ -277,9 +287,9 @@ export default function PriceBox({
             disabled={disabled || isProcessing}
             className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base"
           >
-            <option value="translation">Translation Only - ${priceUSD.toFixed(2)}</option>
-            <option value="bilingual">Bilingual Reader Only - ${(priceUSD + 1.00).toFixed(2)} (+$1.00)</option>
-            <option value="both">Both Formats - ${(priceUSD + 1.50).toFixed(2)} (+$1.50)</option>
+            <option value="translation">Translation Only - ${basePriceUSD.toFixed(2)}</option>
+            <option value="bilingual">Bilingual Reader Only - ${(basePriceUSD + 1.00).toFixed(2)} (+$1.00)</option>
+            <option value="both">Both Formats - ${(basePriceUSD + 1.50).toFixed(2)} (+$1.50)</option>
           </select>
           <p className="text-sm text-neutral-600 mt-1.5">
             {outputFormat === 'bilingual' && 'Side-by-side original + translation for learning'}

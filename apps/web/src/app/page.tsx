@@ -14,7 +14,7 @@ type Step = 'upload' | 'estimate' | 'processing';
 export default function HomePage() {
   const [step, setStep] = useState<Step>('upload');
   const [uploadKey, setUploadKey] = useState<string>('');
-  const [estimate, setEstimate] = useState<{ tokens_est: number; price_cents: number } | null>(null);
+  const [estimate, setEstimate] = useState<{ tokens_est: number; price_cents: number; base_price_cents?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [previewLang, setPreviewLang] = useState<string>('es');
@@ -58,10 +58,14 @@ export default function HomePage() {
       // Step 3: Get price estimate with language-specific message
       const randomAnalyzeMsg = langMessages.analyzing[Math.floor(Math.random() * langMessages.analyzing.length)];
       setUploadMessage(randomAnalyzeMsg);
-      const estimateResponse = await api.getEstimate(key, previewLang, outputFormat);
+      const estimateResponse = await api.getEstimate(key, previewLang, 'translation');
 
       setUploadKey(key);
-      setEstimate(estimateResponse);
+      // Store base price (translation only) for local calculations
+      setEstimate({
+        ...estimateResponse,
+        base_price_cents: estimateResponse.price_cents
+      });
       setStep('estimate');
 
     } catch (err) {
@@ -115,17 +119,24 @@ export default function HomePage() {
     }
   };
 
-  const handleFormatChange = async (newFormat: string) => {
+  const handleFormatChange = (newFormat: string) => {
     setOutputFormat(newFormat);
 
-    // Re-fetch estimate with new format
-    if (uploadKey) {
-      try {
-        const estimateResponse = await api.getEstimate(uploadKey, previewLang, newFormat);
-        setEstimate(estimateResponse);
-      } catch (err) {
-        console.error('Failed to update estimate:', err);
+    // Calculate price locally for instant update (no API call needed)
+    if (estimate && estimate.base_price_cents !== undefined) {
+      const basePriceCents = estimate.base_price_cents;
+      let newPriceCents = basePriceCents;
+
+      if (newFormat === 'bilingual') {
+        newPriceCents = basePriceCents + 100; // +$1.00
+      } else if (newFormat === 'both') {
+        newPriceCents = basePriceCents + 150; // +$1.50
       }
+
+      setEstimate({
+        ...estimate,
+        price_cents: newPriceCents
+      });
     }
   };
 
@@ -337,6 +348,7 @@ export default function HomePage() {
                     <PriceBox
                       tokensEst={estimate.tokens_est}
                       priceCents={estimate.price_cents}
+                      basePriceCents={estimate.base_price_cents}
                       onPayment={handlePayment}
                       onSkipPayment={handleSkipPayment}
                       targetLang={previewLang}
