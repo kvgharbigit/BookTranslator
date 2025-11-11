@@ -249,12 +249,22 @@ def _generate_outputs(
 
     # Import shared modules
     import sys
+    import os
     import asyncio
     from pathlib import Path
 
-    # Add common modules to path
-    common_path = Path(__file__).parent.parent.parent.parent.parent / "common"
-    sys.path.insert(0, str(common_path))
+    # Add common modules to path (3 levels up from worker.py: pipeline -> app -> api -> project root)
+    project_root = Path(__file__).parent.parent.parent.parent.parent
+    common_path = project_root / "common"
+    if not common_path.exists():
+        # Fallback: calculate from cwd (for testing environments)
+        project_root = Path(os.getcwd())
+        common_path = project_root / "common"
+
+    if common_path.exists():
+        sys.path.insert(0, str(common_path.parent))
+    else:
+        raise ImportError(f"Could not find common module. Tried: {common_path}")
 
     from common.outputs import generate_outputs_with_metadata, OutputGenerator
 
@@ -418,12 +428,22 @@ def _generate_both_outputs(
     - Bilingual: {job_id}_bilingual.epub, {job_id}_bilingual.pdf, {job_id}_bilingual.txt
     """
     import sys
+    import os
     import asyncio
     from pathlib import Path
 
-    # Add common modules to path
-    common_path = Path(__file__).parent.parent.parent.parent.parent / "common"
-    sys.path.insert(0, str(common_path))
+    # Add common modules to path (3 levels up from worker.py: pipeline -> app -> api -> project root)
+    project_root = Path(__file__).parent.parent.parent.parent.parent
+    common_path = project_root / "common"
+    if not common_path.exists():
+        # Fallback: calculate from cwd (for testing environments)
+        project_root = Path(os.getcwd())
+        common_path = project_root / "common"
+
+    if common_path.exists():
+        sys.path.insert(0, str(common_path.parent))
+    else:
+        raise ImportError(f"Could not find common module. Tried: {common_path}")
 
     from common.outputs import generate_outputs_with_metadata, OutputGenerator
 
