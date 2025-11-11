@@ -90,6 +90,7 @@ temp/
 
 # Test results (can be large)
 test_results/
+test_outputs/
 
 # Debug files (but not organized tests/)
 debug_*.py
