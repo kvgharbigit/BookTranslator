@@ -329,6 +329,206 @@ def test_bilingual_pdf():
         return False
 
 
+def convert_html_to_pdf(
+    translated_docs: List[dict],
+    css_content: str,
+    output_path: str,
+    target_lang: str = "es",
+    original_book = None
+) -> bool:
+    """
+    Convert regular (non-bilingual) translation HTML to PDF with WeasyPrint.
+
+    This provides superior CSS rendering compared to Calibre's EPUB→PDF conversion.
+
+    Args:
+        translated_docs: List of translated document dicts with 'content' key
+        css_content: CSS content to apply (original EPUB CSS)
+        output_path: Path where PDF should be written
+        target_lang: Target language code (default: "es")
+        original_book: Optional EpubBook object for extracting images
+
+    Returns:
+        True if conversion succeeded, False otherwise
+    """
+    try:
+        from weasyprint import HTML, CSS
+        from weasyprint.text.fonts import FontConfiguration
+    except ImportError:
+        logger.error("WeasyPrint not available - cannot generate PDF from HTML")
+        return False
+
+    try:
+        import base64
+        import re
+        import ebooklib
+
+        logger.info(f"Converting {len(translated_docs)} translated documents to PDF")
+
+        # Extract images from EPUB as base64 data URIs (if original_book provided)
+        image_map = {}
+        if original_book:
+            logger.info("Extracting images from EPUB...")
+            for item in original_book.get_items():
+                if item.get_type() == ebooklib.ITEM_IMAGE:
+                    try:
+                        img_path = item.get_name()
+                        img_content = item.get_content()
+
+                        # Determine MIME type
+                        ext = img_path.lower().split('.')[-1]
+                        mime_types = {
+                            'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+                            'png': 'image/png', 'gif': 'image/gif',
+                            'svg': 'image/svg+xml', 'webp': 'image/webp'
+                        }
+                        mime_type = mime_types.get(ext, 'image/jpeg')
+
+                        # Encode as base64 data URI
+                        img_base64 = base64.b64encode(img_content).decode('utf-8')
+                        data_uri = f"data:{mime_type};base64,{img_base64}"
+
+                        # Store with multiple path variations for matching
+                        image_map[img_path] = data_uri
+                        image_map[img_path.lstrip('/')] = data_uri
+                        image_map[img_path.lstrip('../')] = data_uri
+                        image_map[os.path.basename(img_path)] = data_uri
+
+                    except Exception as e:
+                        logger.warning(f"Failed to extract image {item.get_name()}: {e}")
+
+            logger.info(f"Extracted {len(set(image_map.values()))} unique images")
+
+        # Combine all document contents and replace image sources
+        combined_html_parts = []
+
+        for i, doc in enumerate(translated_docs):
+            content = doc.get('content', '')
+
+            # Replace image src attributes with base64 data URIs
+            if image_map:
+                def replace_img_src(match):
+                    img_tag = match.group(0)
+                    src_match = re.search(r'src=(?:"([^"]*)"|\'([^\']*)\')', img_tag, re.IGNORECASE)
+                    if not src_match:
+                        return img_tag
+
+                    src = src_match.group(1) or src_match.group(2)
+
+                    # Try different path variations
+                    for variant in [src, src.lstrip('/'), src.lstrip('../'), os.path.basename(src)]:
+                        if variant in image_map:
+                            data_uri = image_map[variant]
+                            return img_tag.replace(f'src="{src}"', f'src="{data_uri}"').replace(f"src='{src}'", f"src='{data_uri}'")
+
+                    return img_tag
+
+                content = re.sub(r'<img[^>]*>', replace_img_src, content, flags=re.IGNORECASE)
+
+            # Add page break between chapters (except first)
+            if i > 0:
+                combined_html_parts.append('<div style="page-break-before: always;"></div>')
+
+            combined_html_parts.append(content)
+
+        combined_html = '\n'.join(combined_html_parts)
+
+        # Determine if RTL language
+        rtl_languages = {'ar', 'he', 'fa', 'ur'}
+        is_rtl = target_lang.lower() in rtl_languages
+
+        # Set HTML attributes for RTL support
+        dir_attr = ' dir="rtl"' if is_rtl else ''
+        lang_attr = f' lang="{target_lang}"'
+        direction_css = 'rtl' if is_rtl else 'ltr'
+        text_align = 'right' if is_rtl else 'left'
+
+        # Create complete HTML document with CSS
+        full_html = f"""<!DOCTYPE html>
+<html{lang_attr}{dir_attr}>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Original EPUB CSS */
+        {css_content}
+
+        /* PDF-specific enhancements */
+        @page {{
+            size: A4;
+            margin: 1.5cm 2cm;  /* Top/bottom: 1.5cm, Left/right: 2cm */
+            @bottom-center {{
+                content: counter(page);
+                font-size: 10pt;
+                color: #666;
+            }}
+        }}
+
+        body {{
+            font-family: 'Times New Roman', 'Georgia', 'Garamond', serif;
+            line-height: 1.6;
+            direction: {direction_css};
+            text-align: {text_align};
+            font-size: 11pt;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }}
+
+        /* PDF page breaking */
+        h1, h2, h3 {{
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }}
+
+        p {{
+            orphans: 2;
+            widows: 2;
+        }}
+
+        img {{
+            max-width: 100%;
+            height: auto;
+            page-break-inside: avoid;
+        }}
+
+        /* Chapter breaks */
+        .chapter {{
+            page-break-before: always;
+        }}
+    </style>
+</head>
+<body>
+{combined_html}
+</body>
+</html>"""
+
+        # Convert HTML to PDF using WeasyPrint
+        logger.info("Rendering HTML to PDF with WeasyPrint...")
+
+        # Create font configuration for better font rendering
+        font_config = FontConfiguration()
+
+        # Generate PDF
+        html_obj = HTML(string=full_html)
+        html_obj.write_pdf(
+            output_path,
+            font_config=font_config
+        )
+
+        # Check file was created
+        if os.path.exists(output_path):
+            file_size = os.path.getsize(output_path) / (1024 * 1024)  # MB
+            logger.info(f"✅ Translation PDF generated with WeasyPrint: {file_size:.2f} MB")
+            return True
+        else:
+            logger.error("PDF file was not created")
+            return False
+
+    except Exception as e:
+        logger.error(f"Failed to convert HTML to PDF: {e}", exc_info=True)
+        return False
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(0 if test_bilingual_pdf() else 1)

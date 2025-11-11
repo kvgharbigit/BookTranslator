@@ -428,8 +428,10 @@ def _generate_both_outputs(
     output_keys = {}
 
     try:
-        # Generate standard translation outputs (3 files)
+        # Generate standard translation outputs (EPUB + TXT, PDF via WeasyPrint)
         logger.info("Generating standard translation outputs...")
+
+        # Generate EPUB + TXT using common module (PDF will be replaced by WeasyPrint version)
         translation_results = asyncio.run(generate_outputs_with_metadata(
             output_dir=temp_dir,
             job_id=job_id,
@@ -528,6 +530,37 @@ def _generate_both_outputs(
         except Exception as e:
             logger.error(f"Failed to generate bilingual TXT: {e}")
 
+        # Generate translation PDF with WeasyPrint (superior to Calibre)
+        try:
+            from app.html_to_pdf import convert_html_to_pdf
+            from app.pipeline.epub_io import EPUBProcessor
+
+            translation_pdf_path = os.path.join(temp_dir, f"{job_id}.pdf")
+            logger.info("📄 Converting translation HTML to PDF with WeasyPrint (superior quality)...")
+
+            # Get CSS from original book
+            epub_processor = EPUBProcessor()
+            original_css = epub_processor.extract_all_css_from_book(original_book)
+
+            # Convert HTML → PDF with WeasyPrint
+            success = convert_html_to_pdf(
+                translated_docs=translated_docs,
+                css_content=original_css,
+                output_path=translation_pdf_path,
+                target_lang=target_lang,
+                original_book=original_book
+            )
+
+            if success and os.path.exists(translation_pdf_path):
+                pdf_key = f"outputs/{job_id}.pdf"
+                if storage.upload_file(translation_pdf_path, pdf_key, "application/pdf"):
+                    output_keys["pdf"] = pdf_key
+                    logger.info(f"✅ Uploaded translation PDF (WeasyPrint): {pdf_key}")
+            else:
+                logger.warning("Translation PDF generation failed with WeasyPrint")
+        except Exception as e:
+            logger.error(f"Failed to generate translation PDF with WeasyPrint: {e}", exc_info=True)
+
         # Upload all translation outputs to storage
         output_generator = OutputGenerator()
         trans_files = output_generator.get_output_files(temp_dir, job_id)
@@ -537,12 +570,6 @@ def _generate_both_outputs(
             if storage.upload_file(trans_files["epub"], epub_key, "application/epub+zip"):
                 output_keys["epub"] = epub_key
                 logger.info(f"Uploaded translation EPUB: {epub_key}")
-
-        if translation_results.get("pdf") and trans_files.get("pdf"):
-            pdf_key = f"outputs/{job_id}.pdf"
-            if storage.upload_file(trans_files["pdf"], pdf_key, "application/pdf"):
-                output_keys["pdf"] = pdf_key
-                logger.info(f"Uploaded translation PDF: {pdf_key}")
 
         if translation_results.get("txt") and trans_files.get("txt"):
             txt_key = f"outputs/{job_id}.txt"
