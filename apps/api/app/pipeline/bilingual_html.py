@@ -71,82 +71,47 @@ class BilingualHTMLGenerator:
         source_name: str,
         target_name: str
     ) -> str:
-        """Create HTML for one bilingual paragraph pair."""
+        """Create HTML for one bilingual paragraph pair.
+
+        Layout: TARGET (left/first) | SOURCE (right/second)
+        Users read primarily in target language, reference source when needed.
+        """
 
         return f'''<div class="bi-pair" epub:type="z3998:translation">
-    <div class="bi-col bi-source" lang="{source_lang}" xml:lang="{source_lang}">
-        <div class="bi-label">{source_name}</div>
-        <div class="bi-content">
-            {original}
-        </div>
-    </div>
     <div class="bi-col bi-target" lang="{target_lang}" xml:lang="{target_lang}">
-        <div class="bi-label">{target_name}</div>
-        <div class="bi-content">
-            {translation}
-        </div>
+        {translation}
+    </div>
+    <div class="bi-col bi-source" lang="{source_lang}" xml:lang="{source_lang}">
+        {original}
     </div>
 </div>'''
 
     def _get_css(self) -> str:
-        """Return production-ready CSS."""
-        return '''/* Bilingual EPUB Styles - Production Ready */
+        """Return CSS for bilingual subtitle styling.
 
-/* Baseline: stacked (universal) */
-.bi-pair {
-    margin: 1em 0;
-    page-break-inside: avoid;
+        Subtitles appear inline in very small, subtle gray text.
+        No extra spacing - just inherits parent element's natural spacing.
+        """
+        return '''/* Bilingual Subtitle Styles - Minimal and Unobtrusive */
+
+.bilingual-subtitle {
+    font-size: 0.65em;
+    font-style: italic;
+    color: #bbb;
+    opacity: 0.7;
 }
 
-.bi-col {
-    padding: 0.75em;
-    border: 1px solid #ddd;
-}
-
-.bi-source {
-    background-color: #fafafa;
-    border-bottom: 0;
-}
-
-.bi-target {
-    background-color: #f5f5f5;
-}
-
-.bi-label {
-    display: block;
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 0.5em;
-}
-
-.bi-content {
-    line-height: 1.5;
-}
-
-/* Enhancement: side-by-side using table layout (widely supported) */
-@media (min-width: 48em) {
-    .bi-pair {
-        display: table;
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .bi-col {
-        display: table-cell;
-        width: 50%;
-        vertical-align: top;
-        border: 1px solid #ddd;
-    }
-
-    .bi-source {
-        border-right: 0;
-        border-bottom: 1px solid #ddd;
-    }
-}
-
-.bi-col em { font-style: italic; }
-.bi-col strong { font-weight: bold; }'''
+/* Ensure subtitles don't inherit bold from parent */
+h1 .bilingual-subtitle,
+h2 .bilingual-subtitle,
+h3 .bilingual-subtitle,
+h4 .bilingual-subtitle,
+h5 .bilingual-subtitle,
+h6 .bilingual-subtitle,
+strong .bilingual-subtitle,
+b .bilingual-subtitle {
+    font-weight: normal;
+}'''
 
     def _get_language_name(self, lang_code: str) -> str:
         """Get display name for language code."""
@@ -195,6 +160,9 @@ def create_bilingual_documents(
     """
     Create bilingual documents from aligned segments.
 
+    Preserves original HTML structure and formatting, inserting source text
+    as subtitles below each translated element.
+
     Args:
         original_segments: All original text segments
         translated_segments: All translated segments (1:1 aligned)
@@ -206,9 +174,8 @@ def create_bilingual_documents(
     Returns:
         List of bilingual documents, one per original document
     """
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup, NavigableString
 
-    bilingual_gen = BilingualHTMLGenerator()
     bilingual_docs = []
 
     for doc_map in reconstruction_maps:
@@ -220,49 +187,28 @@ def create_bilingual_documents(
         orig_segs = original_segments[start:end]
         trans_segs = translated_segments[start:end]
 
-        # Generate bilingual HTML for this document
-        bilingual_html = bilingual_gen.merge_segments(
+        # Get original document
+        doc_idx = doc_map['doc_idx']
+        original_doc = spine_docs[doc_idx]
+        original_content = original_doc['content']
+
+        # Parse original document
+        soup = BeautifulSoup(original_content, 'lxml-xml', from_encoding='utf-8')
+
+        # Reconstruct with bilingual subtitles
+        reconstructed_html = _reconstruct_bilingual_html(
+            soup,
             orig_segs,
             trans_segs,
             source_lang,
             target_lang
         )
 
-        # Get original document structure
-        doc_idx = doc_map['doc_idx']
-        original_doc = spine_docs[doc_idx]
-        original_content = original_doc['content']
-
-        # Parse original document and replace body content with bilingual HTML
-        soup = BeautifulSoup(original_content, 'lxml-xml', from_encoding='utf-8')
-
-        # Find body or create one if it doesn't exist
-        body = soup.find('body')
-        if body:
-            # Clear existing content and insert bilingual HTML
-            body.clear()
-            body.append(BeautifulSoup(bilingual_html, 'html.parser'))
-        else:
-            # If no body, try to find the root and replace all content
-            logger.warning(f"No body tag found in document {doc_idx}, using full replacement")
-            # Wrap bilingual HTML in proper XHTML structure
-            full_html = f'''<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>{doc_map['doc_title']}</title>
-</head>
-<body>
-{bilingual_html}
-</body>
-</html>'''
-            soup = BeautifulSoup(full_html, 'lxml-xml', from_encoding='utf-8')
-
         bilingual_docs.append({
             'id': doc_map['doc_id'],
             'href': doc_map['doc_href'],
             'title': doc_map['doc_title'],
-            'content': str(soup)
+            'content': reconstructed_html
         })
 
         logger.info(
@@ -272,3 +218,89 @@ def create_bilingual_documents(
 
     logger.info(f"Created {len(bilingual_docs)} bilingual documents")
     return bilingual_docs
+
+
+def _reconstruct_bilingual_html(
+    soup,
+    original_segments: List[str],
+    translated_segments: List[str],
+    source_lang: str,
+    target_lang: str
+) -> str:
+    """
+    Reconstruct HTML with bilingual content, preserving all original formatting.
+
+    For each text node:
+    1. Replace with translated text
+    2. Insert subtitle span with original text right after parent element
+    """
+    from bs4 import NavigableString, Tag
+
+    segment_idx = 0
+    no_translate_tags = {'pre', 'code', 'script', 'style', 'svg', 'image', 'img'}
+
+    # Track which elements we've processed to add subtitles
+    elements_to_subtitle = []
+
+    # First pass: Replace text with translations and mark elements for subtitles
+    for element in soup.find_all(string=True):
+        if isinstance(element, NavigableString) and element.strip():
+            parent = element.parent
+
+            # Skip non-translatable content
+            if _should_skip_element(parent, no_translate_tags):
+                continue
+
+            text = element.strip()
+            # Same criteria as segmentation
+            if (len(text) >= 3 and
+                not text.isdigit() and
+                text.lower() not in ['html', 'head', 'body', 'div', 'span'] and
+                segment_idx < len(translated_segments)):
+
+                # Replace with translation
+                element.replace_with(translated_segments[segment_idx])
+
+                # Mark parent for subtitle insertion
+                elements_to_subtitle.append({
+                    'parent': parent,
+                    'original': original_segments[segment_idx],
+                    'translation': translated_segments[segment_idx]
+                })
+
+                segment_idx += 1
+
+    # Second pass: Insert subtitle spans inside parent elements
+    for item in elements_to_subtitle:
+        parent = item['parent']
+        original_text = item['original']
+
+        # Create line break and subtitle span
+        br = soup.new_tag('br')
+        subtitle = soup.new_tag('span', attrs={
+            'class': 'bilingual-subtitle',
+            'lang': source_lang,
+            'xml:lang': source_lang
+        })
+        subtitle.string = original_text
+
+        # Append line break and subtitle inside the parent element
+        parent.append(br)
+        parent.append(subtitle)
+
+    return str(soup)
+
+
+def _should_skip_element(element, no_translate_tags: set) -> bool:
+    """Check if element content should be skipped for translation."""
+    if not element:
+        return True
+
+    # Check if element or any parent is in no-translate tags
+    current = element
+    while current:
+        if hasattr(current, 'name') and current.name in no_translate_tags:
+            return True
+        current = current.parent if hasattr(current, 'parent') else None
+
+    return False
