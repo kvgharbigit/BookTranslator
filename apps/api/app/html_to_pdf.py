@@ -1,10 +1,18 @@
 """
-HTML to PDF converter for bilingual books.
+HTML to PDF converter for ALL book translations.
 
-This module converts bilingual HTML documents to PDF while preserving CSS styling,
-including the bilingual subtitle format with smaller gray italic text.
+This module converts both bilingual and regular translation HTML to PDF using
+WeasyPrint, which provides vastly superior CSS rendering compared to Calibre.
 
-Uses WeasyPrint which has excellent CSS support for print media.
+Features:
+- Bilingual PDFs: Preserves subtitle styling (0.85em, gray, italic)
+- Regular translations: Professional typography and layout
+- RTL language support (Arabic, Hebrew, Farsi, Urdu)
+- Base64 image embedding
+- Optimized margins (1.5cm top/bottom, 2cm left/right)
+- Page numbers and proper typography
+
+WeasyPrint is the standard for ALL PDF generation in BookTranslator.
 """
 
 import os
