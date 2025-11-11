@@ -156,6 +156,9 @@ class PreviewService:
                 translated_segments, segment_maps, limited_docs
             )
 
+            # Filter image_map to only include images referenced in preview docs
+            filtered_image_map = self._filter_images_for_docs(limited_docs, image_map) if image_map else None
+
             # If bilingual format requested, also create bilingual version
             if output_format == "bilingual":
                 logger.info("Creating bilingual preview using shared bilingual_html module")
@@ -175,12 +178,12 @@ class PreviewService:
 
                 # Format bilingual preview
                 preview_html = self._format_preview_html(
-                    bilingual_docs, css_content, image_map, target_lang, actual_words, is_bilingual=True
+                    bilingual_docs, css_content, filtered_image_map, target_lang, actual_words, is_bilingual=True
                 )
             else:
                 # Format as single HTML document for preview display with images
                 preview_html = self._format_preview_html(
-                    translated_docs, css_content, image_map, target_lang, actual_words
+                    translated_docs, css_content, filtered_image_map, target_lang, actual_words
                 )
 
             # Send language-specific completion message
@@ -408,6 +411,45 @@ class PreviewService:
             'title': doc['title'],
             'content': str(soup)
         }
+
+    def _filter_images_for_docs(self, docs: List[dict], image_map: Dict[str, str]) -> Dict[str, str]:
+        """Filter image_map to only include images referenced in the given documents.
+
+        This prevents orphaned images from earlier/later chapters from appearing in preview.
+
+        Args:
+            docs: List of document dicts to scan for image references
+            image_map: Full image map from EPUB
+
+        Returns:
+            Filtered image map with only referenced images
+        """
+        if not image_map:
+            return {}
+
+        # Find all image src attributes in the documents
+        referenced_images = set()
+
+        for doc in docs:
+            content = doc['content']
+            # Find all img src attributes
+            img_srcs = re.findall(r'<img[^>]*src=(?:"([^"]*)"|\'([^\']*)\')', content, re.IGNORECASE)
+            for src_tuple in img_srcs:
+                src = src_tuple[0] or src_tuple[1]
+                # Add all variations that might match
+                referenced_images.add(src)
+                referenced_images.add(src.lstrip('/'))
+                referenced_images.add(src.lstrip('../'))
+                referenced_images.add(os.path.basename(src))
+
+        # Filter image_map to only referenced images
+        filtered_map = {}
+        for key, value in image_map.items():
+            if key in referenced_images:
+                filtered_map[key] = value
+
+        logger.info(f"Filtered images: {len(filtered_map)} of {len(image_map)} images referenced in preview docs")
+        return filtered_map
 
     def _extract_css_from_epub(self, book) -> str:
         """Extract CSS stylesheets from EPUB for preview display.
