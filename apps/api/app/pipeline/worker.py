@@ -511,17 +511,39 @@ def _generate_both_outputs(
             except Exception as fallback_error:
                 logger.error(f"Fallback PDF generation also failed: {fallback_error}")
 
-        # Generate bilingual TXT from documents
+        # Generate bilingual TXT from documents with proper formatting
         try:
-            bilingual_text = []
+            bilingual_text_parts = []
+
             for doc in bilingual_docs:
                 soup = BeautifulSoup(doc['content'], 'lxml-xml')
-                text = soup.get_text(separator=' ', strip=True)
-                bilingual_text.append(text)
+
+                # Find all bilingual subtitle pairs
+                for element in soup.find_all(class_='bilingual-subtitle'):
+                    parent = element.parent
+
+                    # Get the translated text (everything except the subtitle)
+                    translated_text = ""
+                    for content in parent.contents:
+                        if hasattr(content, 'get') and content.get('class') == ['bilingual-subtitle']:
+                            continue  # Skip subtitle
+                        if isinstance(content, str):
+                            translated_text += content
+                        else:
+                            translated_text += content.get_text()
+
+                    # Get the original text from subtitle
+                    original_text = element.get_text(strip=True)
+
+                    # Format: Translation first, then original in parentheses on new line
+                    if translated_text.strip() and original_text.strip():
+                        bilingual_text_parts.append(
+                            f"{translated_text.strip()}\n    ({original_text.strip()})\n"
+                        )
 
             bilingual_txt_path = os.path.join(temp_dir, f"{job_id}_bilingual.txt")
             with open(bilingual_txt_path, "w", encoding="utf-8") as f:
-                f.write("\n\n".join(bilingual_text))
+                f.write("\n".join(bilingual_text_parts))
 
             txt_key = f"outputs/{job_id}_bilingual.txt"
             if storage.upload_file(bilingual_txt_path, txt_key, "text/plain; charset=utf-8"):
