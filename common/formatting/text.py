@@ -72,7 +72,7 @@ class TextFormatter:
         """Extract chapter title from HTML content."""
 
         try:
-            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
+            soup = BeautifulSoup(content, 'lxml', from_encoding='utf-8')
             for heading in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
                 heading_text = heading.get_text(strip=True)
                 if (heading_text and len(heading_text) > 3 and 
@@ -116,8 +116,8 @@ class TextFormatter:
         ]
 
         try:
-            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
-            
+            soup = BeautifulSoup(content, 'lxml', from_encoding='utf-8')
+
             # Extract TOC entries and translate them
             toc_entries = []
             for element in soup.find_all(['p', 'div', 'li', 'a']):
@@ -194,8 +194,8 @@ class TextFormatter:
         formatted_content = []
 
         try:
-            soup = BeautifulSoup(content, 'html.parser')  # Use html.parser for better UTF-8 handling
-            
+            soup = BeautifulSoup(content, 'lxml', from_encoding='utf-8')
+
             # Track seen text to avoid duplicates
             seen_texts: Set[str] = set()
             first_heading_used = False  # Track if we've used the first heading as chapter title

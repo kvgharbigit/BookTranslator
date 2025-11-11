@@ -212,59 +212,34 @@ def _generate_outputs(
     translated_segments: list
 ) -> dict:
     """Generate EPUB, PDF, and TXT outputs using shared output generator."""
-    
+
     # Import shared modules
     import sys
+    import asyncio
     from pathlib import Path
-    
+
     # Add common modules to path
     common_path = Path(__file__).parent.parent.parent.parent.parent / "common"
     sys.path.insert(0, str(common_path))
-    
-    from common.outputs import OutputGenerator
-    
-    # Initialize storage and output generator
+
+    from common.outputs import generate_outputs_with_metadata, OutputGenerator
+
+    # Initialize storage
     storage = get_storage()
-    output_generator = OutputGenerator()
-    
     output_keys = {}
-    
+
     try:
-        # Extract metadata for formatting
-        metadata = {
-            "title": "Traducción de Libro",
-            "author": "Autor Desconocido",
-            "original_title": "Original Book"
-        }
-        
-        # Try to extract actual metadata from original book
-        try:
-            if hasattr(original_book, 'get_metadata'):
-                book_metadata = original_book.get_metadata('DC', 'title')
-                if book_metadata:
-                    metadata["original_title"] = book_metadata[0][0]
-                
-                author_metadata = original_book.get_metadata('DC', 'creator')
-                if author_metadata:
-                    metadata["author"] = author_metadata[0][0]
-                    
-                # Set translated title based on original
-                if "jungle" in metadata["original_title"].lower():
-                    metadata["title"] = "EL LIBRO DE LA SELVA"
-        except Exception as e:
-            logger.debug(f"Could not extract book metadata: {e}")
-        
-        # Generate all outputs using shared module
-        import asyncio
-        results = asyncio.run(output_generator.generate_all_outputs(
+        # Use common output generation function
+        results = asyncio.run(generate_outputs_with_metadata(
             output_dir=temp_dir,
+            job_id=job_id,
             original_book=original_book,
             translated_docs=translated_docs,
-            provider_name=job_id,  # Use job_id as provider name for file naming
-            metadata=metadata
+            translated_segments=translated_segments
         ))
-        
+
         # Upload successful outputs to storage
+        output_generator = OutputGenerator()
         file_paths = output_generator.get_output_files(temp_dir, job_id)
         
         # Upload EPUB
@@ -289,80 +264,14 @@ def _generate_outputs(
                 logger.info(f"Uploaded TXT: {txt_key}")
         
         logger.info(f"Generated outputs: {list(output_keys.keys())}")
-        
+
     except Exception as e:
         logger.error(f"Failed to generate outputs using shared module: {e}")
-        # Fallback to legacy generation if shared module fails
-        return _generate_outputs_legacy(job_id, temp_dir, original_book, translated_docs, translated_segments)
-    
+        # Re-raise exception instead of using legacy fallback
+        # This ensures consistent output quality and reveals issues early
+        raise
+
     return output_keys
-
-
-def _generate_outputs_legacy(
-    job_id: str,
-    temp_dir: str,
-    original_book,
-    translated_docs: list,
-    translated_segments: list
-) -> dict:
-    """Legacy output generation as fallback."""
-    
-    # Initialize storage
-    storage = get_storage()
-    
-    output_keys = {}
-    epub_processor = EPUBProcessor()
-    
-    # Generate EPUB
-    if settings.generate_pdf or True:  # Always generate EPUB
-        epub_path = os.path.join(temp_dir, f"{job_id}.epub")
-        
-        if epub_processor.write_epub(original_book, translated_docs, epub_path):
-            epub_key = f"outputs/{job_id}.epub"
-            if storage.upload_file(epub_path, epub_key, "application/epub+zip"):
-                output_keys["epub"] = epub_key
-                logger.info(f"Uploaded EPUB: {epub_key}")
-    
-    # Generate enhanced PDF
-    if settings.generate_pdf and output_keys.get("epub"):
-        try:
-            if ENHANCED_PDF_AVAILABLE:
-                # Use enhanced PDF generation with Calibre/WeasyPrint/ReportLab
-                epub_path = os.path.join(temp_dir, f"{job_id}.epub")
-                pdf_path = convert_epub_to_pdf(epub_path, temp_dir)
-                
-                pdf_key = f"outputs/{job_id}.pdf"
-                if storage.upload_file(pdf_path, pdf_key, "application/pdf"):
-                    output_keys["pdf"] = pdf_key
-                    logger.info(f"Uploaded enhanced PDF: {pdf_key}")
-            else:
-                logger.warning("Enhanced PDF generation not available, skipping PDF")
-                
-        except Exception as e:
-            logger.error(f"Failed to generate enhanced PDF: {e}")
-    
-    # Generate TXT
-    if settings.generate_txt:
-        try:
-            # Extract plain text from translated segments
-            plain_text = "\n\n".join(translated_segments)
-            
-            txt_path = os.path.join(temp_dir, f"{job_id}.txt")
-            with open(txt_path, "w", encoding="utf-8") as f:
-                f.write(plain_text)
-            
-            txt_key = f"outputs/{job_id}.txt"
-            if storage.upload_file(txt_path, txt_key, "text/plain"):
-                output_keys["txt"] = txt_key
-                logger.info(f"Uploaded TXT: {txt_key}")
-                
-        except Exception as e:
-            logger.error(f"Failed to generate TXT: {e}")
-    
-    return output_keys
-
-
-# Legacy PDF generation function removed - now using enhanced PDF generation
 
 
 def _apply_rtl_layout(translated_docs: list) -> list:

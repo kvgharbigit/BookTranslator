@@ -47,9 +47,9 @@ class HTMLSegmenter:
     
     def segment_html(self, html_content: str, doc_idx: int) -> Tuple[List[str], Dict]:
         """Segment single HTML document into translatable segments."""
-        
+
         try:
-            soup = BeautifulSoup(html_content, 'xml')
+            soup = BeautifulSoup(html_content, 'lxml-xml', from_encoding='utf-8')
             segments = []
             segment_map = {}
             
@@ -147,7 +147,7 @@ class HTMLSegmenter:
         """Reconstruct HTML with translated segments."""
 
         try:
-            soup = BeautifulSoup(original_html, 'xml')
+            soup = BeautifulSoup(original_html, 'lxml-xml', from_encoding='utf-8')
             segment_idx = 0
 
             # Replace text content with translations
@@ -169,7 +169,7 @@ class HTMLSegmenter:
                         segment_idx += 1
 
             # Convert to string with proper UTF-8 encoding
-            final_html = soup.decode(formatter='minimal')
+            final_html = str(soup)
 
             # Post-process: Apply chapter title translations in TOC documents
             final_html = self._apply_chapter_title_translations(final_html)
