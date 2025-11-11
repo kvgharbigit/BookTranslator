@@ -352,11 +352,6 @@ export default function HomePage() {
                       onPayment={handlePayment}
                       onSkipPayment={handleSkipPayment}
                       targetLang={previewLang}
-                      onLanguageChange={(langCode) => {
-                        setPreviewLang(langCode);
-                        const lang = LANGUAGES.find(l => l.code === langCode);
-                        if (lang) setPreviewLangName(lang.name);
-                      }}
                       outputFormat={outputFormat}
                       onFormatChange={handleFormatChange}
                     />

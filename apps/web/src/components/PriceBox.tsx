@@ -298,33 +298,6 @@ export default function PriceBox({
           </p>
         </div>
 
-        {/* Target Language Selection */}
-        <div>
-          <label htmlFor="target-lang" className="block text-base font-semibold text-neutral-800 mb-2">
-            Translate to:
-          </label>
-          <select
-            id="target-lang"
-            value={targetLang}
-            onChange={(e) => {
-              const newLang = e.target.value;
-              if (onLanguageChange) {
-                onLanguageChange(newLang);
-              } else {
-                setInternalTargetLang(newLang);
-              }
-            }}
-            disabled={disabled || isProcessing}
-            className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base"
-          >
-            {LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.flag} {lang.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Email Input */}
         <div>
           <label htmlFor="email" className="block text-base font-semibold text-neutral-800 mb-2">
