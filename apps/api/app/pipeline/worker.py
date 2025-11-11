@@ -259,7 +259,7 @@ def _generate_outputs(
         # Upload TXT
         if results.get("txt") and file_paths.get("txt"):
             txt_key = f"outputs/{job_id}.txt"
-            if storage.upload_file(file_paths["txt"], txt_key, "text/plain"):
+            if storage.upload_file(file_paths["txt"], txt_key, "text/plain; charset=utf-8"):
                 output_keys["txt"] = txt_key
                 logger.info(f"Uploaded TXT: {txt_key}")
         
