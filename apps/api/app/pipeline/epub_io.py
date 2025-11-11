@@ -202,7 +202,7 @@ class EPUBProcessor:
         target_lang: str,
         output_path: str
     ) -> bool:
-        """Write bilingual EPUB with side-by-side original and translation."""
+        """Write bilingual EPUB with translation and original text as subtitles."""
 
         try:
             # Create new book with bilingual metadata
