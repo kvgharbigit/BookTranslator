@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, alias="PORT")
     env: str = Field(default="development", alias="ENV")
     log_level: str = Field(default="info", alias="LOG_LEVEL")
-    database_url: str = Field(default="sqlite:///./data/jobs.db", alias="DATABASE_URL")
+    database_url: str = Field(alias="DATABASE_URL")  # Required - always use Railway PostgreSQL
 
     # Cloudflare R2 Storage (Required - No Local Fallback)
     r2_account_id: str = Field(alias="R2_ACCOUNT_ID")

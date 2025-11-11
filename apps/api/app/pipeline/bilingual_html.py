@@ -119,6 +119,28 @@ b .bilingual-subtitle {
     font-weight: normal !important;
 }
 
+/* Ensure block elements maintain block display and spacing */
+p, h1, h2, h3, h4, h5, h6, div, blockquote, li {
+    display: block !important;
+}
+
+/* Ensure proper spacing between block elements */
+p {
+    margin: 1em 0 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 1em 0 0.5em 0 !important;
+    display: block !important;
+}
+
+/* Line breaks should be visible */
+br {
+    display: block !important;
+    content: "" !important;
+    margin: 0.5em 0 !important;
+}
+
 /* Bilingual pair container - ensure block display with proper spacing */
 .bi-pair {
     display: block;
