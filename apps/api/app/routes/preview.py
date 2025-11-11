@@ -22,13 +22,14 @@ class PreviewRequest(BaseModel):
     """Request model for preview generation."""
     key: str  # R2 storage key for the EPUB file
     target_lang: str  # Target language code (e.g., 'es', 'fr', 'de')
-    max_words: int = 1000  # Maximum words to translate
+    max_words: int = 600  # Maximum words to translate
     output_format: str = "translation"  # Output format: 'translation' or 'bilingual'
 
 
 class PreviewResponse(BaseModel):
     """Response model for preview generation."""
-    preview_html: str  # Formatted HTML preview
+    translation_html: str  # Formatted HTML preview (translation only)
+    bilingual_html: str  # Formatted HTML preview (bilingual reader)
     word_count: int  # Actual number of words translated
     provider: str  # Provider used (e.g., 'groq')
     model: str  # Model used (e.g., 'llama-3.1-8b-instant')
@@ -67,9 +68,9 @@ async def generate_preview(
             f"max_words={data.max_words}"
         )
 
-        # Generate preview (Groq primary, Gemini fallback)
+        # Generate preview (Groq primary, Gemini fallback) - now generates BOTH formats
         preview_service = PreviewService()
-        preview_html, actual_words, provider_used = await preview_service.generate_preview(
+        translation_html, bilingual_html, actual_words, provider_used = await preview_service.generate_preview(
             r2_key=data.key,
             target_lang=data.target_lang,
             max_words=data.max_words,
@@ -91,7 +92,8 @@ async def generate_preview(
         )
 
         return PreviewResponse(
-            preview_html=preview_html,
+            translation_html=translation_html,
+            bilingual_html=bilingual_html,
             word_count=actual_words,
             provider=provider_name,
             model=model_name
@@ -111,7 +113,7 @@ async def stream_preview(
     request: Request,
     key: str,
     target_lang: str,
-    max_words: int = 300,
+    max_words: int = 600,
     output_format: str = "translation"
 ):
     """Stream preview generation with real-time progress updates via SSE.
@@ -127,7 +129,7 @@ async def stream_preview(
         request: FastAPI request object (for rate limiting)
         key: R2 storage key for the EPUB file
         target_lang: Target language code (e.g., 'es', 'fr', 'de')
-        max_words: Maximum words to translate (default: 300)
+        max_words: Maximum words to translate (default: 600)
 
     Returns:
         StreamingResponse with SSE events
@@ -180,8 +182,8 @@ async def stream_preview(
                         event_type, data = message
 
                         if event_type == "done":
-                            # Preview generation complete
-                            preview_html, actual_words, provider_used = data
+                            # Preview generation complete - now includes both formats
+                            translation_html, bilingual_html, actual_words, provider_used = data
 
                             # Parse provider name and model
                             provider_name = provider_used.lower()
@@ -192,9 +194,9 @@ async def stream_preview(
                             else:
                                 model_name = "unknown"
 
-                            # Send completion event
+                            # Send completion event with both HTMLs
                             yield f"event: complete\n"
-                            yield f"data: {json.dumps({'preview_html': preview_html, 'word_count': actual_words, 'provider': provider_name, 'model': model_name})}\n\n"
+                            yield f"data: {json.dumps({'translation_html': translation_html, 'bilingual_html': bilingual_html, 'word_count': actual_words, 'provider': provider_name, 'model': model_name})}\n\n"
                             break
 
                         elif event_type == "error":

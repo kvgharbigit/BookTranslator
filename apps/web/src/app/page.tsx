@@ -209,7 +209,7 @@ export default function HomePage() {
               <Sparkles className="w-5 h-5" />
               <span>Try It Free Now</span>
             </button>
-            <p className="text-sm text-neutral-600 mt-2">300-word preview • No payment needed</p>
+            <p className="text-sm text-neutral-600 mt-2">600-word preview • No payment needed</p>
           </div>
 
           {/* Social Proof */}
@@ -267,7 +267,7 @@ export default function HomePage() {
                   Select your target language, then upload your EPUB for an instant price estimate
                 </p>
                 <p className="text-base text-primary-600 font-bold">
-                  Full book translation starting at $0.99 • Free 300-word preview
+                  Full book translation starting at $0.99 • Free 600-word preview
                 </p>
               </div>
 
@@ -336,7 +336,7 @@ export default function HomePage() {
                   Preview & Pay
                 </h3>
                 <p className="text-lg text-neutral-600 leading-relaxed">
-                  Check out your <strong className="text-primary-600">free 300-word preview</strong> below—see the quality before you pay
+                  Check out your <strong className="text-primary-600">free 600-word preview</strong> below—see the quality before you pay
                 </p>
               </div>
 
@@ -373,7 +373,7 @@ export default function HomePage() {
                       <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-6 py-4">
                         <h4 className="text-lg font-semibold text-white flex items-center space-x-2">
                           <Sparkles className="w-5 h-5" />
-                          <span>Free 300-Word Preview</span>
+                          <span>Free 600-Word Preview</span>
                         </h4>
                         <p className="text-primary-50 text-sm mt-1">
                           Try before you buy • Translated to {previewLangName}

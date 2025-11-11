@@ -39,24 +39,24 @@ class PreviewService:
         self,
         r2_key: str,
         target_lang: str,
-        max_words: int = 1000,
+        max_words: int = 600,
         provider: str = "groq",
         model: Optional[str] = None,
         progress_callback: Optional[callable] = None,
         output_format: str = "translation"
-    ) -> Tuple[str, int, str]:
-        """Generate a preview translation of the first N words of an EPUB.
+    ) -> Tuple[str, str, int, str]:
+        """Generate preview translations of the first N words of an EPUB in both formats.
 
         Args:
             r2_key: R2 storage key for the EPUB file
             target_lang: Target language code (e.g., 'es', 'fr', 'de')
-            max_words: Maximum number of words to translate (default: 1000)
+            max_words: Maximum number of words to translate (default: 600)
             provider: Translation provider to use (default: 'groq' for speed/cost)
             model: Optional specific model (default: llama-3.1-8b-instant for groq)
-            output_format: Output format - 'translation' or 'bilingual' (default: 'translation')
+            output_format: Deprecated - now always generates both formats
 
         Returns:
-            Tuple of (preview_html, actual_word_count, provider_used)
+            Tuple of (translation_html, bilingual_html, actual_word_count, provider_used)
 
         Raises:
             Exception: If preview generation fails
@@ -86,7 +86,7 @@ class PreviewService:
             book, spine_docs = self.epub_processor.read_epub(epub_path)
 
             # Extract original CSS and images from EPUB
-            css_content = self._extract_css_from_epub(book)
+            css_content = self.epub_processor.extract_all_css_from_book(book)
             logger.info(f"Extracted {len(css_content)} chars of CSS from EPUB")
 
             image_map = self._extract_images_from_epub(book)
@@ -94,7 +94,7 @@ class PreviewService:
 
             # Limit documents to first N words
             logger.info(f"📊 Before limiting: {len(spine_docs)} spine documents, target: {max_words} words")
-            limited_docs, actual_words = self._limit_to_words(spine_docs, max_words)
+            limited_docs, actual_words = self._limit_to_words(spine_docs, max_words, book)
             logger.info(f"📊 After limiting: {len(limited_docs)} documents, {actual_words} words (target was {max_words})")
 
             # Verify the limit is actually enforced
@@ -159,32 +159,29 @@ class PreviewService:
             # Filter image_map to only include images referenced in preview docs
             filtered_image_map = self._filter_images_for_docs(limited_docs, image_map) if image_map else None
 
-            # If bilingual format requested, also create bilingual version
-            if output_format == "bilingual":
-                logger.info("Creating bilingual preview using shared bilingual_html module")
-                from app.pipeline.bilingual_html import create_bilingual_documents
+            # Generate BOTH translation and bilingual previews
+            logger.info("Generating both translation and bilingual previews")
+            from app.pipeline.bilingual_html import create_bilingual_documents
 
-                # Detect source language (assume English for now, could be improved)
-                source_lang = "en"  # TODO: Add language detection if needed
+            # Detect source language (assume English for now, could be improved)
+            source_lang = "en"  # TODO: Add language detection if needed
 
-                bilingual_docs = create_bilingual_documents(
-                    original_segments=segments,  # Original segments
-                    translated_segments=translated_segments,
-                    reconstruction_maps=segment_maps,
-                    spine_docs=limited_docs,
-                    source_lang=source_lang,
-                    target_lang=target_lang
-                )
+            bilingual_docs = create_bilingual_documents(
+                original_segments=segments,  # Original segments
+                translated_segments=translated_segments,
+                reconstruction_maps=segment_maps,
+                spine_docs=limited_docs,
+                source_lang=source_lang,
+                target_lang=target_lang
+            )
 
-                # Format bilingual preview
-                preview_html = self._format_preview_html(
-                    bilingual_docs, css_content, filtered_image_map, target_lang, actual_words, is_bilingual=True
-                )
-            else:
-                # Format as single HTML document for preview display with images
-                preview_html = self._format_preview_html(
-                    translated_docs, css_content, filtered_image_map, target_lang, actual_words
-                )
+            # Format both previews
+            translation_html = self._format_preview_html(
+                translated_docs, css_content, filtered_image_map, target_lang, actual_words, is_bilingual=False
+            )
+            bilingual_html = self._format_preview_html(
+                bilingual_docs, css_content, filtered_image_map, target_lang, actual_words, is_bilingual=True
+            )
 
             # Send language-specific completion message
             if progress_callback:
@@ -192,7 +189,7 @@ class PreviewService:
                 progress_callback(finish_msg)
 
             logger.info(f"Preview generated successfully: {actual_words} words using {provider_used}")
-            return preview_html, actual_words, provider_used
+            return translation_html, bilingual_html, actual_words, provider_used
 
         except Exception as e:
             logger.error(f"Preview generation failed: {e}", exc_info=True)
@@ -202,24 +199,120 @@ class PreviewService:
             if os.path.exists(epub_path):
                 os.unlink(epub_path)
 
+    def _find_first_chapter(self, book, spine_docs: List[dict]) -> Optional[int]:
+        """Find the index of the first chapter in spine_docs using TOC.
+
+        Args:
+            book: EpubBook object with toc attribute
+            spine_docs: List of spine document dicts with 'href' key
+
+        Returns:
+            Index of first chapter document, or None if not found
+        """
+        try:
+            if not hasattr(book, 'toc') or not book.toc:
+                logger.info("No TOC found in book")
+                return None
+
+            # Extract all TOC hrefs (flatten nested structure)
+            def extract_hrefs(toc_items):
+                hrefs = []
+                for item in toc_items:
+                    if isinstance(item, tuple):
+                        # (Link, subsections) tuple
+                        link, subsections = item[0], item[1] if len(item) > 1 else []
+                        if hasattr(link, 'href'):
+                            hrefs.append(link.href)
+                        if subsections:
+                            hrefs.extend(extract_hrefs(subsections))
+                    elif hasattr(item, 'href'):
+                        # Direct Link object
+                        hrefs.append(item.href)
+                return hrefs
+
+            toc_hrefs = extract_hrefs(book.toc)
+            logger.info(f"Found {len(toc_hrefs)} TOC entries: {toc_hrefs[:5]}")  # Log first 5
+
+            if not toc_hrefs:
+                return None
+
+            # Common front matter titles to skip (case-insensitive)
+            front_matter_keywords = [
+                'copyright', 'title', 'dedication', 'acknowledgment', 'acknowledgement',
+                'contents', 'table of contents', 'toc', 'preface', 'foreword',
+                'introduction', 'prologue', 'about the author', 'about this book',
+                'cover', 'front matter', 'half title', 'title page'
+            ]
+
+            # Get TOC items with their titles for filtering
+            def extract_hrefs_with_titles(toc_items):
+                items = []
+                for item in toc_items:
+                    if isinstance(item, tuple):
+                        link, subsections = item[0], item[1] if len(item) > 1 else []
+                        if hasattr(link, 'href') and hasattr(link, 'title'):
+                            items.append((link.href, link.title or ''))
+                        if subsections:
+                            items.extend(extract_hrefs_with_titles(subsections))
+                    elif hasattr(item, 'href') and hasattr(item, 'title'):
+                        items.append((item.href, item.title or ''))
+                return items
+
+            toc_items_with_titles = extract_hrefs_with_titles(book.toc)
+            logger.info(f"TOC with titles: {[(title, href) for href, title in toc_items_with_titles[:5]]}")
+
+            # Find first chapter that's NOT front matter
+            for toc_href, toc_title in toc_items_with_titles:
+                # Check if this is front matter
+                title_lower = toc_title.lower()
+                is_front_matter = any(keyword in title_lower for keyword in front_matter_keywords)
+
+                if is_front_matter:
+                    logger.info(f"⏭️  Skipping front matter: '{toc_title}' ({toc_href})")
+                    continue
+
+                # Remove fragment identifiers (#section)
+                toc_href_base = toc_href.split('#')[0]
+
+                for idx, doc in enumerate(spine_docs):
+                    doc_href = doc['href']
+
+                    # Match by filename (handle different path formats)
+                    if doc_href.endswith(toc_href_base) or toc_href_base.endswith(doc_href):
+                        logger.info(f"✅ First chapter found at index {idx}: '{toc_title}' ({doc_href})")
+                        return idx
+
+            logger.info("No matching chapter found in spine documents (after filtering front matter)")
+            return None
+
+        except Exception as e:
+            logger.warning(f"Failed to find first chapter: {e}")
+            return None
+
     def _limit_to_words(
         self,
         spine_docs: List[dict],
-        max_words: int
+        max_words: int,
+        book = None
     ) -> Tuple[List[dict], int]:
-        """Limit spine documents to approximately max_words from the MIDDLE of the book.
+        """Limit spine documents to approximately max_words.
 
-        Calculates the total word count, finds the middle position, and extracts
-        max_words centered around that middle point. This gives a better preview
-        of actual narrative content rather than front matter.
+        If chapters are detected via TOC, starts from the first chapter.
+        Otherwise, extracts from the middle of the book to avoid front matter.
 
         Args:
             spine_docs: List of spine document dicts with 'content' key
             max_words: Maximum words to include
+            book: Optional EpubBook object for chapter detection
 
         Returns:
             Tuple of (limited_docs, actual_word_count)
         """
+        # Try to detect first chapter from TOC
+        first_chapter_idx = None
+        if book:
+            first_chapter_idx = self._find_first_chapter(book, spine_docs)
+
         # First pass: count total words in all documents
         doc_word_counts = []
         total_book_words = 0
@@ -233,24 +326,29 @@ class PreviewService:
 
         logger.info(f"Total book: {len(spine_docs)} documents, {total_book_words} words")
 
-        # Calculate starting position (middle of book minus half preview length)
-        # This centers the preview in the middle of the book
-        middle_word_position = total_book_words // 2
-        preview_start_position = max(0, middle_word_position - (max_words // 2))
+        # Determine starting position
+        if first_chapter_idx is not None:
+            # Start from first chapter (don't skip any words within it)
+            start_doc_idx = first_chapter_idx
+            start_doc_offset = 0
+            logger.info(f"📖 Starting from first chapter at document {start_doc_idx}")
+        else:
+            # Fallback: use middle of book if no chapters detected
+            middle_word_position = total_book_words // 2
+            preview_start_position = max(0, middle_word_position - (max_words // 2))
+            logger.info(f"📖 No chapters detected, using middle (position {preview_start_position}-{preview_start_position + max_words})")
 
-        logger.info(f"Preview: {max_words} words from middle (position {preview_start_position}-{preview_start_position + max_words})")
+            # Find which document contains our start position
+            cumulative_words = 0
+            start_doc_idx = 0
+            start_doc_offset = 0
 
-        # Find which document contains our start position
-        cumulative_words = 0
-        start_doc_idx = 0
-        start_doc_offset = 0
-
-        for i, word_count in enumerate(doc_word_counts):
-            if cumulative_words + word_count > preview_start_position:
-                start_doc_idx = i
-                start_doc_offset = preview_start_position - cumulative_words
-                break
-            cumulative_words += word_count
+            for i, word_count in enumerate(doc_word_counts):
+                if cumulative_words + word_count > preview_start_position:
+                    start_doc_idx = i
+                    start_doc_offset = preview_start_position - cumulative_words
+                    break
+                cumulative_words += word_count
 
         logger.info(f"Starting from document {start_doc_idx}, offset {start_doc_offset} words")
 
@@ -450,28 +548,6 @@ class PreviewService:
 
         logger.info(f"Filtered images: {len(filtered_map)} of {len(image_map)} images referenced in preview docs")
         return filtered_map
-
-    def _extract_css_from_epub(self, book) -> str:
-        """Extract CSS stylesheets from EPUB for preview display.
-
-        Args:
-            book: EbookLib Book object
-
-        Returns:
-            Combined CSS content from all stylesheets
-        """
-        import ebooklib
-
-        css_content = []
-        for item in book.get_items():
-            if item.get_type() == ebooklib.ITEM_STYLE:
-                try:
-                    css = item.get_content().decode('utf-8')
-                    css_content.append(css)
-                except Exception as e:
-                    logger.warning(f"Failed to extract CSS: {e}")
-
-        return '\n\n'.join(css_content)
 
     def _extract_images_from_epub(self, book) -> Dict[str, str]:
         """Extract images from EPUB and encode as base64 data URIs.

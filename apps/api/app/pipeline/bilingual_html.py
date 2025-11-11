@@ -95,10 +95,16 @@ class BilingualHTMLGenerator:
         return '''/* Bilingual Subtitle Styles - Minimal and Unobtrusive */
 
 .bilingual-subtitle {
+    display: inline;
     font-size: 0.65em;
     font-style: italic;
     color: #bbb;
-    opacity: 0.7;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+    vertical-align: baseline;
+    text-decoration: none;
+    white-space: normal;
 }
 
 /* Ensure subtitles don't inherit bold from parent */
@@ -110,7 +116,18 @@ h5 .bilingual-subtitle,
 h6 .bilingual-subtitle,
 strong .bilingual-subtitle,
 b .bilingual-subtitle {
-    font-weight: normal;
+    font-weight: normal !important;
+}
+
+/* Bilingual pair container - ensure block display with proper spacing */
+.bi-pair {
+    display: block;
+    margin-bottom: 1em;
+}
+
+.bi-col {
+    display: block;
+    margin: 0;
 }'''
 
     def _get_language_name(self, lang_code: str) -> str:
@@ -271,22 +288,35 @@ def _reconstruct_bilingual_html(
                 segment_idx += 1
 
     # Second pass: Insert subtitle spans inside parent elements
+    # Block-level elements that should have <br> before subtitle
+    block_elements = {'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'blockquote', 'li', 'td', 'th', 'dd', 'dt'}
+
     for item in elements_to_subtitle:
-        parent = item['parent']
-        original_text = item['original']
+        try:
+            parent = item['parent']
+            original_text = item['original']
 
-        # Create line break and subtitle span
-        br = soup.new_tag('br')
-        subtitle = soup.new_tag('span', attrs={
-            'class': 'bilingual-subtitle',
-            'lang': source_lang,
-            'xml:lang': source_lang
-        })
-        subtitle.string = original_text
+            # Create subtitle span
+            subtitle = soup.new_tag('span', attrs={
+                'class': 'bilingual-subtitle',
+                'lang': source_lang,
+                'xml:lang': source_lang
+            })
+            subtitle.string = original_text
 
-        # Append line break and subtitle inside the parent element
-        parent.append(br)
-        parent.append(subtitle)
+            # Only add <br> if parent is a block-level element
+            # For inline parents (like <em>, <strong>, <a>), just append subtitle
+            if parent.name in block_elements:
+                br = soup.new_tag('br')
+                parent.append(br)
+                parent.append(subtitle)
+            else:
+                # For inline elements, add a space before subtitle
+                parent.append(' ')
+                parent.append(subtitle)
+        except Exception as e:
+            logger.warning(f"Failed to add subtitle to element '{parent.name if hasattr(parent, 'name') else 'unknown'}': {e}")
+            continue  # Skip this subtitle but continue with others
 
     return str(soup)
 

@@ -218,7 +218,7 @@ export const api = {
   async generatePreview(
     key: string,
     targetLang: string,
-    maxWords: number = 1000
+    maxWords: number = 600
   ): Promise<{
     preview_html: string;
     word_count: number;
@@ -239,10 +239,11 @@ export const api = {
   streamPreview(
     key: string,
     targetLang: string,
-    maxWords: number = 250,
+    maxWords: number = 600,
     onProgress: (message: string) => void,
     onComplete: (data: {
-      preview_html: string;
+      translation_html: string;
+      bilingual_html: string;
       word_count: number;
       provider: string;
       model: string;

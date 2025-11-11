@@ -133,7 +133,7 @@ class EPUBProcessor:
                 new_book.add_author(author[0])
 
             # Extract and combine all CSS for embedding (like preview does)
-            css_content = self._extract_all_css_from_book(original_book)
+            css_content = self.extract_all_css_from_book(original_book)
             logger.info(f"Extracted {len(css_content)} chars of CSS for embedding")
 
             # Copy all non-document items (CSS, images, fonts, etc.)
@@ -232,7 +232,7 @@ class EPUBProcessor:
                 new_book.add_author(author[0])
 
             # Extract original CSS
-            original_css = self._extract_all_css_from_book(original_book)
+            original_css = self.extract_all_css_from_book(original_book)
 
             # Get bilingual CSS from generator
             bilingual_css = gen._get_css()
@@ -561,7 +561,7 @@ class EPUBProcessor:
             logger.warning(f"Failed to update navigation document: {e}")
             return nav_item
     
-    def _extract_all_css_from_book(self, book: epub.EpubBook) -> str:
+    def extract_all_css_from_book(self, book: epub.EpubBook) -> str:
         """Extract and combine all CSS stylesheets from EPUB.
 
         Args:
