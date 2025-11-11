@@ -26,6 +26,9 @@ export interface JobStatusResponse {
     epub?: string;
     pdf?: string;
     txt?: string;
+    bilingual_epub?: string;
+    bilingual_pdf?: string;
+    bilingual_txt?: string;
   };
   expires_at?: string;
   error?: string;
@@ -151,12 +154,17 @@ export const api = {
   },
 
   // Get price estimate
-  async getEstimate(key: string, targetLang: string): Promise<EstimateResponse> {
+  async getEstimate(
+    key: string,
+    targetLang: string,
+    outputFormat: string = 'translation'
+  ): Promise<EstimateResponse> {
     return apiCall('/estimate', {
       method: 'POST',
       body: JSON.stringify({
         key,
         target_lang: targetLang,
+        output_format: outputFormat,
       }),
     });
   },
@@ -167,6 +175,7 @@ export const api = {
     targetLang: string,
     email: string,
     priceCents: number,
+    outputFormat: string = 'translation',
     provider?: string
   ): Promise<CreateCheckoutResponse> {
     return apiCall('/create-checkout', {
@@ -176,6 +185,7 @@ export const api = {
         target_lang: targetLang,
         email: email || undefined,
         price_cents: priceCents,
+        output_format: outputFormat,
         provider,
       }),
     });
@@ -185,7 +195,8 @@ export const api = {
   async skipPayment(
     key: string,
     targetLang: string,
-    email: string
+    email: string,
+    outputFormat: string = 'translation'
   ): Promise<{ job_id: string }> {
     return apiCall('/skip-payment', {
       method: 'POST',
@@ -193,6 +204,7 @@ export const api = {
         key,
         target_lang: targetLang,
         email: email || undefined,
+        output_format: outputFormat,
       }),
     });
   },

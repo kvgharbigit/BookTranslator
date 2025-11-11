@@ -21,6 +21,7 @@ export default function HomePage() {
   const [previewLangName, setPreviewLangName] = useState<string>('Spanish');
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploadMessage, setUploadMessage] = useState<string>('');
+  const [outputFormat, setOutputFormat] = useState<string>('translation');
 
   const handleFileSelected = async (file: File) => {
     setIsLoading(true);
@@ -57,7 +58,7 @@ export default function HomePage() {
       // Step 3: Get price estimate with language-specific message
       const randomAnalyzeMsg = langMessages.analyzing[Math.floor(Math.random() * langMessages.analyzing.length)];
       setUploadMessage(randomAnalyzeMsg);
-      const estimateResponse = await api.getEstimate(key, previewLang);
+      const estimateResponse = await api.getEstimate(key, previewLang, outputFormat);
 
       setUploadKey(key);
       setEstimate(estimateResponse);
@@ -81,7 +82,8 @@ export default function HomePage() {
         uploadKey,
         targetLang,
         email,
-        estimate.price_cents
+        estimate.price_cents,
+        outputFormat
       );
 
       // Redirect to Stripe Checkout
@@ -100,7 +102,8 @@ export default function HomePage() {
       const { job_id } = await api.skipPayment(
         uploadKey,
         targetLang,
-        email
+        email,
+        outputFormat
       );
 
       // Redirect to success page (same as after payment)
@@ -112,12 +115,27 @@ export default function HomePage() {
     }
   };
 
+  const handleFormatChange = async (newFormat: string) => {
+    setOutputFormat(newFormat);
+
+    // Re-fetch estimate with new format
+    if (uploadKey) {
+      try {
+        const estimateResponse = await api.getEstimate(uploadKey, previewLang, newFormat);
+        setEstimate(estimateResponse);
+      } catch (err) {
+        console.error('Failed to update estimate:', err);
+      }
+    }
+  };
+
   const resetForm = () => {
     setStep('upload');
     setUploadKey('');
     setEstimate(null);
     setError('');
     setPreviewLang('es');
+    setOutputFormat('translation');
     setPreviewLangName('Spanish');
   };
 
@@ -327,6 +345,8 @@ export default function HomePage() {
                         const lang = LANGUAGES.find(l => l.code === langCode);
                         if (lang) setPreviewLangName(lang.name);
                       }}
+                      outputFormat={outputFormat}
+                      onFormatChange={handleFormatChange}
                     />
                     <div className="text-center mt-4">
                       <button

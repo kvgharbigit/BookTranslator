@@ -13,6 +13,8 @@ interface PriceBoxProps {
   disabled?: boolean;
   targetLang?: string;
   onLanguageChange?: (langCode: string) => void;
+  outputFormat?: string;
+  onFormatChange?: (format: string) => void;
 }
 
 export default function PriceBox({
@@ -23,15 +25,19 @@ export default function PriceBox({
   onPreview,
   disabled = false,
   targetLang: externalTargetLang,
-  onLanguageChange
+  onLanguageChange,
+  outputFormat: externalOutputFormat,
+  onFormatChange
 }: PriceBoxProps) {
   const [email, setEmail] = useState('');
   const [internalTargetLang, setInternalTargetLang] = useState('es');
+  const [internalOutputFormat, setInternalOutputFormat] = useState('translation');
   const [hasRights, setHasRights] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Use external targetLang if provided, otherwise use internal state
+  // Use external values if provided, otherwise use internal state
   const targetLang = externalTargetLang !== undefined ? externalTargetLang : internalTargetLang;
+  const outputFormat = externalOutputFormat !== undefined ? externalOutputFormat : internalOutputFormat;
 
   const handlePayment = async () => {
     if (!hasRights) {
@@ -161,19 +167,70 @@ export default function PriceBox({
           </p>
           <p className="text-base text-neutral-600 mb-2">{bookCategory.range}</p>
           <p className="text-sm text-neutral-500 italic mb-4">Similar to {bookCategory.example}</p>
-          <div className="flex items-center justify-center space-x-6 text-sm font-medium text-neutral-700 mb-4">
-            <div className="flex items-center space-x-1.5">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>EPUB</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>PDF</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>TXT</span>
-            </div>
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-neutral-600 mb-2 text-center">You'll receive:</p>
+            {outputFormat === 'both' ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-center space-x-4 text-sm font-medium text-neutral-700">
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span>EPUB</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span>PDF</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span>TXT</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center space-x-4 text-sm font-medium text-purple-700">
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                    <span>Bilingual EPUB</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                    <span>PDF</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                    <span>TXT</span>
+                  </div>
+                </div>
+              </div>
+            ) : outputFormat === 'bilingual' ? (
+              <div className="flex items-center justify-center space-x-6 text-sm font-medium text-purple-700">
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                  <span>Bilingual EPUB</span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                  <span>PDF</span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                  <span>TXT</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center space-x-6 text-sm font-medium text-neutral-700">
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span>EPUB</span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span>PDF</span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span>TXT</span>
+                </div>
+              </div>
+            )}
           </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
             <p className="text-sm font-bold text-green-800 mb-1">
@@ -201,6 +258,36 @@ export default function PriceBox({
       </div>
 
       <div className="space-y-5">
+        {/* Output Format Selection */}
+        <div>
+          <label htmlFor="output-format" className="block text-base font-semibold text-neutral-800 mb-2">
+            Output Format:
+          </label>
+          <select
+            id="output-format"
+            value={outputFormat}
+            onChange={(e) => {
+              const newFormat = e.target.value;
+              if (onFormatChange) {
+                onFormatChange(newFormat);
+              } else {
+                setInternalOutputFormat(newFormat);
+              }
+            }}
+            disabled={disabled || isProcessing}
+            className="w-full px-4 py-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 text-base"
+          >
+            <option value="translation">Translation Only - ${priceUSD.toFixed(2)}</option>
+            <option value="bilingual">Bilingual Reader Only - ${(priceUSD + 1.00).toFixed(2)} (+$1.00)</option>
+            <option value="both">Both Formats - ${(priceUSD + 1.50).toFixed(2)} (+$1.50)</option>
+          </select>
+          <p className="text-sm text-neutral-600 mt-1.5">
+            {outputFormat === 'bilingual' && 'Side-by-side original + translation for learning'}
+            {outputFormat === 'both' && 'Get both standard translation + bilingual reader'}
+            {outputFormat === 'translation' && 'Standard translation in target language only'}
+          </p>
+        </div>
+
         {/* Target Language Selection */}
         <div>
           <label htmlFor="target-lang" className="block text-base font-semibold text-neutral-800 mb-2">
