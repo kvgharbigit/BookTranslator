@@ -9,6 +9,7 @@ interface PreviewSectionProps {
   targetLang: string;
   targetLangName: string;
   onLanguageChange: (langCode: string) => void;
+  outputFormat?: string;
 }
 
 interface PreviewResponse {
@@ -22,7 +23,8 @@ export default function PreviewSection({
   epubKey,
   targetLang,
   targetLangName,
-  onLanguageChange
+  onLanguageChange,
+  outputFormat = 'translation'
 }: PreviewSectionProps) {
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ export default function PreviewSection({
 
   useEffect(() => {
     generatePreview();
-  }, [targetLang]);
+  }, [targetLang, outputFormat]);
 
   function generatePreview() {
     try {
@@ -39,7 +41,7 @@ export default function PreviewSection({
       setError(null);
       setProgressMessage('🎬 Starting translation...');
 
-      console.log('🚀 Starting SSE preview stream for', targetLang);
+      console.log('🚀 Starting SSE preview stream for', targetLang, 'format:', outputFormat);
 
       // Use SSE streaming for real-time progress updates
       api.streamPreview(
@@ -62,7 +64,9 @@ export default function PreviewSection({
           console.error('❌ Preview generation error:', errorMsg);
           setError(errorMsg);
           setLoading(false);
-        }
+        },
+        // outputFormat
+        outputFormat
       );
     } catch (err) {
       console.error('❌ Preview generation error:', err);

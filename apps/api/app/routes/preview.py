@@ -23,6 +23,7 @@ class PreviewRequest(BaseModel):
     key: str  # R2 storage key for the EPUB file
     target_lang: str  # Target language code (e.g., 'es', 'fr', 'de')
     max_words: int = 1000  # Maximum words to translate
+    output_format: str = "translation"  # Output format: 'translation' or 'bilingual'
 
 
 class PreviewResponse(BaseModel):
@@ -71,7 +72,8 @@ async def generate_preview(
         preview_html, actual_words, provider_used = await preview_service.generate_preview(
             r2_key=data.key,
             target_lang=data.target_lang,
-            max_words=data.max_words
+            max_words=data.max_words,
+            output_format=data.output_format
         )
 
         # Parse provider name and model from provider_used string (e.g., "groq" or "gemini")
@@ -109,7 +111,8 @@ async def stream_preview(
     request: Request,
     key: str,
     target_lang: str,
-    max_words: int = 300
+    max_words: int = 300,
+    output_format: str = "translation"
 ):
     """Stream preview generation with real-time progress updates via SSE.
 
@@ -158,7 +161,8 @@ async def stream_preview(
                         r2_key=key,
                         target_lang=target_lang,
                         max_words=max_words,
-                        progress_callback=progress_callback
+                        progress_callback=progress_callback,
+                        output_format=output_format
                     )
                     await progress_queue.put(("done", result))
                 except Exception as e:

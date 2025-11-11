@@ -247,9 +247,10 @@ export const api = {
       provider: string;
       model: string;
     }) => void,
-    onError: (error: string) => void
+    onError: (error: string) => void,
+    outputFormat: string = 'translation'
   ): EventSource {
-    const url = `${API_BASE}/preview/stream?key=${encodeURIComponent(key)}&target_lang=${encodeURIComponent(targetLang)}&max_words=${maxWords}`;
+    const url = `${API_BASE}/preview/stream?key=${encodeURIComponent(key)}&target_lang=${encodeURIComponent(targetLang)}&max_words=${maxWords}&output_format=${encodeURIComponent(outputFormat)}`;
     console.log('🔗 Connecting to SSE:', url);
     const eventSource = new EventSource(url);
 

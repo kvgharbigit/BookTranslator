@@ -393,6 +393,7 @@ export default function HomePage() {
                           const lang = LANGUAGES.find(l => l.code === langCode);
                           if (lang) setPreviewLangName(lang.name);
                         }}
+                        outputFormat={outputFormat}
                       />
                     </div>
                   )}

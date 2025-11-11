@@ -42,7 +42,8 @@ class PreviewService:
         max_words: int = 1000,
         provider: str = "groq",
         model: Optional[str] = None,
-        progress_callback: Optional[callable] = None
+        progress_callback: Optional[callable] = None,
+        output_format: str = "translation"
     ) -> Tuple[str, int, str]:
         """Generate a preview translation of the first N words of an EPUB.
 
@@ -52,9 +53,10 @@ class PreviewService:
             max_words: Maximum number of words to translate (default: 1000)
             provider: Translation provider to use (default: 'groq' for speed/cost)
             model: Optional specific model (default: llama-3.1-8b-instant for groq)
+            output_format: Output format - 'translation' or 'bilingual' (default: 'translation')
 
         Returns:
-            Tuple of (preview_html, actual_word_count)
+            Tuple of (preview_html, actual_word_count, provider_used)
 
         Raises:
             Exception: If preview generation fails
@@ -154,10 +156,32 @@ class PreviewService:
                 translated_segments, segment_maps, limited_docs
             )
 
-            # Format as single HTML document for preview display with images
-            preview_html = self._format_preview_html(
-                translated_docs, css_content, image_map, target_lang, actual_words
-            )
+            # If bilingual format requested, also create bilingual version
+            if output_format == "bilingual":
+                logger.info("Creating bilingual preview using shared bilingual_html module")
+                from app.pipeline.bilingual_html import create_bilingual_documents
+
+                # Detect source language (assume English for now, could be improved)
+                source_lang = "en"  # TODO: Add language detection if needed
+
+                bilingual_docs = create_bilingual_documents(
+                    original_segments=segments,  # Original segments
+                    translated_segments=translated_segments,
+                    reconstruction_maps=segment_maps,
+                    spine_docs=limited_docs,
+                    source_lang=source_lang,
+                    target_lang=target_lang
+                )
+
+                # Format bilingual preview
+                preview_html = self._format_preview_html(
+                    bilingual_docs, css_content, image_map, target_lang, actual_words, is_bilingual=True
+                )
+            else:
+                # Format as single HTML document for preview display with images
+                preview_html = self._format_preview_html(
+                    translated_docs, css_content, image_map, target_lang, actual_words
+                )
 
             # Send language-specific completion message
             if progress_callback:
@@ -642,7 +666,8 @@ class PreviewService:
         css_content: str = "",
         image_map: Optional[Dict[str, str]] = None,
         target_lang: str = "en",
-        actual_word_count: int = 0
+        actual_word_count: int = 0,
+        is_bilingual: bool = False
     ) -> str:
         """Format translated documents into a single HTML preview.
 
@@ -654,6 +679,8 @@ class PreviewService:
             css_content: Original CSS from the EPUB
             image_map: Optional dictionary mapping image paths to base64 data URIs
             target_lang: Target language code for RTL detection
+            actual_word_count: Number of words in the preview
+            is_bilingual: Whether this is a bilingual preview (adds bilingual CSS)
 
         Returns:
             Single HTML string suitable for iframe display
@@ -710,6 +737,13 @@ class PreviewService:
         direction_css = 'rtl' if is_rtl else 'ltr'
         text_align = 'right' if is_rtl else 'left'
 
+        # Add bilingual CSS if needed
+        bilingual_css = ""
+        if is_bilingual:
+            from app.pipeline.bilingual_html import BilingualHTMLGenerator
+            generator = BilingualHTMLGenerator()
+            bilingual_css = generator.css
+
         # Wrap with original EPUB CSS plus minimal responsive wrapper
         preview_html = f"""<!DOCTYPE html>
 <html{lang_attr}{dir_attr}>
@@ -719,6 +753,9 @@ class PreviewService:
     <style>
         /* Original EPUB CSS */
         {css_content}
+
+        /* Bilingual styles (if applicable) */
+        {bilingual_css}
 
         /* Minimal responsive wrapper - don't override EPUB styles */
         body {{
