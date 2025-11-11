@@ -149,6 +149,7 @@ def translate_epub(job_id: str):
 
             # Check output format
             output_format = getattr(job, 'output_format', 'translation')
+            logger.info(f"🔍 DEBUG: output_format = {repr(output_format)} (type: {type(output_format).__name__})")
 
             if output_format == "bilingual":
                 # Create bilingual documents with side-by-side layout
@@ -587,10 +588,22 @@ def _send_completion_email(job: Job, email: str):
     if job.output_txt_key:
         download_urls["txt"] = storage.generate_presigned_download_url(job.output_txt_key)
 
-    # For "both" format, also include bilingual outputs
+    # For "bilingual" format, rename the standard outputs to bilingual keys
+    # For "both" format, also include bilingual outputs with _bilingual suffix
     output_format = getattr(job, 'output_format', 'translation')
-    if output_format == "both":
-        # Generate URLs for bilingual files
+
+    if output_format == "bilingual":
+        # For bilingual-only, the standard keys contain bilingual content
+        # Rename them in the download_urls dict so the email displays them correctly
+        if download_urls.get("epub"):
+            download_urls["bilingual_epub"] = download_urls.pop("epub")
+        if download_urls.get("pdf"):
+            download_urls["bilingual_pdf"] = download_urls.pop("pdf")
+        if download_urls.get("txt"):
+            download_urls["bilingual_txt"] = download_urls.pop("txt")
+
+    elif output_format == "both":
+        # Generate URLs for bilingual files (with _bilingual suffix)
         bilingual_epub_key = f"outputs/{job.id}_bilingual.epub"
         bilingual_pdf_key = f"outputs/{job.id}_bilingual.pdf"
         bilingual_txt_key = f"outputs/{job.id}_bilingual.txt"
@@ -603,11 +616,12 @@ def _send_completion_email(job: Job, email: str):
         success = asyncio.run(email_service.send_completion_email(
             to_email=email,
             download_urls=download_urls,
-            job_id=job.id
+            job_id=job.id,
+            output_format=output_format
         ))
 
         if success:
-            logger.info(f"📧 Sent completion email │ To: {email} │ {len(download_urls)} download links │ Job: {job.id[:13]}...")
+            logger.info(f"📧 Sent completion email │ To: {email} │ {len(download_urls)} download links │ Format: {output_format} │ Job: {job.id[:13]}...")
         else:
             logger.error(f"Failed to send completion email to {email}")
     else:

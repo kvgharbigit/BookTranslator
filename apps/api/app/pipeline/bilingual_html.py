@@ -221,6 +221,19 @@ def create_bilingual_documents(
 
     bilingual_docs = []
 
+    # Validate segment count alignment before processing
+    if len(original_segments) != len(translated_segments):
+        logger.error(
+            f"CRITICAL: Segment count mismatch! "
+            f"Original: {len(original_segments)}, Translated: {len(translated_segments)}. "
+            f"This will cause misaligned bilingual text. "
+            f"Trimming to shorter length to prevent complete failure."
+        )
+        # Trim to minimum length to prevent index out of bounds
+        min_len = min(len(original_segments), len(translated_segments))
+        original_segments = original_segments[:min_len]
+        translated_segments = translated_segments[:min_len]
+
     for doc_map in reconstruction_maps:
         # Extract segments for this document
         start = doc_map['segment_start']
@@ -229,6 +242,17 @@ def create_bilingual_documents(
 
         orig_segs = original_segments[start:end]
         trans_segs = translated_segments[start:end]
+
+        # Additional per-document validation
+        if len(orig_segs) != len(trans_segs):
+            logger.warning(
+                f"Document {doc_map['doc_idx']} segment mismatch: "
+                f"orig={len(orig_segs)}, trans={len(trans_segs)}. "
+                f"Trimming to match."
+            )
+            min_len = min(len(orig_segs), len(trans_segs))
+            orig_segs = orig_segs[:min_len]
+            trans_segs = trans_segs[:min_len]
 
         # Get original document
         doc_idx = doc_map['doc_idx']
@@ -280,7 +304,7 @@ def _reconstruct_bilingual_html(
     from bs4 import NavigableString, Tag
 
     segment_idx = 0
-    no_translate_tags = {'pre', 'code', 'script', 'style', 'svg', 'image', 'img'}
+    no_translate_tags = {'pre', 'code', 'script', 'style', 'svg', 'image', 'img', 'a'}
 
     # Track which elements we've processed to add subtitles
     elements_to_subtitle = []
@@ -315,37 +339,10 @@ def _reconstruct_bilingual_html(
 
     # Second pass: Insert subtitle spans inside parent elements
     # Subtitle is now display:block so it automatically appears on new line
-    inline_elements = {'em', 'strong', 'b', 'i', 'a', 'span', 'code', 'sup', 'sub'}
-
     for item in elements_to_subtitle:
         try:
             parent = item['parent']
             original_text = item['original']
-
-            # For inline elements (except links), check if next sibling starts with punctuation
-            # If so, move that punctuation inside the parent before adding subtitle
-            # Skip this for <a> tags since URLs should keep punctuation outside
-            if parent.name in inline_elements and parent.name != 'a':
-                next_sibling = parent.next_sibling
-                if next_sibling and isinstance(next_sibling, NavigableString):
-                    sibling_text = str(next_sibling)
-                    # Check if starts with punctuation (colon, period, comma, etc.)
-                    # But only if it's followed by whitespace or end of string (not part of a number like "3.14")
-                    punct_to_move = None
-                    if sibling_text and len(sibling_text) > 0 and sibling_text[0] in ':,;!?…':
-                        punct_to_move = sibling_text[0]
-                    elif sibling_text and len(sibling_text) > 1 and sibling_text[0] == '.' and (sibling_text[1].isspace() or sibling_text[1] in '\n\r\t'):
-                        punct_to_move = '.'
-
-                    if punct_to_move:
-                        # Add punctuation to the end of parent's content
-                        if parent.string:
-                            parent.string = parent.string + punct_to_move
-                        else:
-                            # Parent has child elements, append to last child or parent
-                            parent.append(punct_to_move)
-                        # Remove punctuation from next sibling
-                        next_sibling.replace_with(sibling_text[1:])
 
             # Create subtitle span (display: block in CSS, so no <br> needed)
             subtitle = soup.new_tag('span', attrs={

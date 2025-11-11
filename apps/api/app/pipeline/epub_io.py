@@ -234,12 +234,22 @@ class EPUBProcessor:
             # Extract original CSS
             original_css = self.extract_all_css_from_book(original_book)
 
-            # Get bilingual CSS from generator
-            bilingual_css = gen._get_css()
+            # Get bilingual CSS from generator (use public property for consistency with preview)
+            bilingual_css = gen.css
 
             # Combine CSS: original + bilingual
             combined_css = f"{original_css}\n\n/* Bilingual Layout */\n{bilingual_css}"
             logger.info(f"Combined CSS: {len(combined_css)} chars")
+
+            # Create external CSS file (EPUB standard - better e-reader compatibility)
+            css_file = epub.EpubItem(
+                uid="bilingual_style",
+                file_name="styles/bilingual.css",
+                media_type="text/css",
+                content=combined_css.encode('utf-8')
+            )
+            new_book.add_item(css_file)
+            logger.info("Created external bilingual CSS file: styles/bilingual.css")
 
             # Copy all non-document items (images, fonts, etc.)
             for item in original_book.get_items():
@@ -261,9 +271,9 @@ class EPUBProcessor:
 
                 href_mapping[doc['href']] = chapter.get_name()
 
-                # Update links and embed combined CSS
+                # Update links and ADD CSS LINK instead of embedding
                 updated_content = self._update_internal_links(doc['content'], href_mapping)
-                updated_content = self._embed_css_in_html(updated_content, combined_css)
+                updated_content = self._add_css_link(updated_content, "../styles/bilingual.css")
 
                 # Set content
                 if isinstance(updated_content, str):
@@ -281,6 +291,16 @@ class EPUBProcessor:
 
             # Update navigation
             self._update_navigation(original_book, new_book, spine, bilingual_docs, href_mapping)
+
+            # Add NCX and Nav only if they don't already exist
+            has_ncx = any(item.file_name.endswith('.ncx') for item in new_book.get_items())
+            has_nav = any(item.get_type() == ebooklib.ITEM_NAVIGATION for item in new_book.get_items())
+
+            if not has_ncx:
+                new_book.add_item(epub.EpubNcx())
+
+            if not has_nav:
+                new_book.add_item(epub.EpubNav())
 
             # Write EPUB
             epub.write_epub(output_path, new_book)
@@ -419,9 +439,20 @@ class EPUBProcessor:
         """Create a basic table of contents from spine documents."""
         toc = []
         for i, chapter in enumerate(spine):
+            # Get title from chapter - try different attributes
+            title = None
+            if hasattr(chapter, 'title'):
+                title = chapter.title
+            elif hasattr(chapter, 'get_name'):
+                # Use filename as fallback
+                name = chapter.get_name()
+                title = name.replace('.xhtml', '').replace('.html', '').replace('_', ' ').title()
+            else:
+                title = f"Chapter {i+1}"
+
             toc_item = epub.Link(
-                href=chapter.get_name(),
-                title=chapter.get_title() or f"Chapter {i+1}",
+                href=chapter.get_name() if hasattr(chapter, 'get_name') else f"chapter{i+1}.xhtml",
+                title=title,
                 uid=f"toc_{i}"
             )
             toc.append(toc_item)
@@ -584,7 +615,7 @@ class EPUBProcessor:
     def _embed_css_in_html(self, html_content: str, css_content: str) -> str:
         """Embed CSS directly in HTML document's <head> section.
 
-        Uses EXACT same CSS approach as preview for consistency.
+        Uses EXACT same approach as preview.py for consistency.
 
         Args:
             html_content: HTML document content
@@ -611,10 +642,8 @@ class EPUBProcessor:
                     logger.warning("No <html> or <head> tag found, cannot embed CSS")
                     return html_content
 
-            # Create style tag with EXACT same CSS as preview
-            style_tag = soup.new_tag('style', type='text/css')
-
-            # Use EXACT same CSS structure as preview.py _format_preview_html
+            # Use EXACT same CSS embedding as preview.py (lines 968-1008)
+            # Just inject raw CSS text inside <style> tags - no BeautifulSoup manipulation
             enhanced_css = f"""{css_content}
 
 /* Minimal responsive wrapper - don't override EPUB styles */
@@ -630,15 +659,63 @@ img {{
     height: auto !important;
 }}
 """
-            style_tag.string = enhanced_css
 
-            # Insert at beginning of head
-            head.insert(0, style_tag)
+            # Insert the style tag as raw HTML (same as preview does)
+            style_html = f'<style type="text/css">\n{enhanced_css}\n</style>'
 
-            return str(soup)
+            # Convert to string and inject style tag at start of head
+            html_str = str(soup)
+
+            # Find </head> closing tag and insert before it
+            head_close_pos = html_str.find('</head>')
+            if head_close_pos != -1:
+                html_str = html_str[:head_close_pos] + style_html + html_str[head_close_pos:]
+            else:
+                # Fallback: try to find <head> and insert after it
+                head_open_pos = html_str.find('<head>')
+                if head_open_pos != -1:
+                    insert_pos = html_str.find('>', head_open_pos) + 1
+                    html_str = html_str[:insert_pos] + style_html + html_str[insert_pos:]
+
+            return html_str
 
         except Exception as e:
             logger.error(f"Failed to embed CSS in HTML: {e}", exc_info=True)
+            return html_content
+
+    def _add_css_link(self, html_content: str, css_href: str) -> str:
+        """Add CSS link to HTML document's <head> section.
+
+        Args:
+            html_content: HTML document content
+            css_href: Relative path to CSS file (e.g., "../styles/bilingual.css")
+
+        Returns:
+            HTML with CSS link added
+        """
+        try:
+            soup = BeautifulSoup(html_content, 'xml')
+
+            # Find or create head element
+            head = soup.find('head')
+            if not head:
+                html_tag = soup.find('html')
+                if html_tag:
+                    head = soup.new_tag('head')
+                    html_tag.insert(0, head)
+                else:
+                    logger.warning("No <html> or <head> tag found, cannot add CSS link")
+                    return html_content
+
+            # Create link tag (EPUB standard format)
+            link_tag = soup.new_tag('link', rel='stylesheet', type='text/css', href=css_href)
+            head.insert(0, link_tag)
+
+            logger.info(f"Added CSS link: {css_href}")
+            return str(soup)
+
+        except Exception as e:
+            logger.error(f"Failed to add CSS link: {e}", exc_info=True)
             return html_content
 
     def _update_internal_links(self, content: str, href_mapping: Dict[str, str]) -> str:
