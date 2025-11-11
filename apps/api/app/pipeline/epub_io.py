@@ -249,7 +249,8 @@ class EPUBProcessor:
                 content=combined_css.encode('utf-8')
             )
             new_book.add_item(css_file)
-            logger.info("Created external bilingual CSS file: styles/bilingual.css")
+            logger.info("📄 Created external bilingual CSS file: styles/bilingual.css")
+            logger.info(f"📄 CSS file size: {len(combined_css)} bytes")
 
             # Copy all non-document items (images, fonts, etc.)
             for item in original_book.get_items():
@@ -274,6 +275,7 @@ class EPUBProcessor:
                 # Update links and ADD CSS LINK instead of embedding
                 updated_content = self._update_internal_links(doc['content'], href_mapping)
                 updated_content = self._add_css_link(updated_content, "../styles/bilingual.css")
+                logger.info(f"📝 Added CSS link to document: {doc['href']}")
 
                 # Set content
                 if isinstance(updated_content, str):

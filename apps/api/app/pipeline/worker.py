@@ -29,9 +29,14 @@ from app.pipeline.epub_io import EPUBProcessor
 from app.pipeline.html_segment import HTMLSegmenter
 from app.pipeline.translate import TranslationOrchestrator
 from app.pricing import calculate_provider_cost_cents
-from app.logger import get_logger, set_request_id
+from app.logger import get_logger, set_request_id, setup_logging
+
+# Initialize logging for worker process
+setup_logging()
 
 logger = get_logger(__name__)
+print("🔧 WORKER MODULE LOADED - DIAGNOSTICS ENABLED", flush=True)
+logger.info("🔧 Worker module loaded with logging configured - diagnostics enabled")
 
 
 def translate_epub(job_id: str):
@@ -59,8 +64,9 @@ def translate_epub(job_id: str):
         if not job:
             logger.error(f"Job {job_id} not found in database")
             return
-            
+
         logger.info(f"🚀 Starting translation │ Job: {job_id[:13]}... │ Lang: {job.target_lang} │ Provider: {job.provider}")
+        logger.info(f"📥 WORKER READ FROM DB: job_id={job_id}, output_format={repr(job.output_format)}")
         
         # Extract job parameters
         source_key = job.source_key
@@ -147,86 +153,45 @@ def translate_epub(job_id: str):
             job.progress_percent = 60
             db.commit()
 
-            # Check output format
+            # Check output format (for user download access control)
             output_format = getattr(job, 'output_format', 'translation')
-            logger.info(f"🔍 DEBUG: output_format = {repr(output_format)} (type: {type(output_format).__name__})")
+            logger.info(f"🔍 User purchased format: {repr(output_format)}")
+            logger.info(f"📦 Generating ALL 6 files (3 translation + 3 bilingual) regardless of purchase")
 
-            if output_format == "bilingual":
-                # Create bilingual documents with side-by-side layout
-                from app.pipeline.bilingual_html import create_bilingual_documents
+            # ALWAYS generate both translation and bilingual versions
+            from app.pipeline.bilingual_html import create_bilingual_documents
 
-                bilingual_docs = create_bilingual_documents(
-                    original_segments=segments,
-                    translated_segments=translated_segments,
-                    reconstruction_maps=reconstruction_maps,
-                    spine_docs=spine_docs,
-                    source_lang=job.source_lang or "en",
-                    target_lang=target_lang
-                )
+            # Reconstruct standard translation documents
+            translated_docs = segmenter.reconstruct_documents(
+                translated_segments, reconstruction_maps, spine_docs
+            )
 
-                # Step 5: Generate bilingual outputs
-                job.progress_step = "uploading"
-                job.progress_percent = 80
-                db.commit()
+            # Apply RTL layout if needed
+            if orchestrator.should_use_rtl_layout(target_lang):
+                translated_docs = _apply_rtl_layout(translated_docs)
 
-                output_keys = _generate_bilingual_outputs(
-                    job_id, temp_dir, original_book, bilingual_docs,
-                    job.source_lang or "en", target_lang
-                )
+            # Create bilingual documents
+            bilingual_docs = create_bilingual_documents(
+                original_segments=segments,
+                translated_segments=translated_segments,
+                reconstruction_maps=reconstruction_maps,
+                spine_docs=spine_docs,
+                source_lang=job.source_lang or "en",
+                target_lang=target_lang
+            )
 
-            elif output_format == "both":
-                # Generate BOTH standard translation AND bilingual (6 files total)
-                from app.pipeline.bilingual_html import create_bilingual_documents
+            # Step 5: Generate all outputs (6 files total)
+            job.progress_step = "uploading"
+            job.progress_percent = 80
+            db.commit()
 
-                # First, reconstruct standard translation
-                translated_docs = segmenter.reconstruct_documents(
-                    translated_segments, reconstruction_maps, spine_docs
-                )
-
-                # Apply RTL layout if needed
-                if orchestrator.should_use_rtl_layout(target_lang):
-                    translated_docs = _apply_rtl_layout(translated_docs)
-
-                # Also create bilingual documents
-                bilingual_docs = create_bilingual_documents(
-                    original_segments=segments,
-                    translated_segments=translated_segments,
-                    reconstruction_maps=reconstruction_maps,
-                    spine_docs=spine_docs,
-                    source_lang=job.source_lang or "en",
-                    target_lang=target_lang
-                )
-
-                # Step 5: Generate all outputs (6 files total)
-                job.progress_step = "uploading"
-                job.progress_percent = 80
-                db.commit()
-
-                output_keys = _generate_both_outputs(
-                    job_id, temp_dir, original_book,
-                    translated_docs, translated_segments,
-                    bilingual_docs,
-                    job.source_lang or "en", target_lang
-                )
-
-            else:
-                # Standard translation-only flow
-                translated_docs = segmenter.reconstruct_documents(
-                    translated_segments, reconstruction_maps, spine_docs
-                )
-
-                # Apply RTL layout if needed
-                if orchestrator.should_use_rtl_layout(target_lang):
-                    translated_docs = _apply_rtl_layout(translated_docs)
-
-                # Step 5: Generate multi-format outputs
-                job.progress_step = "uploading"
-                job.progress_percent = 80
-                db.commit()
-
-                output_keys = _generate_outputs(
-                    job_id, temp_dir, original_book, translated_docs, translated_segments
-                )
+            # Generate all 6 files
+            output_keys = _generate_both_outputs(
+                job_id, temp_dir, original_book,
+                translated_docs, translated_segments,
+                bilingual_docs,
+                job.source_lang or "en", target_lang
+            )
 
             # Update job with output keys
             # For "both" format, we generate 6 files but only store the primary 3 in database
@@ -391,7 +356,13 @@ def _generate_bilingual_outputs(
             text = soup.get_text(separator=' ', strip=True)
             translated_segments.append(text)
 
-        # Generate all three outputs using shared module
+        # Upload the bilingual EPUB we already created
+        epub_key = f"outputs/{job_id}.epub"
+        if storage.upload_file(epub_path, epub_key, "application/epub+zip"):
+            output_keys["epub"] = epub_key
+            logger.info(f"Uploaded bilingual EPUB: {epub_key}")
+
+        # Generate PDF and TXT using shared module (but skip EPUB since we already have it)
         results = asyncio.run(generate_outputs_with_metadata(
             output_dir=temp_dir,
             job_id=job_id,
@@ -403,13 +374,6 @@ def _generate_bilingual_outputs(
         # Upload successful outputs to storage
         output_generator = OutputGenerator()
         file_paths = output_generator.get_output_files(temp_dir, job_id)
-
-        # Upload EPUB
-        if results.get("epub") and file_paths.get("epub"):
-            epub_key = f"outputs/{job_id}.epub"
-            if storage.upload_file(file_paths["epub"], epub_key, "application/epub+zip"):
-                output_keys["epub"] = epub_key
-                logger.info(f"Uploaded bilingual EPUB: {epub_key}")
 
         # Upload PDF
         if results.get("pdf") and file_paths.get("pdf"):
@@ -474,30 +438,69 @@ def _generate_both_outputs(
             translated_segments=translated_segments
         ))
 
-        # Generate bilingual outputs (3 files)
-        logger.info("Generating bilingual outputs...")
+        # Generate bilingual outputs (3 files) - CRITICAL: Use write_bilingual_epub for proper CSS
+        logger.info("Generating bilingual outputs with external CSS...")
 
-        # Extract translated text for TXT generation
-        bilingual_segments = []
-        for doc in bilingual_docs:
-            soup = BeautifulSoup(doc['content'], 'lxml-xml')
-            text = soup.get_text(separator=' ', strip=True)
-            bilingual_segments.append(text)
+        # Create bilingual EPUB with external CSS (EPUB standard)
+        from app.pipeline.epub_io import EPUBProcessor
+        epub_processor = EPUBProcessor()
 
-        bilingual_job_id = f"{job_id}_bilingual"
-        bilingual_results = asyncio.run(generate_outputs_with_metadata(
-            output_dir=temp_dir,
-            job_id=bilingual_job_id,
+        bilingual_epub_path = os.path.join(temp_dir, f"{job_id}_bilingual.epub")
+        logger.info(f"Creating bilingual EPUB with external CSS at: {bilingual_epub_path}")
+
+        epub_processor.write_bilingual_epub(
             original_book=original_book,
-            translated_docs=bilingual_docs,
-            translated_segments=bilingual_segments
-        ))
+            bilingual_docs=bilingual_docs,
+            output_path=bilingual_epub_path,
+            source_lang=source_lang,
+            target_lang=target_lang
+        )
+        logger.info("Created bilingual EPUB with external CSS file")
 
-        # Upload all outputs to storage
+        # Upload bilingual EPUB
+        epub_key = f"outputs/{job_id}_bilingual.epub"
+        if storage.upload_file(bilingual_epub_path, epub_key, "application/epub+zip"):
+            output_keys["bilingual_epub"] = epub_key
+            logger.info(f"Uploaded bilingual EPUB: {epub_key}")
+
+        # Generate bilingual PDF from the EPUB we just created
+        try:
+            if ENHANCED_PDF_AVAILABLE:
+                bilingual_pdf_path = convert_epub_to_pdf(bilingual_epub_path, temp_dir)
+            else:
+                raise Exception("Enhanced PDF converter not available")
+
+            if bilingual_pdf_path and os.path.exists(bilingual_pdf_path):
+                pdf_key = f"outputs/{job_id}_bilingual.pdf"
+                if storage.upload_file(bilingual_pdf_path, pdf_key, "application/pdf"):
+                    output_keys["bilingual_pdf"] = pdf_key
+                    logger.info(f"Uploaded bilingual PDF: {pdf_key}")
+        except Exception as e:
+            logger.error(f"Failed to generate bilingual PDF: {e}")
+
+        # Generate bilingual TXT from documents
+        try:
+            bilingual_text = []
+            for doc in bilingual_docs:
+                soup = BeautifulSoup(doc['content'], 'lxml-xml')
+                text = soup.get_text(separator=' ', strip=True)
+                bilingual_text.append(text)
+
+            bilingual_txt_path = os.path.join(temp_dir, f"{job_id}_bilingual.txt")
+            with open(bilingual_txt_path, "w", encoding="utf-8") as f:
+                f.write("\n\n".join(bilingual_text))
+
+            txt_key = f"outputs/{job_id}_bilingual.txt"
+            if storage.upload_file(bilingual_txt_path, txt_key, "text/plain; charset=utf-8"):
+                output_keys["bilingual_txt"] = txt_key
+                logger.info(f"Uploaded bilingual TXT: {txt_key}")
+        except Exception as e:
+            logger.error(f"Failed to generate bilingual TXT: {e}")
+
+        # Upload all translation outputs to storage
         output_generator = OutputGenerator()
-
-        # Upload translation files
         trans_files = output_generator.get_output_files(temp_dir, job_id)
+
         if translation_results.get("epub") and trans_files.get("epub"):
             epub_key = f"outputs/{job_id}.epub"
             if storage.upload_file(trans_files["epub"], epub_key, "application/epub+zip"):
@@ -515,26 +518,6 @@ def _generate_both_outputs(
             if storage.upload_file(trans_files["txt"], txt_key, "text/plain; charset=utf-8"):
                 output_keys["txt"] = txt_key
                 logger.info(f"Uploaded translation TXT: {txt_key}")
-
-        # Upload bilingual files
-        bi_files = output_generator.get_output_files(temp_dir, bilingual_job_id)
-        if bilingual_results.get("epub") and bi_files.get("epub"):
-            epub_key = f"outputs/{job_id}_bilingual.epub"
-            if storage.upload_file(bi_files["epub"], epub_key, "application/epub+zip"):
-                output_keys["bilingual_epub"] = epub_key
-                logger.info(f"Uploaded bilingual EPUB: {epub_key}")
-
-        if bilingual_results.get("pdf") and bi_files.get("pdf"):
-            pdf_key = f"outputs/{job_id}_bilingual.pdf"
-            if storage.upload_file(bi_files["pdf"], pdf_key, "application/pdf"):
-                output_keys["bilingual_pdf"] = pdf_key
-                logger.info(f"Uploaded bilingual PDF: {pdf_key}")
-
-        if bilingual_results.get("txt") and bi_files.get("txt"):
-            txt_key = f"outputs/{job_id}_bilingual.txt"
-            if storage.upload_file(bi_files["txt"], txt_key, "text/plain; charset=utf-8"):
-                output_keys["bilingual_txt"] = txt_key
-                logger.info(f"Uploaded bilingual TXT: {txt_key}")
 
         logger.info(f"Generated both formats: {list(output_keys.keys())}")
 
