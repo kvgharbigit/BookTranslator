@@ -13,9 +13,13 @@ interface Job {
     epub?: string;
     pdf?: string;
     txt?: string;
+    bilingual_epub?: string;
+    bilingual_pdf?: string;
+    bilingual_txt?: string;
   };
   expires_at?: string;
   error?: string;
+  output_format?: string;
 }
 
 export default function RetrievePage() {
@@ -205,54 +209,124 @@ export default function RetrievePage() {
                     </div>
 
                     {job.status === 'done' && job.download_urls && (
-                      <div className="space-y-2 mt-4">
+                      <div className="space-y-3 mt-4">
                         <p className="text-sm font-medium text-neutral-700 mb-2">
-                          Download Files:
+                          Download Files
+                          {job.output_format && (
+                            <span className="ml-2 text-xs text-neutral-500">
+                              ({job.output_format === 'both' ? '6 files' : '3 files'})
+                            </span>
+                          )}
                         </p>
 
-                        {job.download_urls.epub && (
-                          <a
-                            href={job.download_urls.epub}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group"
-                          >
-                            <BookOpen className="w-5 h-5 text-blue-600" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-blue-900">EPUB</p>
-                            </div>
-                            <Download className="w-4 h-4 text-blue-600 group-hover:translate-y-0.5 transition-transform" />
-                          </a>
+                        {/* Regular translation files */}
+                        {(job.download_urls.epub || job.download_urls.pdf || job.download_urls.txt) && (
+                          <div className="space-y-2">
+                            {(job.output_format === 'both' || job.output_format === 'bilingual') && (
+                              <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wide mt-2">
+                                Translation Only
+                              </p>
+                            )}
+
+                            {job.download_urls.epub && (
+                              <a
+                                href={job.download_urls.epub}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group"
+                              >
+                                <BookOpen className="w-5 h-5 text-blue-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-blue-900">EPUB</p>
+                                </div>
+                                <Download className="w-4 h-4 text-blue-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+
+                            {job.download_urls.pdf && (
+                              <a
+                                href={job.download_urls.pdf}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors group"
+                              >
+                                <Image className="w-5 h-5 text-purple-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-purple-900">PDF</p>
+                                </div>
+                                <Download className="w-4 h-4 text-purple-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+
+                            {job.download_urls.txt && (
+                              <a
+                                href={job.download_urls.txt}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors group"
+                              >
+                                <FileText className="w-5 h-5 text-green-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-green-900">TXT</p>
+                                </div>
+                                <Download className="w-4 h-4 text-green-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+                          </div>
                         )}
 
-                        {job.download_urls.pdf && (
-                          <a
-                            href={job.download_urls.pdf}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-3 p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors group"
-                          >
-                            <Image className="w-5 h-5 text-purple-600" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-purple-900">PDF</p>
-                            </div>
-                            <Download className="w-4 h-4 text-purple-600 group-hover:translate-y-0.5 transition-transform" />
-                          </a>
-                        )}
+                        {/* Bilingual files */}
+                        {(job.download_urls.bilingual_epub || job.download_urls.bilingual_pdf || job.download_urls.bilingual_txt) && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wide mt-3">
+                              Bilingual (with subtitles)
+                            </p>
 
-                        {job.download_urls.txt && (
-                          <a
-                            href={job.download_urls.txt}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors group"
-                          >
-                            <FileText className="w-5 h-5 text-green-600" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-green-900">TXT</p>
-                            </div>
-                            <Download className="w-4 h-4 text-green-600 group-hover:translate-y-0.5 transition-transform" />
-                          </a>
+                            {job.download_urls.bilingual_epub && (
+                              <a
+                                href={job.download_urls.bilingual_epub}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group"
+                              >
+                                <BookOpen className="w-5 h-5 text-blue-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-blue-900">EPUB (Bilingual)</p>
+                                </div>
+                                <Download className="w-4 h-4 text-blue-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+
+                            {job.download_urls.bilingual_pdf && (
+                              <a
+                                href={job.download_urls.bilingual_pdf}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors group"
+                              >
+                                <Image className="w-5 h-5 text-purple-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-purple-900">PDF (Bilingual)</p>
+                                </div>
+                                <Download className="w-4 h-4 text-purple-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+
+                            {job.download_urls.bilingual_txt && (
+                              <a
+                                href={job.download_urls.bilingual_txt}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors group"
+                              >
+                                <FileText className="w-5 h-5 text-green-600" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-green-900">TXT (Bilingual)</p>
+                                </div>
+                                <Download className="w-4 h-4 text-green-600 group-hover:translate-y-0.5 transition-transform" />
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}

@@ -49,6 +49,7 @@ class JobStatusResponse(BaseModel):
     download_urls: Optional[Dict[str, str]] = Field(None, description="Download URLs by format")
     expires_at: Optional[datetime] = Field(None, description="Download link expiration")
     error: Optional[str] = Field(None, description="Error message if failed")
+    output_format: Optional[str] = Field(None, description="Purchased output format: 'translation', 'bilingual', or 'both'")
 
 
 class HealthResponse(BaseModel):

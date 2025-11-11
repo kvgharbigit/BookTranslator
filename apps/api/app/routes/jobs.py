@@ -19,6 +19,40 @@ limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
 
 
+def _get_download_urls_for_format(job: Job, storage, output_format: str) -> dict:
+    """Generate download URLs based on the purchased output_format.
+
+    Args:
+        job: The job object with file keys
+        storage: Storage instance for generating presigned URLs
+        output_format: 'translation', 'bilingual', or 'both'
+
+    Returns:
+        Dictionary of download URLs filtered by purchased format
+    """
+    download_urls = {}
+
+    # For 'translation' or 'both': include regular translation files
+    if output_format in ['translation', 'both']:
+        if job.output_epub_key:
+            download_urls["epub"] = storage.generate_presigned_download_url(job.output_epub_key)
+        if job.output_pdf_key:
+            download_urls["pdf"] = storage.generate_presigned_download_url(job.output_pdf_key)
+        if job.output_txt_key:
+            download_urls["txt"] = storage.generate_presigned_download_url(job.output_txt_key)
+
+    # For 'bilingual' or 'both': include bilingual files
+    if output_format in ['bilingual', 'both']:
+        if job.bilingual_epub_key:
+            download_urls["bilingual_epub"] = storage.generate_presigned_download_url(job.bilingual_epub_key)
+        if job.bilingual_pdf_key:
+            download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(job.bilingual_pdf_key)
+        if job.bilingual_txt_key:
+            download_urls["bilingual_txt"] = storage.generate_presigned_download_url(job.bilingual_txt_key)
+
+    return download_urls
+
+
 @router.get("/job/{job_id}", response_model=JobStatusResponse)
 @limiter.limit("1000/minute")  # Allow frequent polling - well below AI API limits
 async def get_job_status(
@@ -35,6 +69,7 @@ async def get_job_status(
         raise HTTPException(status_code=404, detail="Job not found")
     
     # Prepare base response
+    output_format = job.output_format or 'translation'  # Default to 'translation' for old jobs
     response_data = {
         "id": job.id,
         "status": job.status,
@@ -43,50 +78,18 @@ async def get_job_status(
         "created_at": job.created_at,
         "download_urls": None,
         "expires_at": None,
-        "error": job.error
+        "error": job.error,
+        "output_format": output_format
     }
-    
-    # Add download URLs if job is complete
+
+    # Add download URLs if job is complete (filtered by purchased format)
     if job.status == "done":
-        download_urls = {}
-        expires_at = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
-
         try:
-            # Generate presigned URLs for each available format
-            if job.output_epub_key:
-                download_urls["epub"] = storage.generate_presigned_download_url(
-                    job.output_epub_key
-                )
-
-            if job.output_pdf_key:
-                download_urls["pdf"] = storage.generate_presigned_download_url(
-                    job.output_pdf_key
-                )
-
-            if job.output_txt_key:
-                download_urls["txt"] = storage.generate_presigned_download_url(
-                    job.output_txt_key
-                )
-
-            # Include bilingual outputs if they exist (for "bilingual" or "both" formats)
-            if job.bilingual_epub_key:
-                download_urls["bilingual_epub"] = storage.generate_presigned_download_url(
-                    job.bilingual_epub_key
-                )
-
-            if job.bilingual_pdf_key:
-                download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(
-                    job.bilingual_pdf_key
-                )
-
-            if job.bilingual_txt_key:
-                download_urls["bilingual_txt"] = storage.generate_presigned_download_url(
-                    job.bilingual_txt_key
-                )
+            download_urls = _get_download_urls_for_format(job, storage, output_format)
 
             if download_urls:
                 response_data["download_urls"] = download_urls
-                response_data["expires_at"] = expires_at
+                response_data["expires_at"] = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
 
         except Exception as e:
             logger.error(f"Failed to generate download URLs for job {job_id}: {e}")
@@ -133,6 +136,7 @@ async def get_jobs_by_email(
     # Build response for each job
     responses = []
     for job in jobs:
+        output_format = job.output_format or 'translation'  # Default to 'translation' for old jobs
         response_data = {
             "id": job.id,
             "status": job.status,
@@ -141,50 +145,18 @@ async def get_jobs_by_email(
             "created_at": job.created_at,
             "download_urls": None,
             "expires_at": None,
-            "error": job.error
+            "error": job.error,
+            "output_format": output_format
         }
 
-        # Add download URLs if job is complete
+        # Add download URLs if job is complete (filtered by purchased format)
         if job.status == "done":
-            download_urls = {}
-            expires_at = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
-
             try:
-                # Generate presigned URLs for each available format
-                if job.output_epub_key:
-                    download_urls["epub"] = storage.generate_presigned_download_url(
-                        job.output_epub_key
-                    )
-
-                if job.output_pdf_key:
-                    download_urls["pdf"] = storage.generate_presigned_download_url(
-                        job.output_pdf_key
-                    )
-
-                if job.output_txt_key:
-                    download_urls["txt"] = storage.generate_presigned_download_url(
-                        job.output_txt_key
-                    )
-
-                # Include bilingual outputs if they exist (for "bilingual" or "both" formats)
-                if job.bilingual_epub_key:
-                    download_urls["bilingual_epub"] = storage.generate_presigned_download_url(
-                        job.bilingual_epub_key
-                    )
-
-                if job.bilingual_pdf_key:
-                    download_urls["bilingual_pdf"] = storage.generate_presigned_download_url(
-                        job.bilingual_pdf_key
-                    )
-
-                if job.bilingual_txt_key:
-                    download_urls["bilingual_txt"] = storage.generate_presigned_download_url(
-                        job.bilingual_txt_key
-                    )
+                download_urls = _get_download_urls_for_format(job, storage, output_format)
 
                 if download_urls:
                     response_data["download_urls"] = download_urls
-                    response_data["expires_at"] = expires_at
+                    response_data["expires_at"] = datetime.utcnow() + timedelta(seconds=settings.signed_get_ttl_seconds)
 
             except Exception as e:
                 logger.error(f"Failed to generate download URLs for job {job.id}: {e}")
