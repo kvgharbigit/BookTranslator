@@ -168,7 +168,7 @@ def convert_bilingual_html_to_pdf(
             line-height: 1.6;
             direction: {direction_css};
             text-align: {text_align};
-            font-size: 11pt;
+            font-size: 14pt;
             max-width: 100%;
             margin: 0;
             padding: 0;
@@ -476,7 +476,7 @@ def convert_html_to_pdf(
             line-height: 1.6;
             direction: {direction_css};
             text-align: {text_align};
-            font-size: 11pt;
+            font-size: 14pt;
             max-width: 100%;
             margin: 0;
             padding: 0;
